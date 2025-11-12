@@ -1,0 +1,22 @@
+{
+  "name": "backend-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@angular/material": "^19.2.19",
+    "amqplib": "^0.10.9",
+    "angular-calendar": "^0.31.1",
+    "body-parse": "^0.1.0",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}

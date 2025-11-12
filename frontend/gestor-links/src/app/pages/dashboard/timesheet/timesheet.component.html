@@ -1,0 +1,32 @@
+<h2>Timesheet de {{ userName }}</h2>
+<p>Semana iniciando em: {{ weekStartDate }}</p>
+
+<table class="mat-elevation-z2 timesheet-table">
+  <thead>
+    <tr>
+      <th>Projeto</th>
+      <th>Tarefa</th>
+      <th *ngFor="let dia of diasDaSemana">{{ dia.label }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let entry of timeEntries">
+      <td>{{ entry.project_name }}</td>
+      <td>{{ entry.task_name }}</td>
+      <td *ngFor="let dia of diasDaSemana">
+        <input
+          type="number"
+          min="0"
+          max="24"
+          [(ngModel)]="entry.horas[dia.key]"
+          class="hour-input"
+        />
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="actions">
+  <button mat-flat-button color="primary" (click)="salvar()">Salvar</button>
+  <button mat-stroked-button color="accent" (click)="voltar()">Voltar</button>
+</div>

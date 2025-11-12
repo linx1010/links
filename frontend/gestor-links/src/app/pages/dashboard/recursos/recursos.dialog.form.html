@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>Cadastrar Recurso</h2>
+
+<mat-dialog-content>
+  <form #form="ngForm">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nome</mat-label>
+      <input matInput [(ngModel)]="data.name" name="name" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email</mat-label>
+      <input matInput [(ngModel)]="data.email" name="email" required type="email">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Função</mat-label>
+      <input matInput [(ngModel)]="data.role" name="role">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Valor-Hora</mat-label>
+      <input matInput [(ngModel)]="data.hourly_rate" name="hourly_rate">
+    </mat-form-field>
+
+    
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button mat-flat-button color="primary" [mat-dialog-close]="data">Salvar</button>
+</mat-dialog-actions>

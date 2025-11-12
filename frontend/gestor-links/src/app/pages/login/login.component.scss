@@ -1,0 +1,137 @@
+:root {
+  --primary-color: #0a3d91;
+  --accent-color: #ffffff;
+  --error-color: #d93025;
+  --background-color: #f4f7fc;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--background-color);
+}
+
+.login-wrapper {
+  display: flex;
+  height: 100vh;
+}
+
+.login-left {
+  flex: 1;
+  
+  background-image: url('/assets/images/pexels-gdtography-277628-911738.jpg'); // caminho da sua imagem
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--accent-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.login-left .logo {
+  width: 200px;
+  margin-bottom: 10px;
+}
+
+.login-left h1 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.login-left p {
+  font-size: 16px;
+  max-width: 300px;
+}
+
+.login-right {
+  flex: 1;
+  background-color: var(--accent-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-form {
+  width: 100%;
+  max-width: 360px;
+  padding: 40px;
+}
+
+.login-form h2 {
+  color: var(--primary-color);
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #333;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary-color);
+  color: var(--accent-color);
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+button.signup {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.social {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.social p {
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.icons i {
+  font-size: 20px;
+  margin: 0 10px;
+  color: var(--primary-color);
+  cursor: pointer;
+}
+
+.error {
+  color: var(--error-color);
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+}

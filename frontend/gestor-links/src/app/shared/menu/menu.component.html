@@ -1,0 +1,20 @@
+<nav class="menu">
+  <ul>
+    <li *ngIf="isAdmin||isManager||isMember">
+      <a routerLink="/dashboard/recursos" routerLinkActive="active"><span class="material-icons">group</span> Recursos</a>
+    </li>
+    <li *ngIf="isAdmin||isManager">
+      <a routerLink="/dashboard/clientes" routerLinkActive="active"><span class="material-icons">person</span> Clientes</a>
+    </li>
+    <li *ngIf="isAdmin||isManager">
+      <a routerLink="/dashboard/projetos" routerLinkActive="active"><span class="material-icons">folder</span> Projetos</a>
+    </li>
+    <li *ngIf="isAdmin||isManager">
+      <a routerLink="/dashboard/timesheet" routerLinkActive="active"><span class="material-icons">schedule</span> Tarefas</a>
+    </li>
+    <!-- <li><a routerLink="/dashboard/calendar" routerLinkActive="active"><span class="material-icons">calendar_today</span> Calendário</a></li> -->
+    <li>
+      <button (click)="logout()" class="logout-btn"><span class="material-icons">logout</span> Sair</button>
+    </li>
+  </ul>
+</nav>

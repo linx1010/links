@@ -1,0 +1,30 @@
+<div class="login-wrapper">
+  <div class="login-left">
+    <img src="assets/images/logo-links.png" alt="Logo Links" class="logo" />
+    <h1>Olá, bem-vindo!</h1>
+    <p>Conectando o futuro com tecnologia e inovação.</p>
+  </div>
+
+  <div class="login-right">
+    <form [formGroup]="form" (ngSubmit)="login()" class="login-form">
+      <h2>Login</h2>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="Digite seu email" />
+      </div>
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input id="password" type="password" formControlName="password" placeholder="Digite sua senha" />
+      </div>
+      <div class="form-options">
+        <label><input type="checkbox" /> Lembrar-me</label>
+        <a href="#">Esqueceu a senha?</a>
+      </div>
+      <button type="submit">Entrar</button>
+      <button type="button" class="signup">Cadastrar</button>
+
+   
+    </form>
+    <p class="error" *ngIf="error">{{ error }}</p>
+  </div>
+</div>

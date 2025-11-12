@@ -1,0 +1,108 @@
+<h2>Clientes</h2>
+
+<div *ngIf="loading">Carregando clientes...</div>
+<div *ngIf="error" style="color: red">{{ error }}</div>
+
+<!-- Campo de filtro + botão -->
+<div class="toolbar">
+  <button mat-icon-button color="primary" (click)="toggleCadastro()">
+    <mat-icon>add_business</mat-icon>
+  </button>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Filtro</mat-label>
+    <input matInput class="filter" (keyup)="applyFilter($event)" #input>
+  </mat-form-field>
+</div>
+
+<!-- Formulário de Cadastro Inline -->
+<div *ngIf="showCadastro" class="cadastro-container">
+  <form #form="ngForm" (ngSubmit)="salvarCadastro()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nome</mat-label>
+      <input matInput [(ngModel)]="novoClient.name" name="name" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Código</mat-label>
+      <input matInput [(ngModel)]="novoClient.code" name="code">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Moeda</mat-label>
+      <input matInput [(ngModel)]="novoClient.default_currency" name="default_currency" maxlength="3">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Prazo de Pagamento (dias)</mat-label>
+      <input matInput [(ngModel)]="novoClient.payment_terms_days" name="payment_terms_days" type="number">
+    </mat-form-field>
+
+    <div class="actions">
+      <button mat-button type="button" (click)="cancelarCadastro()">Cancelar</button>
+      <button mat-flat-button color="primary"  type="submit">Salvar</button>
+    </div>
+  </form>
+</div>
+
+<!-- Tabela Angular Material -->
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+  <!-- ID -->
+  <ng-container matColumnDef="id">
+    <th mat-header-cell *matHeaderCellDef> ID </th>
+    <td mat-cell *matCellDef="let client"> {{client.id}} </td>
+  </ng-container>
+
+  <!-- Nome -->
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef> Nome </th>
+    <td mat-cell *matCellDef="let client"> {{client.name}} </td>
+  </ng-container>
+
+  <!-- Código -->
+  <ng-container matColumnDef="code">
+    <th mat-header-cell *matHeaderCellDef> Código </th>
+    <td mat-cell *matCellDef="let client"> {{client.code}} </td>
+  </ng-container>
+
+  <!-- Moeda -->
+  <ng-container matColumnDef="default_currency">
+    <th mat-header-cell *matHeaderCellDef> Moeda </th>
+    <td mat-cell *matCellDef="let client"> {{client.default_currency}} </td>
+  </ng-container>
+
+  <!-- Prazo de Pagamento -->
+  <ng-container matColumnDef="payment_terms_days">
+    <th mat-header-cell *matHeaderCellDef> Pagamento (dias) </th>
+    <td mat-cell *matCellDef="let client"> {{client.payment_terms_days}} </td>
+  </ng-container>
+
+  <!-- Ações -->
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef> Ações </th>
+    <td mat-cell *matCellDef="let client" class="actions-cell">
+      <button mat-icon-button color="accent" (click)="abrirCalendario(client)">
+        <mat-icon>calendar_today</mat-icon>
+      </button>
+      <button mat-icon-button color="accent" (click)="visualizar(client)">
+        <mat-icon>search</mat-icon>
+      </button>
+      <button mat-icon-button color="accent" (click)="atualizar(client)">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button mat-icon-button color="warn" (click)="deletar(client)">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <!-- Header e rows -->
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+  <!-- Nenhum resultado encontrado -->
+  <tr class="mat-row" *matNoDataRow>
+    <td class="mat-cell" colspan="7">Nenhum dado encontrado para "{{input.value}}"</td>
+  </tr>
+</table>
