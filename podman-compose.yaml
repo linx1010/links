@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  backend-python:
+    image: python:3.11-slim
+    container_name: backend-python
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    command: python consumer_rpc.py
+    restart: always
+
+  backend-node:
+    image: node:20-alpine
+    container_name: backend-node
+    working_dir: /app
+    volumes:
+      - ./frontend/gestor-left/backend-node:/app
+    command: node server.js
+    ports:
+      - "3000:3000"   # expõe a porta se o server.js ouvir em 3000
+    restart: always

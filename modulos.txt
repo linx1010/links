@@ -1,0 +1,52 @@
+SIGAATF: Ativo fixo 
+SIGACOM: Compras 
+SIGAEST: Estoque e Custos 
+SIGAFAT: Faturamento 
+SIGAFIN: Financeiro 
+SIGAFIS: Livros Fiscais 
+SIGAPCP: Planejamento e controle de produção 
+SIGALOJA: Operações de PDV e retaguarda 
+SIGATMK: Telemarketing, Televendas e Telecobrança 
+SIGAPON: Ponto eletrônico 
+SIGATCF: Terminal de Consulta do Funcionário 
+SIGARSP: Recrutamento e Seleção Pessoal 
+SIGAQIE: Inspeção de Entradas 
+SIGAQMT: Metrologia (laboratório) 
+SIGAFRT: Front Loja 
+SIGAQDO: Controle de documentos 
+SIGAQIP: Inspeção de Processos 
+SIGATRM: Treinamento 
+SIGATEC: Gestão de Serviços 
+SIGAPLS: Plano de Saúde 
+SIGACTB: Contabilidade Gerencial 
+SIGAQNC: Controle de Não-Conformidades 
+SIGAQAD: Controlar de Auditoria 
+SIGAOMS: OMS – Gestão de Distribuição 
+SIGACSA: Cargos e Salários 
+SIGAWMS: Gestão de Armazéns 
+SIGATMS: Gestão de Transportes 
+SIGAPMS: Gestão de Projetos 
+SIGACDA: Controle de Direitos Autorais 
+SIGAACD: Automação e Coleta de Dados 
+SIGAPPAP: Processo de Aprovação de Peças de Produção (PPAP) 
+SIGAAPD: Avaliação e Pesquisa de Desempenho 
+SIGAPCO: Planejamento e Controle Orçamentário 
+SIGAAPT: Acompanhamento de processos trabalhistas 
+SIGAAGR: Gestão Agrícola 
+SIGAGCT: Gestão de Contratos 
+SIGAORG: Arquitetura organizacional 
+SIGACRM: Customer Relationship Management (CRM) 
+SIGAJURI: Gestão de Assuntos Jurídicos 
+SIGAPFS: Pré faturamento de Serviço 
+TOTVSGFE: Frete Embarcador 
+TOTVSSFC: Chão de Fábrica 
+SIGADPR: Desenvolvedor de Produtos 
+SIGATAF: TOTVS Automação Fiscal 
+SIGAGCP: Gestão de Compras Públicas 
+SIGAGTP: Gestão de transporte de passageiro 
+SIGACFG: Configurador 
+SIGAEIC: Comércio Exterior 
+Administração de Vendas 
+Business Intelligence 
+Portal de Vendas 
+Aplicativos mobile: Meu Protheus, Meus Ativos Fixos, Minha Prestação de Contas 
