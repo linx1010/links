@@ -55,6 +55,23 @@ services:
       MYSQL_DATABASE: left
     ports:
       - "3306:3306"
+    volumes:
+      - ./backend/initdb:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin-compose
+    environment:
+      PMA_HOST: mysql-compose   # nome do serviço MySQL no Compose
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: 123456
+    ports:
+      - "8080:80"               # acessa via http://localhost:8080
+    depends_on:
+      - mysql-compose
     networks:
       - app-network
 
