@@ -14,6 +14,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle'; // para o
 import { Router } from '@angular/router';
 import { MatSelectModule, MatOption, MatSelect } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ToastService } from '../../../shared/toast.service';
 
 
 // ⭐ Mini componente do Dialog
@@ -141,21 +142,37 @@ export class RecursosComponent implements OnInit {
     if (this.editUser) {
       // atualização de usuário existente
       this.recursosService.updateUser(this.editUser.id, this.novoUser).subscribe({
-        next: () => {
-          this.loadUsers();        // atualiza tabela
-          this.cancelarCadastro(); // fecha formulário
-          this.editUser = null;    // reseta edição
+        next: (res:any) => {
+          if (res.status===false){
+            this.toast.show(res.message || 'Erro ao atualizar o usuario','error')
+          }else{
+            this.loadUsers();        // atualiza tabela
+            this.cancelarCadastro(); // fecha formulário
+            this.editUser = null;    // reseta edição
+            this.toast.show('Cadastro Atualizado com sucesso ')
+          }
         },
-        error: (err) => console.error('Erro ao atualizar usuário', err)
+        error: (err) => {
+          console.error('Erro ao atualizar usuário', err)
+          this.toast.show('Erro ao atualizar usuário ', err)
+        }
       });
     } else {
       // Cadastro novo
       this.recursosService.createUser(this.novoUser).subscribe({
-        next: (usuarioCriado) => {
-          this.loadUsers();        // recarrega tabela
-          this.cancelarCadastro(); // fecha formulário
+        next: (res:any) => {
+          if (res.status === false) {
+            this.toast.show(res.message || 'Erro ao criar usuário', 'error');
+          } else {
+            this.loadUsers();        // recarrega tabela
+            this.cancelarCadastro(); // fecha formulário
+            this.toast.show('Cadastro criado com sucesso ')
+          }
         },
-        error: (err) => console.error('Erro ao criar usuário', err)
+        error: (err) => {
+          this.toast.show('Erro ao criar usuário', err)
+          console.error('Erro ao criar usuário', err)
+        }
       });
     }
   }
@@ -178,7 +195,8 @@ export class RecursosComponent implements OnInit {
   constructor(
     private recursosService: RecursosService, 
     private dialog: MatDialog,
-    private router:Router
+    private router:Router,
+    private toast : ToastService
   ) {}
 
   ngOnInit() {
