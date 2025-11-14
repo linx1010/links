@@ -1,0 +1,63 @@
+version: '3.9'
+
+services:
+  angular:
+    build: ./frontend/gestor-links
+    ports:
+      - "4200:4200"
+    depends_on:
+      - server-js
+    networks:
+      - app-network
+
+  server-js:
+    build: ./frontend/gestor-links/backend-nodes
+    container_name: node-server
+    ports:
+      - "3000:3000"
+    environment:
+      - RABBITMQ_HOST=rabbitmq-compose
+      - RABBITMQ_PORT=5672
+    depends_on:
+      - rabbitmq-compose
+    networks:
+      - app-network
+
+  python-consumer:
+    build: ./backend
+    environment:
+      - RABBITMQ_HOST=rabbitmq-compose
+      - RABBITMQ_PORT=5672
+      - MYSQL_HOST=mysql-compose
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=123456
+      - MYSQL_DB=left
+    depends_on:
+      - rabbitmq-compose
+      - mysql-compose
+    networks:
+      - app-network
+
+  rabbitmq-compose:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-compose
+    ports:
+      - "5672:5672"
+      - "15672:15672" # painel web
+    networks:
+      - app-network
+
+  mysql-compose:
+    image: mysql:8.0
+    container_name: mysql-compose
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: left
+    ports:
+      - "3306:3306"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -7,7 +7,11 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const RABBITMQ_URL = "amqp://localhost";
+// const RABBITMQ_URL = "amqp://localhost";
+const rabbitHost = process.env.RABBITMQ_HOST || "rabbitmq-compose";
+const rabbitPort = process.env.RABBITMQ_PORT || 5672;
+const RABBITMQ_URL = `amqp://${rabbitHost}:${rabbitPort}`;
+
 const QUEUE_NAME = "users_rpc_queue";
 
 let channel;
@@ -261,15 +265,19 @@ app.get("/modules", async (req, res) => {
 
 
 
-// Inicializa conexão RabbitMQ e servidor
-async function start() {
-  const conn = await amqp.connect(RABBITMQ_URL);
-  channel = await conn.createChannel();
-  console.log("✅ Conectado ao RabbitMQ");
+async function connectRabbitMQ() {
+  try {
+    const conn = await amqp.connect(RABBITMQ_URL);
+    channel = await conn.createChannel();
+    console.log("✅ Conectado ao RabbitMQ");
 
-  app.listen(3000, () => {
-    console.log("🚀 API rodando em http://localhost:3000");
-  });
+    app.listen(3000, () => {
+      console.log("🚀 API rodando em http://localhost:3000");
+    });
+  } catch (err) {
+    console.error("❌ Erro ao conectar no RabbitMQ:", err.message);
+    setTimeout(connectRabbitMQ, 5000); // tenta novamente após 5 segundos
+  }
 }
 
-start();
+connectRabbitMQ();
