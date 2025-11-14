@@ -1,7 +1,7 @@
 import pika
 import json
 import mysql.connector
-import os, time
+import os, time, sys
 from users import Users
 from clients import Clients
 from calendario import Calendar
@@ -9,7 +9,11 @@ from timesheet import Timesheet
 from modules import Modules
 
 # Configurações do RabbitMQ
-rabbitmq_host = os.getenv("RABBITMQ_HOST", "rabbitmq-compose")
+rabbitmq_host = os.getenv("RABBITMQ_HOST")
+if not rabbitmq_host:
+    # Se não tiver variável definida, assume localhost
+    rabbitmq_host = "localhost"
+
 rabbitmq_port = int(os.getenv("RABBITMQ_PORT", "5672"))
 queue_name = "users_rpc_queue"
 
@@ -30,7 +34,7 @@ def on_request(ch, method, props, body):
         source = request.get("source")
         data = request.get("data", {})
 
-        print(f" ✅ Requisição recebida origem {source} ação: {action}")
+        print(f"✅ Requisição recebida origem {source} ação: {action}", flush=True)
 
         if source == 'users':
             users = Users(conn)
@@ -107,13 +111,13 @@ def on_request(ch, method, props, body):
 connection = None
 while connection is None:
     try:
-        print(f"Tentando conectar ao RabbitMQ em {rabbitmq_host}:{rabbitmq_port}...")
+        print(f"Tentando conectar ao RabbitMQ em {rabbitmq_host}:{rabbitmq_port}...", flush=True)
         connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=rabbitmq_host, port=rabbitmq_port)
         )
-        print("✅ Conectado ao RabbitMQ")
+        print("✅ Conectado ao RabbitMQ", flush=True)
     except pika.exceptions.AMQPConnectionError:
-        print("❌ RabbitMQ não está pronto, tentando novamente em 5s...")
+        print("❌ RabbitMQ não está pronto, tentando novamente em 5s...", flush=True)
         time.sleep(5)
 
 channel = connection.channel()
@@ -122,5 +126,5 @@ channel.queue_declare(queue=queue_name)
 channel.basic_qos(prefetch_count=1)
 channel.basic_consume(queue=queue_name, on_message_callback=on_request)
 
-print("🕰️  Aguardando requisições RPC...")
+print("🕰️  Aguardando requisições RPC...", flush=True)
 channel.start_consuming()
