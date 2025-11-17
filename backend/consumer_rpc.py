@@ -19,7 +19,7 @@ queue_name = "users_rpc_queue"
 
 # Configurações do MySQL
 mysql_config = {
-    "host": os.getenv("MYSQL_HOST", "mysql-compose"),
+    "host": os.getenv("MYSQL_HOST", "localhost"),
     "user": os.getenv("MYSQL_USER", "root"),
     "password": os.getenv("MYSQL_PASSWORD", "123456"),
     "database": os.getenv("MYSQL_DB", "left")

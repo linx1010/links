@@ -8,7 +8,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // const RABBITMQ_URL = "amqp://localhost";
-const rabbitHost = process.env.RABBITMQ_HOST || "rabbitmq-compose";
+const rabbitHost = process.env.RABBITMQ_HOST || "localhost";
 const rabbitPort = process.env.RABBITMQ_PORT || 5672;
 const RABBITMQ_URL = `amqp://${rabbitHost}:${rabbitPort}`;
 
@@ -260,9 +260,6 @@ app.get("/modules", async (req, res) => {
   });
   res.json(response);
 });
-
-
-
 
 
 async function connectRabbitMQ() {

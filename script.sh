@@ -10,5 +10,5 @@ end tell"
 
 # 2. Abre outra aba no Terminal e roda o server.js
 osascript -e "tell application \"Terminal\"
-    do script \"cd '$BASE_DIR'/frontend/gestor-links/backend-nodes && node server.js\"
+    do script \"cd '$BASE_DIR'/frontend/gestor-links/backend-nodes && node --env-file=.env server.js\"
 end tell"
