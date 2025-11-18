@@ -1,31 +1,69 @@
-<h2 mat-dialog-title>Cadastrar Recurso</h2>
+<h2 mat-dialog-title>{{ data.novoUser?.id ? 'Editar Recurso' : 'Cadastrar Recurso' }}</h2>
 
 <mat-dialog-content>
-  <form #form="ngForm">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nome</mat-label>
-      <input matInput [(ngModel)]="data.name" name="name" required>
-    </mat-form-field>
+  <form #form="ngForm" class="form-container">
+    <!-- Nome -->
+    <div class="form-group">
+      <mat-form-field class="full-width">
+        <mat-label>Nome</mat-label>
+        <input matInput [(ngModel)]="data.novoUser.name" name="name" required>
+      </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Email</mat-label>
-      <input matInput [(ngModel)]="data.email" name="email" required type="email">
-    </mat-form-field>
+    <!-- Email -->
+    <div class="form-group">
+      <mat-form-field class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput [(ngModel)]="data.novoUser.email" name="email" required type="email">
+      </mat-form-field>
+    </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Função</mat-label>
-      <input matInput [(ngModel)]="data.role" name="role">
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Valor-Hora</mat-label>
-      <input matInput [(ngModel)]="data.hourly_rate" name="hourly_rate">
-    </mat-form-field>
+    <!-- Função -->
+    <div class="form-group">
+      <mat-form-field class="full-width">
+        <mat-label>Função</mat-label>
+        <mat-select [(ngModel)]="data.novoUser.role" name="role" required>
+          <mat-option [value]="null">Nenhuma</mat-option>
+          <mat-option *ngFor="let role of data.rolesPermitidas" [value]="role">
+            {{ role }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
 
-    
+    <!-- Módulos -->
+    <div class="form-group">
+      <mat-form-field class="full-width">
+        <mat-label>Módulos</mat-label>
+        <mat-select [(ngModel)]="data.novoUser.modulos" name="modulos" multiple>
+          <mat-option>
+            <input
+              matInput
+              placeholder="Filtrar módulos..."
+              [(ngModel)]="modulosFiltro"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="filtrarModulos()"
+              style="width: 100%; padding: 4px;"
+            />
+          </mat-option>
+          <mat-option *ngFor="let modulo of modulosFiltrados" [value]="modulo.code">
+            {{ modulo.code }}: {{ modulo.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Valor-Hora -->
+    <div class="form-group">
+      <mat-form-field class="full-width">
+        <mat-label>Valor-Hora</mat-label>
+        <input matInput [(ngModel)]="data.novoUser.hourly_rate" name="hourly_rate" type="number">
+      </mat-form-field>
+    </div>
   </form>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Cancelar</button>
-  <button mat-flat-button color="primary" [mat-dialog-close]="data">Salvar</button>
+  <button mat-button (click)="cancelar()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="salvar()">Salvar</button>
 </mat-dialog-actions>

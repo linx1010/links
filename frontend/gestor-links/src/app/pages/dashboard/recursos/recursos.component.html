@@ -7,7 +7,7 @@
 
 <!-- Campo de filtro + botão -->
 <div class="toolbar">
-  <button mat-icon-button color="primary" (click)="toggleCadastro()"*ngIf="isAdminOrManager">
+  <button mat-icon-button color="primary" (click)="abrirCadastro()"*ngIf="isAdminOrManager">
     <mat-icon>person_add</mat-icon>
   </button>
 
@@ -17,70 +17,7 @@
   </mat-form-field>
 </div>
 
-<!-- Formulário de Cadastro Inline -->
-<div *ngIf="showCadastro && isAdminOrManager" class="cadastro-container">
-  <form #form="ngForm" (ngSubmit)="salvarCadastro()">
-    <mat-form-field  class="full-width">
-      <mat-label>Nome</mat-label>
-      <input matInput [(ngModel)]="novoUser.name" name="name" required>
-    </mat-form-field>
 
-    <mat-form-field  class="full-width">
-      <mat-label>Email</mat-label>
-      <input matInput [(ngModel)]="novoUser.email" name="email" required type="email">
-    </mat-form-field>
-
-    
-    <mat-form-field  class="full-width">
-      <mat-label>Função</mat-label>
-      <mat-select [(ngModel)]="novoUser.role" name="role" required>
-        <mat-option [value]="null">Nenhuma</mat-option>
-        <mat-option *ngFor="let role of rolesPermitidas" [value]="role">
-          {{ role }}
-        </mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field  class="full-width">
-      <mat-label>Módulos</mat-label>
-      <mat-select [(ngModel)]="novoUser.modulos" name="modulos" multiple>
-        
-        <!-- Campo de filtro dentro do dropdown -->
-        <mat-option>
-          <input
-            matInput
-            placeholder="Filtrar módulos..."
-            [(ngModel)]="modulosFiltro"
-            [ngModelOptions]="{standalone: true}"
-            (keyup)="filtrarModulos()"
-            style="width: 100%; padding: 4px;"
-          />
-        </mat-option>
-
-
-        <!-- Lista filtrada -->
-        <mat-option *ngFor="let modulo of modulosFiltrados" [value]="modulo.code">
-          {{ modulo.code }}: {{ modulo.label }}
-        </mat-option>
-
-      </mat-select>
-    </mat-form-field>
-
-
-  
-
-
-    <mat-form-field  class="full-width">
-      <mat-label>Valor-Hora</mat-label>
-      <input matInput [(ngModel)]="novoUser.hourly_rate" name="hourly_rate" type="number">
-    </mat-form-field>
-
-    <div class="actions">
-      <button mat-button type="button" (click)="cancelarCadastro()">Cancelar</button>
-      <button mat-flat-button color="primary" type="submit">Salvar</button>
-    </div>
-  </form>
-</div>
 
 <!-- Tabela Angular Material -->
 <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">

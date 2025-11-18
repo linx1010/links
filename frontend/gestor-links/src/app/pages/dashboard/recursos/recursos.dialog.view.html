@@ -1,38 +1,14 @@
-<h2 mat-dialog-title>Dados do Usuário</h2>
+<h2 mat-dialog-title>Detalhes do Recurso</h2>
 
 <mat-dialog-content>
-  <table class="mat-elevation-z2">
-    <tr>
-      <th>ID</th>
-      <td>{{ data.id }}</td>
-    </tr>
-    <tr>
-      <th>Nome</th>
-      <td>{{ data.name }}</td>
-    </tr>
-    <tr>
-      <th>Email</th>
-      <td>{{ data.email }}</td>
-    </tr>
-    <tr>
-      <th>Função</th>
-      <td>{{ data.role }}</td>
-    </tr>
-    <tr>
-      <th>Valor/Hora</th>
-      <td>R$ {{ data.hourly_rate }}</td>
-    </tr>
-    <tr>
-      <th>Criado em</th>
-      <td>{{ data.created_at }}</td>
-    </tr>
-    <tr>
-      <th>Atualizado em</th>
-      <td>{{ data.updated_at }}</td>
-    </tr>
-  </table>
+  <p><strong>ID:</strong> {{ data.id }}</p>
+  <p><strong>Nome:</strong> {{ data.name }}</p>
+  <p><strong>Email:</strong> {{ data.email }}</p>
+  <p><strong>Função:</strong> {{ data.role }}</p>
+  <p><strong>Ativo:</strong> {{ data.active ? 'Sim' : 'Não' }}</p>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Fechar</button>
 </mat-dialog-actions>
+
