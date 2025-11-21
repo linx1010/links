@@ -7,6 +7,7 @@ from clients import Clients
 from calendario import Calendar
 from timesheet import Timesheet
 from modules import Modules
+from reports import Reports
 
 # Configurações do RabbitMQ
 rabbitmq_host = os.getenv("RABBITMQ_HOST")
@@ -28,13 +29,14 @@ mysql_config = {
 # expedidor
 def on_request(ch, method, props, body):
     conn = mysql.connector.connect(**mysql_config)
+    status = True
     try:
         request = json.loads(body)
         action = request.get("action")
         source = request.get("source")
         data = request.get("data", {})
 
-        print(f"✅ Requisição recebida origem {source} ação: {action}", flush=True)
+        print(f"🌀 Requisição recebida origem {source} ação: {action}", flush=True)
 
         if source == 'users':
             users = Users(conn)
@@ -52,6 +54,7 @@ def on_request(ch, method, props, body):
                 response = users.login(data)
             else:
                 response = {"status": False, "message": "invalid action!"}
+                status = False
 
         elif source == 'modules':
             module = Modules(conn)
@@ -59,6 +62,7 @@ def on_request(ch, method, props, body):
                 response = module.read_modules()
             else:
                 response = {"status": False, "message": "invalid action!"}
+                status = False
 
         elif source == 'clients':
             clients = Clients(conn)
@@ -72,6 +76,7 @@ def on_request(ch, method, props, body):
                 response = clients.delete_client(data)
             else:
                 response = {"status": False, "message": "invalid action!"}
+                status = False
 
         elif source == 'calendar':
             calendar = Calendar(conn)
@@ -85,6 +90,7 @@ def on_request(ch, method, props, body):
                 response = calendar.updateCalendar(data)
             else:
                 response = {"status": False, "message": "invalid action!"}
+                status = False
 
         elif source == 'timesheet':
             timesheet = Timesheet(conn)
@@ -94,10 +100,34 @@ def on_request(ch, method, props, body):
                 response = timesheet.save_timesheet(data)
             else:
                 response = {"status": False, "message": "invalid action!"}
+                status = False
+        
+        elif source == "reports":
+            reports = Reports(conn)
+
+            if action == "upload":
+                response = reports.upload(data)
+
+            elif action == "list":
+                response = reports.list(data)
+
+            elif action == "download":
+                response = reports.download(data)
+
+            elif action == "approve":
+                response = reports.approve(data)
+
+            else:
+                response = {"status": False, "message": "invalid reports action"}
+                status = False
 
     except Exception as e:
         response = {"status": False, "message": str(e)}
-
+        status = False
+    if status:
+        print(f'👍 {source},{action}')
+    else:
+        print(f'🙅 {source},{action}')
     ch.basic_publish(
         exchange='',
         routing_key=props.reply_to,

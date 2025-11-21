@@ -261,6 +261,48 @@ app.get("/modules", async (req, res) => {
   res.json(response);
 });
 
+//Rotas de upload
+app.post("/reports/upload", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "upload",
+    data: req.body
+  });
+
+  res.json(response);
+});
+
+app.post("/reports/list", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "list",
+    data: req.body
+  });
+
+  res.json(response);
+});
+
+app.post("/reports/download", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "download",
+    data: req.body
+  });
+
+  res.json(response);
+});
+
+app.post("/reports/approve", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "approve",
+    data: req.body
+  });
+
+  res.json(response);
+});
+
+
 
 async function connectRabbitMQ() {
   try {
