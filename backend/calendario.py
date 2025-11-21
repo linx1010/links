@@ -122,6 +122,73 @@ class Calendar:
         except Exception as e:
             self.conn.rollback()
             return { "success": False, "error": str(e) }
+        
+    def createCalendarBatch(self, data):
+        cursor = self.conn.cursor()
+        results = []
+
+        try:
+            dates = data.get('dates', [])
+            client_id = data['id']
+            title = data['title']
+            description = data.get('description', None)
+            location = data.get('location', None)
+            role = data.get('role', 'participant')
+            user_ids = data.get('user_id', [])
+
+            from datetime import datetime
+
+            for date in dates:
+                try:
+                    # Bloqueia datas retroativas
+                    if datetime.strptime(date, "%Y-%m-%d").date() < datetime.today().date():
+                        results.append({"date": date, "success": False, "error": "Data retroativa"})
+                        continue
+
+                    # Validação de conflito: já existe evento para este cliente nesta data?
+                    cursor.execute(
+                        "SELECT id FROM schedules WHERE client_id = %s AND DATE(start_time) = %s",
+                        (client_id, date)
+                    )
+                    if cursor.fetchone():
+                        results.append({"date": date, "success": False, "error": "Conflito de agenda"})
+                        continue
+
+                    # 1. Inserir schedule
+                    insert_schedule = """
+                        INSERT INTO schedules (client_id, title, description, start_time, location)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """
+                    start_time = f"{date} 00:00:00"
+                    cursor.execute(insert_schedule, (client_id, title, description, start_time, location))
+                    schedule_id = cursor.lastrowid
+
+                    # 2. Associar usuários
+                    insert_user = """
+                        INSERT INTO schedule_users (schedule_id, user_id, role)
+                        VALUES (%s, %s, %s)
+                    """
+                    if isinstance(user_ids, list):
+                        for user_id in user_ids:
+                            cursor.execute(insert_user, (schedule_id, user_id, role))
+                    else:
+                        cursor.execute(insert_user, (schedule_id, user_ids, role))
+
+                    results.append({"date": date, "success": True, "schedule_id": schedule_id})
+
+                except Exception as e:
+                    results.append({"date": date, "success": False, "error": str(e)})
+
+            self.conn.commit()
+            return {"success": True, "results": results}
+
+        except Exception as e:
+            self.conn.rollback()
+            return {"success": False, "error": str(e)}
+
+        finally:
+            cursor.close()
+            self.conn.close()
 
     
     def deleteCalendar(self, data):

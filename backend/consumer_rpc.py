@@ -84,6 +84,8 @@ def on_request(ch, method, props, body):
                 response = calendar.getCalendar(data)
             elif action == 'create':
                 response = calendar.createCalendar(data)
+            elif action == 'create_batch':  
+                response = calendar.createCalendarBatch(data)
             elif action == 'delete':
                 response = calendar.deleteCalendar(data)
             elif action == 'update':

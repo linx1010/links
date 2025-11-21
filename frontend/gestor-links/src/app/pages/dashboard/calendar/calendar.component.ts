@@ -1,14 +1,12 @@
 // calendar.component.ts
-// Componente standalone Angular + Angular Material
-// Reescrito completo, com upload de relatórios integrado e comentários linha a linha.
-
-import { Component } from '@angular/core';
+import { Component, ViewChild, TemplateRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClientModule } from '@angular/common/http';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
-// Angular Material modules usados no template
+// Angular Material
 import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,8 +14,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
-// Serviços (assumidos existentes)
 import { CalendarService } from './calendar.service';
 import { RecursosService } from '../recursos/recursos.service';
 
@@ -25,7 +23,6 @@ import { RecursosService } from '../recursos/recursos.service';
   selector: 'app-calendar',
   templateUrl: 'calendar.component.html',
   standalone: true,
-  // Importa módulos necessários para o template funcionar
   imports: [
     CommonModule,
     FormsModule,
@@ -36,99 +33,91 @@ import { RecursosService } from '../recursos/recursos.service';
     MatInputModule,
     MatTableModule,
     MatSelectModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatCheckboxModule,
+    MatDialogModule
   ],
-  providers: [DatePipe], // DatePipe pode ser injetado se necessário
+  providers: [DatePipe],
   styleUrls: ['calendar.component.scss']
 })
 export class CalendarComponent {
   // ---------------------------
-  // Formulário para criação de novo evento (mantido do seu código)
+  // Variáveis principais
   // ---------------------------
-  formEvento = {
-    title: '',
-    description: '',
-    user_id: [] as number[]
-  };
+  /** Formulário do evento (título, descrição e usuários) */
+  formEvento = { title: '', description: '', user_id: [] as number[] };
 
-  // lista de recursos/usuários para seleção
+  /** Lista de recursos carregada do backend */
   recursos: any[] = [];
 
-  // data atual do calendário (usada para navegar entre meses)
+  /** Data base exibida no cabeçalho do calendário */
   currentDate = new Date();
 
-  // estrutura com os dias do mês (cada item tem { day, events })
+  /** Grade de dias do mês atual */
   days: any[] = [];
 
-  // eventos agrupados por 'YYYY-MM-DD' (preenchido ao carregar a agenda)
+  /** Mapa de eventos por chave yyyy-mm-dd */
   events: { [key: string]: any[] } = {};
 
-  // indica se a agenda é do tipo 'client' ou 'user' (gerado pela rota)
+  /** Tipo da agenda (client | user) recebido pela rota */
   tipo: string = '';
 
-  // id da agenda (cliente ou usuário) fornecido pela rota
+  /** Id da agenda (cliente ou usuário) recebido pela rota */
   id: number = 0;
 
-  // dia selecionado para exibir detalhes (ex: { day: 5, events: [...] })
+  /** Dia selecionado na grade para exibir detalhes */
   selectedDay: { day: number, events: any[] } | null = null;
 
-  // nome exibido na página da agenda (capturado do sessionStorage)
+  /** Nome da agenda exibido no topo */
   nomeAgenda: string = '';
 
-  // ---------- Upload related ----------
-  // evento para o qual o upload está sendo feito (quando abrir o painel de upload)
-  eventoUpload: any = null;
-
-  // arquivo selecionado pelo usuário (File)
-  arquivoSelecionado: File | null = null;
-
-  // notas opcionais para o upload
-  uploadNotes: string = '';
-
-  // flag de upload em andamento
-  uploading: boolean = false;
-
-  // progresso do upload (0..100) - simples indicador visual
-  uploadProgress: number = 0;
-
-  // lista de relatórios carregados para o dia/agenda selecionada
-  relatorios: any[] = [];
-
-  // flag simples para saber se o usuário autênticado é tech lead
-  // (você deverá definir essa regra via backend / session)
+  /** Flag se usuário é tech lead (via session roles) */
   isTechLead: boolean = false;
 
-  // variáveis relacionadas ao painel de relatórios (para abrir/fechar)
+  // ---------------------------
+  // Upload de relatórios
+  // ---------------------------
+  eventoUpload: any = null;
+  arquivoSelecionado: File | null = null;
+  uploadNotes: string = '';
+  uploading: boolean = false;
+  uploadProgress: number = 0;
+  relatorios: any[] = [];
+
+  // ---------------------------
+  // Painel de relatórios para tech lead
+  // ---------------------------
   relatorioEvento: any = null;
   mostrarRelatorios: boolean = false;
 
   // ---------------------------
-  // Construtor: injeta serviços e ferramentas
+  // Dialog de replicação em bloco
   // ---------------------------
+  dataInicial: string = '';
+  replicarMes: boolean = false;
+
+  /** TemplateRef do dialog definido no HTML */
+  @ViewChild('dialogReplicacao') dialogReplicacaoTemplate!: TemplateRef<any>;
+
   constructor(
     private route: ActivatedRoute,
     private calendarService: CalendarService,
     private recursosService: RecursosService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) {}
 
   // ---------------------------
-  // ciclo de vida: onInit
+  // Ciclo de vida
   // ---------------------------
   ngOnInit() {
-    // pega tipo/id da rota (conforme sua rota '/dashboard/calendar/:tipo/:id')
     this.tipo = this.route.snapshot.paramMap.get('tipo') || 'user';
     this.id = +this.route.snapshot.paramMap.get('id')! || 0;
-
-    // pega o nome da agenda salvo na sessão (caso exista)
     this.nomeAgenda = sessionStorage.getItem('nameOrig') || 'Agenda';
 
-    // determinar se o usuário atual é tech lead (exemplo simples usando session)
-    // ideal: validar via backend (payload do token / endpoint)
-    const roles = sessionStorage.getItem('roles') || '';
-    this.isTechLead = roles.split(',').includes('tech_lead');
+    const roles = (sessionStorage.getItem('roles') || '').split(',');
+    this.isTechLead = roles.includes('tech_lead');
 
-    // carrega agenda e recursos
     this.carregarAgenda();
   }
 
@@ -136,7 +125,6 @@ export class CalendarComponent {
   // Navegação do calendário
   // ---------------------------
   prevMonth() {
-    // decrementa mês atual e recarrega a agenda
     const year = this.currentDate.getFullYear();
     const month = this.currentDate.getMonth();
     this.currentDate = new Date(year, month - 1, 1);
@@ -144,7 +132,6 @@ export class CalendarComponent {
   }
 
   nextMonth() {
-    // incrementa mês atual e recarrega a agenda
     const year = this.currentDate.getFullYear();
     const month = this.currentDate.getMonth();
     this.currentDate = new Date(year, month + 1, 1);
@@ -152,55 +139,36 @@ export class CalendarComponent {
   }
 
   // ---------------------------
-  // Carrega a agenda do backend e recursos
+  // Carga de dados
   // ---------------------------
   carregarAgenda() {
-    // chama service que retorna todos os eventos (deveria ser seu endpoint atual)
     this.calendarService.getAgenda(this.tipo, this.id).subscribe({
       next: (agenda: any[]) => {
-        // limpa estruturas
         this.events = {};
-
-        // organiza eventos por data (YYYY-MM-DD)
         agenda.forEach(evento => {
           if (!evento.start_time) return;
           const dateKey = this.formatDateKey(evento.start_time);
-
           if (!this.events[dateKey]) this.events[dateKey] = [];
           this.events[dateKey].push(evento);
         });
-
-        // gera grid do mês com base em currentDate e eventos
         this.generateCalendar();
       },
-      // tipagem explícita no handler de erro
-      error: (err: any) => {
-        console.error('Erro ao carregar agenda:', err);
-      }
+      error: (err: any) => console.error('Erro ao carregar agenda:', err)
     });
 
-    // carrega lista de recursos (para adicionar eventos/participantes)
     this.recursosService.getUsers().subscribe({
-      next: (data: any[]) => {
-        this.recursos = data;
-      },
-      error: (err: any) => {
-        console.error('Erro ao carregar recursos:', err);
-      }
+      next: (data: any[]) => this.recursos = data,
+      error: (err: any) => console.error('Erro ao carregar recursos:', err)
     });
   }
 
   // ---------------------------
-  // Util: formata 'YYYY-MM-DD' a partir de 'YYYY-MM-DD HH:MM:SS'
+  // Utilitários de data
   // ---------------------------
   formatDateKey(dateTime: string): string {
-    // assume padrão 'YYYY-MM-DD ...' (conforme seu backend)
-    return dateTime.split(' ')[0];
+    return dateTime.split(' ')[0]; // assume "YYYY-MM-DD HH:mm:ss"
   }
 
-  // ---------------------------
-  // Gera a lista 'days' para montar a grid do mês
-  // ---------------------------
   generateCalendar() {
     this.days = [];
     const year = this.currentDate.getFullYear();
@@ -208,64 +176,40 @@ export class CalendarComponent {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // espaços vazios antes do primeiro dia do mês
-    for (let i = 0; i < firstDay; i++) {
-      this.days.push({ day: null });
-    }
+    for (let i = 0; i < firstDay; i++) this.days.push({ day: null });
 
-    // para cada dia do mês, adiciona objeto com eventos (se houver)
     for (let day = 1; day <= daysInMonth; day++) {
       const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      this.days.push({
-        day,
-        events: this.events[dateKey] || []
-      });
+      this.days.push({ day, events: this.events[dateKey] || [] });
     }
   }
 
-  // ---------------------------
-  // Ao clicar em um dia da grid -> seleciona para mostrar detalhes
-  // ---------------------------
   onDayClick(day: any) {
-    if (day.day) {
-      this.selectedDay = day;
-    }
+    if (day.day) this.selectedDay = day;
   }
 
   // ---------------------------
-  // FUNÇÕES de eventos (visualizar / concluir / excluir)
+  // Ações de eventos
   // ---------------------------
   visualizarEvento(e: any) {
-    // exibe um modal simples (alert) com detalhes e carrega relatórios do evento
     alert(`📋 Detalhes do evento:
-      \nTítulo: ${e.title}
-      \nData: ${e.start_time}
-      \nStatus: ${e.status}
-      \nLocal: ${e.location || 'N/A'}`);
-
-    // carrega relatórios existentes para o evento selecionado
+Título: ${e.title}
+Data: ${e.start_time}
+Status: ${e.status}
+Local: ${e.location || 'N/A'}`);
     this.carregarRelatorios(e);
   }
 
   concluirEvento(e: any) {
-    // alterna status local e chama backend para atualizar (usando calendarService)
     const newStatus = e.status === 'completed' ? 'open' : 'completed';
-    // atualiza visualmente (só após retorno idealmente)
     e.status = newStatus;
-
-    // chama backend (método existente no seu service deve mapear)
     this.calendarService.completeAgenda(e).subscribe({
-      next: () => {
-        this.carregarAgenda();
-      },
-      error: (err: any) => {
-        console.error('Erro ao concluir agenda:', err);
-      }
+      next: () => this.carregarAgenda(),
+      error: (err: any) => console.error('Erro ao concluir agenda:', err)
     });
   }
 
   excluirEvento(e: any) {
-    // aqui chama backend para excluir evento
     if (confirm(`🗑️ Deseja excluir o evento "${e.title}"?`)) {
       this.calendarService.deleteEvento('client', this.id, this.formatDateKey(e.start_time), e.title).subscribe({
         next: () => this.carregarAgenda(),
@@ -275,21 +219,17 @@ export class CalendarComponent {
   }
 
   // ---------------------------
-  // ---------- UPLOAD ----------
+  // Upload de relatórios
   // ---------------------------
-
   abrirUpload(evento: any) {
-    // atribui o evento no qual o usuário abrir o painel de upload
     this.eventoUpload = evento;
     this.arquivoSelecionado = null;
     this.uploadNotes = '';
-    this.relatorios = []; // limpa relatórios exibidos
-    // carrega relatórios já enviados para esse evento/dia (se houver)
+    this.relatorios = [];
     this.carregarRelatorios(evento);
   }
 
   cancelarUpload() {
-    // limpa variáveis relacionadas ao upload e fecha painel
     this.eventoUpload = null;
     this.arquivoSelecionado = null;
     this.uploadNotes = '';
@@ -298,51 +238,42 @@ export class CalendarComponent {
   }
 
   selecionarArquivo(ev: any) {
-    // pega o primeiro arquivo selecionado no input
     this.arquivoSelecionado = ev.target.files && ev.target.files[0] ? ev.target.files[0] : null;
   }
 
   enviarArquivo() {
-    // validações básicas
     if (!this.eventoUpload || !this.arquivoSelecionado) {
       alert('Selecione um evento e um arquivo antes de enviar.');
       return;
     }
 
-    // ler arquivo como base64 para enviar via payload (simples)
     const reader = new FileReader();
     reader.onload = () => {
-      // result vem no formato "data:tipo;base64,AAAA..."
       const base64 = (reader.result as string).split(',')[1];
 
-      // constrói payload conforme handlers backend que sugeri
       const payload = {
-        action: 'upload_report',                     // ação RPC / API
-        organization_id: Number(sessionStorage.getItem('organizationId')) || 1, // opcional
-        schedule_id: this.eventoUpload.id,           // id do schedule/evento
-        user_id: Number(sessionStorage.getItem('userId')) || 0, // id do usuário atual
-        report_date: this.formatDateKey(this.eventoUpload.start_time), // data do relatório
+        action: 'upload_report',
+        organization_id: Number(sessionStorage.getItem('organizationId')) || 1,
+        schedule_id: this.eventoUpload.id,
+        user_id: Number(sessionStorage.getItem('userId')) || 0,
+        report_date: this.formatDateKey(this.eventoUpload.start_time),
         file_name: this.arquivoSelecionado!.name,
         mime_type: this.arquivoSelecionado!.type,
         file_base64: base64,
         notes: this.uploadNotes
       };
 
-      // inicia indicadores visuais
       this.uploading = true;
       this.uploadProgress = 10;
 
-      // chama o service que faz o POST / RPC (integre com seu consumer_rpc)
       this.calendarService.uploadRelatorio(payload).subscribe({
-        next: (res: any) => {
-          // sucesso: atualiza UI, recarrega relatórios e limpa painel
+        next: () => {
           this.uploadProgress = 100;
           setTimeout(() => {
             this.uploading = false;
             this.uploadProgress = 0;
             alert('Relatório enviado com sucesso!');
             this.eventoUpload = null;
-            // recarrega agenda para ver possíveis mudanças de status
             this.carregarAgenda();
           }, 300);
         },
@@ -353,23 +284,18 @@ export class CalendarComponent {
           alert('Erro ao enviar relatório.');
         }
       });
-
     };
 
-    // inicia leitura do file como dataURL
     reader.readAsDataURL(this.arquivoSelecionado);
   }
 
   // ---------------------------
-  // Relatórios: carregar / baixar / aprovar
+  // Relatórios (carregar, baixar, aprovar)
   // ---------------------------
-
   carregarRelatorios(evento: any) {
-    // monta payload e chama backend via service
     const date = this.formatDateKey(evento.start_time);
     this.calendarService.getRelatorios(evento.id, date).subscribe({
       next: (data: any) => {
-        // armazena lista de relatórios obtida do backend
         this.relatorios = data.reports || [];
       },
       error: (err: any) => {
@@ -380,20 +306,16 @@ export class CalendarComponent {
   }
 
   baixarRelatorio(r: any) {
-    // chama backend para obter base64 do arquivo e inicia download no browser
     this.calendarService.downloadRelatorio(r.id).subscribe({
       next: (res: any) => {
         if (!res || !res.file_base64) {
           alert('Arquivo não encontrado no servidor.');
           return;
         }
-
-        // res.file_base64 é string base64, res.mime_type, res.file_name
         const b64 = res.file_base64;
         const mime = res.mime_type || 'application/octet-stream';
         const filename = res.file_name || 'relatorio.bin';
 
-        // converte base64 para blob e cria link de download
         const byteCharacters = atob(b64);
         const byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
@@ -419,45 +341,38 @@ export class CalendarComponent {
   }
 
   abrirRelatorios(evento: any) {
-    // guarda o evento atual e abre painel de relatórios
     this.relatorioEvento = evento;
     this.mostrarRelatorios = true;
     this.carregarRelatorios(evento);
   }
 
   aprovarRelatorio(r: any, aprovar: boolean) {
-    // payload para aprovar/rejeitar
     const payload = {
       action: 'approve_report',
       report_id: r.id,
       approve: aprovar
     };
 
-    // chama backend (o CalendarService deve mapear isso)
     this.calendarService.approveReport(payload).subscribe({
-      next: (res: any) => {
+      next: () => {
         alert(`Relatório ${aprovar ? 'aprovado' : 'rejeitado'} com sucesso.`);
-        // recarregar relatórios para atualizar status
         if (this.eventoUpload) {
-          // se estiver visualizando painel de upload, recarrega os relatórios
           this.carregarRelatorios(this.eventoUpload);
         } else if (this.relatorioEvento) {
-          // se estiver no painel de relatórios, recarrega
           this.carregarRelatorios(this.relatorioEvento);
         } else {
-          // tentar recarregar agenda para refletir mudança
           this.carregarAgenda();
         }
       },
       error: (err: any) => {
-        console.error('Erro ao aprovar/rejeitar:', err);
+        console.error('Erro ao processar aprovação:', err);
         alert('Erro ao processar aprovação.');
       }
     });
   }
 
   // ---------------------------
-  // Criação de novo evento via formulário (mantido)
+  // Criação de evento único via formulário
   // ---------------------------
   submitEvento() {
     if (!this.selectedDay || !this.formEvento.title.trim()) return;
@@ -480,20 +395,90 @@ export class CalendarComponent {
       next: () => {
         this.carregarAgenda();
         const diaAtualizado = this.days.find(d => d.day === day);
-        if (diaAtualizado) {
-          this.selectedDay = diaAtualizado;
-        }
+        if (diaAtualizado) this.selectedDay = diaAtualizado;
       },
-      error: (err: any) => {
-        console.error('Erro ao criar agenda:', err);
-      }
+      error: (err: any) => console.error('Erro ao criar agenda:', err)
     });
 
     this.formEvento = { title: '', description: '', user_id: [] };
   }
 
   // ---------------------------
-  // Navegar para página anterior (usa sessionStorage)
+  // Dialog de replicação em bloco
+  // ---------------------------
+  abrirDialogReplicacao() {
+    if (!this.dialogReplicacaoTemplate) {
+      alert('Template do diálogo não encontrado.');
+      return;
+    }
+    // Pré-popula data inicial com hoje
+    const hoje = new Date();
+    this.dataInicial = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+    this.replicarMes = true;
+
+    this.dialog.open(this.dialogReplicacaoTemplate);
+  }
+
+  confirmarReplicacao() {
+    if (!this.formEvento.title.trim() || !this.dataInicial) {
+      alert('Preencha título e data inicial.');
+      return;
+    }
+
+    const startDate = new Date(this.dataInicial);
+    const diasUteis = this.replicarMes ? this.getDiasUteis(startDate) : [this.dataInicial];
+
+    const payload = {
+      type: 'client',
+      id: this.id,
+      title: this.formEvento.title,
+      description: this.formEvento.description,
+      user_id: this.formEvento.user_id,
+      dates: diasUteis
+    };
+
+    this.calendarService.createAgendaBatch(payload).subscribe({
+      next: (res: any) => {
+        if (res?.success) {
+          alert('Agendas criadas com sucesso!');
+          this.carregarAgenda();
+        } else {
+          alert('Erro ao criar agendas: ' + (res?.error || ''));
+        }
+      },
+      error: (err: any) => {
+        console.error('Erro ao replicar agendas:', err);
+        alert('Erro ao replicar agendas.');
+      }
+    });
+
+    // Fecha todos os dialogs abertos
+    this.dialog.closeAll();
+  }
+
+  // ---------------------------
+  // Util: gerar dias úteis até fim do mês
+  // ---------------------------
+  getDiasUteis(start: Date): string[] {
+    const dias: string[] = [];
+    const today = new Date();
+    const year = start.getFullYear();
+    const month = start.getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+
+    for (let d = start.getDate(); d <= lastDay; d++) {
+      const date = new Date(year, month, d);
+      const dayOfWeek = date.getDay(); // 0-dom, 1-seg, ..., 6-sáb
+      if (date >= new Date(today.getFullYear(), today.getMonth(), today.getDate()) && dayOfWeek >= 1 && dayOfWeek <= 5) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        dias.push(dateStr);
+      }
+    }
+    return dias;
+  }
+
+  // ---------------------------
+  // Navegar para página anterior
   // ---------------------------
   voltar(): void {
     const pageOrig = sessionStorage.getItem('pageOrig');
@@ -503,5 +488,4 @@ export class CalendarComponent {
       this.router.navigate(['/dashboard']);
     }
   }
-
 }

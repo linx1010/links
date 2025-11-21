@@ -151,6 +151,15 @@ app.post("/calendar", async (req, res) => {
     action: "create", data: req.body });
   res.json(response);
 });
+app.post("/calendar/batch", async (req, res) => {
+  // Nova rota para criação em lote
+  const response = await sendRpcMessage({
+    source: "calendar",
+    action: "create_batch",   // ação diferenciada para replicação
+    data: req.body            // deve conter { id, title, user_id, dates: [...] }
+  });
+  res.json(response);
+});
 app.put("/calendar", async (req, res) => {
   const response = await sendRpcMessage({ 
     source: "calendar",
