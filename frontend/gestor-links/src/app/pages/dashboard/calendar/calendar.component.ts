@@ -18,6 +18,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { CalendarService } from './calendar.service';
 import { RecursosService } from '../recursos/recursos.service';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { ToastService } from '../../../shared/toast.service';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+
+import { error } from 'console';
 
 @Component({
   selector: 'app-calendar',
@@ -35,7 +40,9 @@ import { RecursosService } from '../recursos/recursos.service';
     MatSelectModule,
     MatTooltipModule,
     MatCheckboxModule,
-    MatDialogModule
+    MatDialogModule,
+    MatProgressBarModule,
+    MatSnackBarModule
   ],
   providers: [DatePipe],
   styleUrls: ['calendar.component.scss']
@@ -73,6 +80,8 @@ export class CalendarComponent {
 
   /** Flag se usuário é tech lead (via session roles) */
   isTechLead: boolean = false;
+  isAdmin: boolean = false;
+  canCreateAgenda = false;
 
   // ---------------------------
   // Upload de relatórios
@@ -104,19 +113,22 @@ export class CalendarComponent {
     private calendarService: CalendarService,
     private recursosService: RecursosService,
     private router: Router,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private toast:ToastService,
   ) {}
 
   // ---------------------------
   // Ciclo de vida
   // ---------------------------
   ngOnInit() {
-    this.tipo = this.route.snapshot.paramMap.get('tipo') || 'user';
+   this.tipo = this.route.snapshot.paramMap.get('tipo') || 'user';
     this.id = +this.route.snapshot.paramMap.get('id')! || 0;
     this.nomeAgenda = sessionStorage.getItem('nameOrig') || 'Agenda';
 
     const roles = (sessionStorage.getItem('roles') || '').split(',');
-    this.isTechLead = roles.includes('tech_lead');
+    this.isTechLead = roles.some(r => r === 'tech_lead');
+    this.isAdmin = roles.some(r => r === 'admin');
+    this.canCreateAgenda = this.tipo === 'client' || this.isTechLead || this.isAdmin;
 
     this.carregarAgenda();
   }
@@ -255,35 +267,47 @@ Local: ${e.location || 'N/A'}`);
         action: 'upload_report',
         organization_id: Number(sessionStorage.getItem('organizationId')) || 1,
         schedule_id: this.eventoUpload.id,
-        user_id: Number(sessionStorage.getItem('userId')) || 0,
+        user_id: Number(localStorage.getItem('userId')) || 0,
         report_date: this.formatDateKey(this.eventoUpload.start_time),
         file_name: this.arquivoSelecionado!.name,
         mime_type: this.arquivoSelecionado!.type,
         file_base64: base64,
         notes: this.uploadNotes
       };
-
       this.uploading = true;
       this.uploadProgress = 10;
 
       this.calendarService.uploadRelatorio(payload).subscribe({
-        next: () => {
-          this.uploadProgress = 100;
-          setTimeout(() => {
+        next: (res: any) => {
+          // ✅ Trata sucesso/erro conforme backend
+          if (res && res.status === true) {
+            this.uploadProgress = 100;
+            setTimeout(() => {
+              this.uploading = false;
+              this.uploadProgress = 0;
+              this.toast.show('Relatório enviado com sucesso!', 'sucess');
+              this.eventoUpload = null;
+              this.carregarAgenda();
+            }, 300);
+          } else {
+            // ❌ Falha lógica do backend (status=false)
             this.uploading = false;
             this.uploadProgress = 0;
-            alert('Relatório enviado com sucesso!');
-            this.eventoUpload = null;
-            this.carregarAgenda();
-          }, 300);
+            const msg = (res && res.message) ? res.message : 'Falha ao enviar relatório.';
+            this.toast.show(`Erro no upload: ${msg}`, 'error');
+
+          }
         },
         error: (err: any) => {
+          // ❌ Erro HTTP ou exceção
           console.error('Erro ao enviar relatório:', err);
           this.uploading = false;
           this.uploadProgress = 0;
-          alert('Erro ao enviar relatório.');
+          const msg = err?.error?.message || 'Erro ao enviar relatório.';
+          this.toast.show(msg,'error');
         }
       });
+
     };
 
     reader.readAsDataURL(this.arquivoSelecionado);
@@ -309,7 +333,7 @@ Local: ${e.location || 'N/A'}`);
     this.calendarService.downloadRelatorio(r.id).subscribe({
       next: (res: any) => {
         if (!res || !res.file_base64) {
-          alert('Arquivo não encontrado no servidor.');
+          this.toast.show('Arquivo não encontrado no servidor.','error');
           return;
         }
         const b64 = res.file_base64;
@@ -335,7 +359,7 @@ Local: ${e.location || 'N/A'}`);
       },
       error: (err: any) => {
         console.error('Erro ao baixar relatório:', err);
-        alert('Erro ao baixar relatório.');
+        this.toast.show('Erro ao baixar relatório.','error');
       }
     });
   }
@@ -355,7 +379,7 @@ Local: ${e.location || 'N/A'}`);
 
     this.calendarService.approveReport(payload).subscribe({
       next: () => {
-        alert(`Relatório ${aprovar ? 'aprovado' : 'rejeitado'} com sucesso.`);
+        this.toast.show(`Relatório ${aprovar ? 'aprovado' : 'rejeitado'} com sucesso.`,'sucess');
         if (this.eventoUpload) {
           this.carregarRelatorios(this.eventoUpload);
         } else if (this.relatorioEvento) {
@@ -366,7 +390,7 @@ Local: ${e.location || 'N/A'}`);
       },
       error: (err: any) => {
         console.error('Erro ao processar aprovação:', err);
-        alert('Erro ao processar aprovação.');
+        this.toast.show('Erro ao processar aprovação.','error');
       }
     });
   }
@@ -383,12 +407,13 @@ Local: ${e.location || 'N/A'}`);
     const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
     const payload = {
-      type: 'client',
+      type: this.tipo,
       id: this.id,
       date,
       title: this.formEvento.title,
       description: this.formEvento.description,
-      user_id: this.formEvento.user_id
+      user_id: this.formEvento.user_id,
+      lead_id: localStorage.getItem('userId') 
     };
 
     this.calendarService.createAgenda(payload).subscribe({
@@ -408,7 +433,7 @@ Local: ${e.location || 'N/A'}`);
   // ---------------------------
   abrirDialogReplicacao() {
     if (!this.dialogReplicacaoTemplate) {
-      alert('Template do diálogo não encontrado.');
+      this.toast.show('Template do diálogo não encontrado.','error');
       return;
     }
     // Pré-popula data inicial com hoje
@@ -421,7 +446,7 @@ Local: ${e.location || 'N/A'}`);
 
   confirmarReplicacao() {
     if (!this.formEvento.title.trim() || !this.dataInicial) {
-      alert('Preencha título e data inicial.');
+      this.toast.show('Preencha título e data inicial.','error');
       return;
     }
 
@@ -440,15 +465,15 @@ Local: ${e.location || 'N/A'}`);
     this.calendarService.createAgendaBatch(payload).subscribe({
       next: (res: any) => {
         if (res?.success) {
-          alert('Agendas criadas com sucesso!');
+          this.toast.show('Agendas criadas com sucesso!','sucess');
           this.carregarAgenda();
         } else {
-          alert('Erro ao criar agendas: ' + (res?.error || ''));
+          this.toast.show('Erro ao criar agendas: ' + (res?.error || ''),'error');
         }
       },
       error: (err: any) => {
         console.error('Erro ao replicar agendas:', err);
-        alert('Erro ao replicar agendas.');
+        this.toast.show('Erro ao replicar agendas.','error');
       }
     });
 

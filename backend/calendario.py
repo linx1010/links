@@ -92,14 +92,16 @@ class Calendar:
         cursor = self.conn.cursor()
 
         try:
-            # 1. Inserir na tabela schedules
+            # 1. Inserir na tabela schedules com lead_id
             insert_schedule = """
-                INSERT INTO schedules (client_id, title, start_time, location)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO schedules (client_id, title, start_time, location, lead_id)
+                VALUES (%s, %s, %s, %s, %s)
             """
             start_time = f"{data['date']} 00:00:00"
             location = data.get('location', None)
-            cursor.execute(insert_schedule, (data['id'], data['title'], start_time, location))
+            lead_id = data.get('lead_id') 
+
+            cursor.execute(insert_schedule, (data['id'], data['title'], start_time, location, lead_id))
             schedule_id = cursor.lastrowid
 
             # 2. Associar múltiplos usuários na tabela schedule_users
@@ -122,6 +124,7 @@ class Calendar:
         except Exception as e:
             self.conn.rollback()
             return { "success": False, "error": str(e) }
+
         
     def createCalendarBatch(self, data):
         cursor = self.conn.cursor()

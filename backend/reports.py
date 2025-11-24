@@ -1,5 +1,7 @@
 import base64
 import datetime
+import os
+import re
 
 class Reports:
     def __init__(self, conn):
@@ -8,28 +10,37 @@ class Reports:
     # --------------------------------------------------
     # UPLOAD DO RELATÓRIO
     # --------------------------------------------------
+
     def upload(self, data):
         try:
             cursor = self.conn.cursor()
 
-            sql = """
-                INSERT INTO schedule_reports 
-                (schedule_id, user_id, report_date, file_path, notes, status, created_at) 
-                VALUES (%s, %s, %s, %s, %s, 'pending', NOW())
-            """
+            # diretório dinâmico via env, default = ./uploads
+            upload_dir = os.environ.get("UPLOAD_DIR", os.path.join(os.getcwd(), "uploads"))
+            os.makedirs(upload_dir, exist_ok=True)
 
-            # salvando arquivo em disco
-            filename = f"/var/uploads/{data['schedule_id']}_{int(datetime.datetime.now().timestamp())}_{data['file_name']}"
+            # sanitizar nome do arquivo
+            safe_name = re.sub(r'[^a-zA-Z0-9._-]', '_', data['file_name'])
+            filename = os.path.join(
+                upload_dir,
+                f"{data['schedule_id']}_{int(datetime.datetime.now().timestamp())}_{safe_name}"
+            )
+
             file_bytes = base64.b64decode(data["file_base64"])
-
             with open(filename, "wb") as f:
                 f.write(file_bytes)
 
+            sql = """
+                INSERT INTO schedule_reports 
+                (schedule_id, user_id, report_date, file_path, file_name, notes, status, created_at) 
+                VALUES (%s, %s, %s, %s, %s, %s, 'pending', NOW())
+            """
             params = (
                 data["schedule_id"],
                 data["user_id"],
                 data["report_date"],
                 filename,
+                safe_name,
                 data.get("notes", "")
             )
 
@@ -40,6 +51,7 @@ class Reports:
 
         except Exception as e:
             return {"status": False, "message": str(e)}
+
 
 
     # --------------------------------------------------

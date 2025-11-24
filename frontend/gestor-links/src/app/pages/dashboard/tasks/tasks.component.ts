@@ -39,12 +39,14 @@ export class TasksComponent implements OnInit {
           {
             label: 'Enviados',
             data: [8, 10, 7],
-            backgroundColor: '#27ae60'
+            backgroundColor: '#27ae60',
+            stack:'MITs'
           },
           {
             label: 'Pendentes',
             data: [3, 2, 5],
-            backgroundColor: '#c0392b'
+            backgroundColor: '#c0392b',
+            stack:'MITs'
           }
         ]
       },
