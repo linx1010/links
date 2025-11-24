@@ -7,19 +7,21 @@ import { ClientesComponent } from './pages/dashboard/clientes/clientes.component
 import { ProjetosComponent } from './pages/dashboard/projetos/projetos.component';
 import {CalendarComponent} from './pages/dashboard/calendar/calendar.component';
 import { TimesheetComponent } from './pages/dashboard/timesheet/timesheet.component';
+import { TasksComponent } from './pages/dashboard/tasks/tasks.component';
 export const routes: Routes = [
   { path: '', component: LoginComponent },
   {
     path: 'dashboard',
     component: DashboardComponent,
     children: [
+      { path: 'tasks', component: TasksComponent, canActivate:[authGuard] },
       { path: 'recursos', component: RecursosComponent, canActivate:[authGuard] },
       { path: 'clientes', component: ClientesComponent, canActivate:[authGuard] },
       { path: 'projetos', component: ProjetosComponent, canActivate:[authGuard] },
       { path: 'calendar/:tipo/:id', component: CalendarComponent, canActivate:[authGuard] },
       { path: 'timesheet/:id',component: TimesheetComponent, canActivate:[authGuard]},
 
-      { path: '', redirectTo: 'recursos', pathMatch: 'full' }
+      { path: '', redirectTo: 'tasks', pathMatch: 'full' }
     ]
   },
   { path: '**', redirectTo: '' }

@@ -1,6 +1,9 @@
 <nav class="menu">
   <ul>
     <li *ngIf="isAdmin||isManager||isMember">
+      <a routerLink="/dashboard/tasks" routerLinkActive="active"><span class="material-icons">bar_chart</span> Tarefas</a>
+    </li>
+    <li *ngIf="isAdmin||isManager||isMember">
       <a routerLink="/dashboard/recursos" routerLinkActive="active"><span class="material-icons">group</span> Recursos</a>
     </li>
     <li *ngIf="isAdmin||isManager">

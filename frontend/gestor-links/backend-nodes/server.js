@@ -151,6 +151,15 @@ app.post("/calendar", async (req, res) => {
     action: "create", data: req.body });
   res.json(response);
 });
+app.post("/calendar/batch", async (req, res) => {
+  // Nova rota para criação em lote
+  const response = await sendRpcMessage({
+    source: "calendar",
+    action: "create_batch",   // ação diferenciada para replicação
+    data: req.body            // deve conter { id, title, user_id, dates: [...] }
+  });
+  res.json(response);
+});
 app.put("/calendar", async (req, res) => {
   const response = await sendRpcMessage({ 
     source: "calendar",
@@ -260,6 +269,48 @@ app.get("/modules", async (req, res) => {
   });
   res.json(response);
 });
+
+//Rotas de upload
+app.post("/reports/upload", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "upload",
+    data: req.body
+  });
+
+  res.json(response);
+});
+
+app.post("/reports/list", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "list",
+    data: req.body
+  });
+
+  res.json(response);
+});
+
+app.post("/reports/download", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "download",
+    data: req.body
+  });
+
+  res.json(response);
+});
+
+app.post("/reports/approve", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "approve",
+    data: req.body
+  });
+
+  res.json(response);
+});
+
 
 
 async function connectRabbitMQ() {

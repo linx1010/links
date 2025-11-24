@@ -1,1 +1,31 @@
-<p>tasks works!</p>
+<div class="dashboard-kpi">
+  <h2>Dashboard de Pendências</h2>
+
+    <div class="cards">
+        <!-- Card: pendências de upload -->
+        <div class="card upload">
+        <h3>MITs não enviados</h3>
+        <p class="kpi-value">{{ totalUploadPendentes }}</p>
+        </div>
+
+        <!-- Card: pendências de aprovação (apenas se tech lead) -->
+        <div class="card approval" *ngIf="isTechLead">
+        <h3>MITs aguardando aprovação</h3>
+        <p class="kpi-value">{{ totalAprovacaoPendentes }}</p>
+        </div>
+    </div>
+
+    <div class="chart-row">
+        <!-- Gráfico de barras -->
+        <div class="chart-box">
+            <h3>MITs enviados vs pendentes (últimos 3 meses)</h3>
+            <canvas id="barChart"></canvas>
+        </div>
+
+        <!-- Gráfico de pizza -->
+        <div class="chart-box" *ngIf="isTechLead">
+            <h3>Status dos relatórios</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div> 
+</div>

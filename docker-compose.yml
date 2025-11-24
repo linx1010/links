@@ -25,7 +25,10 @@ services:
 
   python-consumer:
     build: ./backend
+    volumes:
+      - ./uploads:/var/uploads
     environment:
+      - UPLOAD_DIR=/var/uploads
       - RABBITMQ_HOST=rabbitmq-compose
       - RABBITMQ_PORT=5672
       - MYSQL_HOST=mysql-compose
@@ -57,6 +60,7 @@ services:
       - "3306:3306"
     volumes:
       - ./backend/initdb:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql   
     networks:
       - app-network
 
@@ -78,3 +82,7 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  mysql_data:
+
