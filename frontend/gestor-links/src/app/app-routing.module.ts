@@ -8,6 +8,7 @@ import { ProjetosComponent } from './pages/dashboard/projetos/projetos.component
 import {CalendarComponent} from './pages/dashboard/calendar/calendar.component';
 import { TimesheetComponent } from './pages/dashboard/timesheet/timesheet.component';
 import { TasksComponent } from './pages/dashboard/tasks/tasks.component';
+import { PendingSchedulesComponent } from './pages/dashboard/pending-schedules/pending-schedules.component';
 export const routes: Routes = [
   { path: '', component: LoginComponent },
   {
@@ -20,6 +21,7 @@ export const routes: Routes = [
       { path: 'projetos', component: ProjetosComponent, canActivate:[authGuard] },
       { path: 'calendar/:tipo/:id', component: CalendarComponent, canActivate:[authGuard] },
       { path: 'timesheet/:id',component: TimesheetComponent, canActivate:[authGuard]},
+      { path: 'pending-schedules',component: PendingSchedulesComponent, canActivate:[authGuard]},
 
       { path: '', redirectTo: 'tasks', pathMatch: 'full' }
     ]

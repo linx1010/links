@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
+import { Router } from '@angular/router';
 
 Chart.register(...registerables);
 
@@ -16,6 +17,8 @@ export class TasksComponent implements OnInit {
   totalAprovacaoPendentes: number = 0;
   isTechLead: boolean = false;
 
+  constructor(private router: Router) {}
+
   ngOnInit() {
     const role = localStorage.getItem('userRole') || '';
     this.isTechLead = role === 'manager' || role === 'admin';
@@ -28,6 +31,9 @@ export class TasksComponent implements OnInit {
    if (this.isTechLead) {
       setTimeout(() => this.renderPieChart(), 0);
     }
+  }
+  goToApproval(): void {
+    this.router.navigate(['/dashboard/pending-schedules']);
   }
 
   renderBarChart() {

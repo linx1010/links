@@ -9,7 +9,7 @@
         </div>
 
         <!-- Card: pendências de aprovação (apenas se tech lead) -->
-        <div class="card approval" *ngIf="isTechLead">
+        <div class="card approval" *ngIf="isTechLead" (click)="goToApproval()">
         <h3>MITs aguardando aprovação</h3>
         <p class="kpi-value">{{ totalAprovacaoPendentes }}</p>
         </div>
