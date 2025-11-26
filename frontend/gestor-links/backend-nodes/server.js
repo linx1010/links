@@ -42,7 +42,7 @@ async function sendRpcMessage(message) {
   });
 }
 
-// Rotas REST users
+// *************************************Rotas REST users*************************************
 app.get("/users", async (req, res) => {
   const response = await sendRpcMessage({ 
     source: "users",
@@ -88,7 +88,7 @@ app.delete("/users/:id", async (req, res) => {
 });
 
 
-// Rotas REST clients
+// *************************************Rotas REST clients*************************************
 app.get("/clients", async (req, res) => {
   const response = await sendRpcMessage({ 
     source: "clients",
@@ -124,7 +124,7 @@ app.delete("/clients/:id", async (req, res) => {
 });
 
 
-//Rotas Calendar
+//*************************************Rotas Calendar*************************************
 app.get("/calendar", async (req, res) => {
   const origType = req.query.type; // 'cliente' ou 'recurso'
   const clientId = parseInt(req.query.id);
@@ -152,6 +152,7 @@ app.post("/calendar", async (req, res) => {
   res.json(response);
 });
 app.post("/calendar/batch", async (req, res) => {
+ 
   // Nova rota para criação em lote
   const response = await sendRpcMessage({
     source: "calendar",
@@ -238,7 +239,7 @@ app.get("/timesheet/pending", async (req, res) => {
 });
 
 
-// Rota de login
+// *************************************Rota de login*************************************
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -261,7 +262,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 
-//Rotas Módulos
+//*************************************Rotas Módulos*************************************
 app.get("/modules", async (req, res) => {
   const response = await sendRpcMessage({
     source: "modules",
@@ -270,7 +271,7 @@ app.get("/modules", async (req, res) => {
   res.json(response);
 });
 
-//Rotas de upload
+//*************************************Rotas de upload*************************************
 app.post("/reports/upload", async (req, res) => {
   const response = await sendRpcMessage({
     source: "reports",
@@ -310,6 +311,27 @@ app.post("/reports/approve", async (req, res) => {
 
   res.json(response);
 });
+
+//*************************************Rotas tasks*************************************
+app.get("/reports/pending-by-lead/:leadId", async (req, res) => {
+  const leadId = parseInt(req.params.leadId);
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "pending_by_lead",
+    data: { lead_id: leadId }
+  });
+  res.json(response);
+});
+app.get("/reports/by-user-status/:userId", async (req, res) => {
+  const userId = parseInt(req.params.userId);
+  const response = await sendRpcMessage({
+    source: "reports",
+    action: "list_by_user_status",
+    data: { user_id: userId }
+  });
+  res.json(response);
+});
+
 
 
 

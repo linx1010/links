@@ -3,8 +3,12 @@ import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { PendingSchedulesService, PendingScheduleGroup } from './pending-schedules.service';
 import { MatExpansionModule } from '@angular/material/expansion';
+import {
+  PendingSchedulesService,
+  PendingScheduleGroup,
+  UserReportStatus
+} from './pending-schedules.service';
 
 @Component({
   selector: 'app-pending-schedules',
@@ -21,6 +25,8 @@ import { MatExpansionModule } from '@angular/material/expansion';
 })
 export class PendingSchedulesComponent implements OnInit {
   groupedSchedules: PendingScheduleGroup[] = [];
+  userReports: UserReportStatus[] = [];
+
   loading = false;
   error = '';
   expandedClientId: number | null = null;
@@ -28,14 +34,25 @@ export class PendingSchedulesComponent implements OnInit {
   constructor(private service: PendingSchedulesService) {}
 
   ngOnInit(): void {
+    this.loading = true;
     this.loadGroupedSchedules();
+    this.loadUserReports();
   }
 
   loadGroupedSchedules(): void {
-    this.loading = true;
-    this.service.getGroupedPendingSchedulesByLead(9).subscribe({
+    const userIdStr = localStorage.getItem('userId');
+    const userId = userIdStr ? Number(userIdStr) : NaN;
+
+    if (isNaN(userId)) {
+      this.error = 'Invalid userId in localStorage';
+      this.loading = false;
+      return;
+    }
+
+    this.service.getGroupedPendingSchedulesByLead(userId).subscribe({
       next: (data) => {
         this.groupedSchedules = data;
+        console.log('Grouped schedules:', data);
         this.loading = false;
       },
       error: (err) => {
@@ -44,6 +61,51 @@ export class PendingSchedulesComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  loadUserReports(): void {
+    const userIdStr = localStorage.getItem('userId');
+    const userId = userIdStr ? Number(userIdStr) : NaN;
+
+    if (isNaN(userId)) {
+      this.error = 'Invalid userId';
+      this.loading = false;
+      return;
+    }
+
+    this.service.getReportsByUserStatus(userId).subscribe({
+      next: (data) => {
+        this.userReports = data;
+        console.log('User reports:', data);
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Error loading reports';
+        this.loading = false;
+        console.error(err);
+      }
+    });
+  }
+
+  getReportsGroupedByDate(): { date: string; reports: UserReportStatus[] }[] {
+    const grouped: { [key: string]: UserReportStatus[] } = {};
+
+    for (const report of this.userReports) {
+      const safeDate = report.start_time.replace(' ', 'T');
+      const dateKey = new Date(safeDate).toISOString().split('T')[0];
+
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+
+      grouped[dateKey].push(report);
+    }
+
+    return Object.entries(grouped).map(([date, reports]) => ({ date, reports }));
+  }
+
+  uploadReport(scheduleId: number): void {
+    alert(`Upload para agenda ${scheduleId}`);
   }
 
   toggleClient(clientId: number): void {

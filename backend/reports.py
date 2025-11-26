@@ -134,3 +134,79 @@ class Reports:
 
         except Exception as e:
             return {"status": False, "message": str(e)}
+        
+    def pending_by_lead(self, data):
+        lead_id = data.get("lead_id")
+        cursor = self.conn.cursor(dictionary=True)
+
+        query = """
+        SELECT 
+            s.id AS schedule_id,
+            c.id AS client_id,
+            c.name AS client_name,
+            su.user_id,
+            u.name AS user_name,
+            s.start_time,
+            CASE WHEN sr.status IS NULL THEN 'missing' ELSE sr.status END AS status
+        FROM schedules s
+        INNER JOIN clients c ON s.client_id = c.id
+        LEFT JOIN schedule_users su ON su.schedule_id = s.id
+        LEFT JOIN users u ON u.id = su.user_id
+        LEFT JOIN schedule_reports sr ON sr.schedule_id = s.id AND sr.user_id = su.user_id
+        WHERE s.lead_id = %s
+        """
+        cursor.execute(query, (lead_id,))
+        rows = cursor.fetchall()
+
+        # Agrupar por cliente
+        grouped = {}
+        for row in rows:
+            cid = row["client_id"]
+            if cid not in grouped:
+                grouped[cid] = {
+                    "client_id": cid,
+                    "client_name": row["client_name"],
+                    "schedules": []
+                }
+            grouped[cid]["schedules"].append({
+                "schedule_id": row["schedule_id"],
+                "start_time": row["start_time"],
+                "user_id": row["user_id"],
+                "user_name": row["user_name"],
+                "status": row["status"]
+            })
+
+        return list(grouped.values())
+    
+    def list_by_user_status(self, data):
+        user_id = data.get("user_id")
+        cursor = self.conn.cursor(dictionary=True)
+
+        query = """
+        SELECT
+            s.id AS schedule_id,
+            su.user_id,
+            c.id AS client_id,
+            c.name AS client_name,
+            s.start_time,
+            CASE
+                WHEN sr.id IS NULL THEN 'missing'
+                ELSE sr.status
+            END AS status
+        FROM schedule_users su
+        INNER JOIN schedules s ON s.id = su.schedule_id
+        INNER JOIN clients c ON c.id = s.client_id
+        LEFT JOIN schedule_reports sr
+            ON sr.schedule_id = su.schedule_id
+            AND sr.user_id = su.user_id
+        WHERE su.user_id = %s
+        AND (
+            sr.id IS NULL           -- sem envio -> missing
+            OR sr.status IN ('pending', 'rejected')  -- enviados mas não aprovados
+        )
+        ORDER BY s.start_time ASC
+        """
+        cursor.execute(query, (user_id,))
+        rows = cursor.fetchall()
+
+        return rows
