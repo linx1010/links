@@ -119,9 +119,19 @@ def on_request(ch, method, props, body):
             elif action == "approve":
                 response = reports.approve(data)
 
+            elif action == "pending_by_lead":
+                response = reports.pending_by_lead(data)
+            
+            elif action == "list_by_user_status":
+                response = reports.list_by_user_status(data)
+           
+            elif action == "dashboard_totals":
+                response = reports.dashboard_totals(data)
+
             else:
                 response = {"status": False, "message": "invalid reports action"}
                 status = False
+        
 
     except Exception as e:
         response = {"status": False, "message": str(e)}
