@@ -35,6 +35,12 @@ export class TasksComponent implements OnInit {
   goToApproval(): void {
     this.router.navigate(['/dashboard/pending-schedules']);
   }
+  goToPending(groupBy: 'client' | 'day'): void {
+    this.router.navigate(['/dashboard/pending-schedules'], {
+      queryParams: { groupBy }
+    });
+  }
+
 
   renderBarChart() {
     new Chart('barChart', {
@@ -46,13 +52,13 @@ export class TasksComponent implements OnInit {
             label: 'Enviados',
             data: [8, 10, 7],
             backgroundColor: '#27ae60',
-            stack:'MITs'
+            stack:'RADs'
           },
           {
             label: 'Pendentes',
             data: [3, 2, 5],
             backgroundColor: '#c0392b',
-            stack:'MITs'
+            stack:'RADs'
           }
         ]
       },

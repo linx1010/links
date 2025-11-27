@@ -10,6 +10,7 @@ import {
   UserReportStatus
 } from './pending-schedules.service';
 
+import { ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-pending-schedules',
   standalone: true,
@@ -26,19 +27,33 @@ import {
 export class PendingSchedulesComponent implements OnInit {
   groupedSchedules: PendingScheduleGroup[] = [];
   userReports: UserReportStatus[] = [];
+  groupedReports: { [date: string]: any[] } = {};
 
+  groupBy: 'client' | 'day' = 'day'; // default
+  
   loading = false;
   error = '';
   expandedClientId: number | null = null;
 
-  constructor(private service: PendingSchedulesService) {}
+  constructor(private service: PendingSchedulesService,private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.loading = true;
-    this.loadGroupedSchedules();
-    this.loadUserReports();
+    // pega o parâmetro da rota
+    this.route.queryParams.subscribe(params => {
+      this.groupBy = params['groupBy'] || 'day';
+      this.loadData();
+    });
+    // this.loadGroupedSchedules();
+    // this.loadUserReports();
   }
-
+  loadData(): void {
+    if (this.groupBy === 'client') {
+      this.loadGroupedSchedules();
+    } else {
+      this.loadUserReports();
+    }
+  }
   loadGroupedSchedules(): void {
     const userIdStr = localStorage.getItem('userId');
     const userId = userIdStr ? Number(userIdStr) : NaN;
@@ -76,6 +91,7 @@ export class PendingSchedulesComponent implements OnInit {
     this.service.getReportsByUserStatus(userId).subscribe({
       next: (data) => {
         this.userReports = data;
+        this.groupReportsByDate();
         console.log('User reports:', data);
         this.loading = false;
       },
@@ -85,6 +101,22 @@ export class PendingSchedulesComponent implements OnInit {
         console.error(err);
       }
     });
+  }
+
+  groupReportsByDate(): void {
+    this.groupedReports = this.userReports.reduce((acc: Record<string, any[]>, report) => {
+      const date = report.start_time.split(' ')[0]; // só a parte da data
+      if (!acc[date]) {
+        acc[date] = [];
+      }
+      acc[date].push(report);
+      return acc;
+    }, {} as Record<string, any[]>);
+  }
+
+  onUpload(report: UserReportStatus): void {
+    console.log('Upload clicado para:', report);
+    // aqui você pode abrir um dialog, chamar serviço de upload, etc.
   }
 
   getReportsGroupedByDate(): { date: string; reports: UserReportStatus[] }[] {
