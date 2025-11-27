@@ -332,7 +332,23 @@ app.get("/reports/by-user-status/:userId", async (req, res) => {
   res.json(response);
 });
 
+//*************************************Rotas dashboard*************************************
+app.post("/reports/dashboard-totals", async (req, res) => {
+  try {
+    const { lead_id, user_id } = req.body;
 
+    const response = await sendRpcMessage({
+      source: "reports",
+      action: "dashboard_totals",
+      data: { lead_id, user_id }
+    });
+
+    res.json(response);
+  } catch (err) {
+    console.error("Erro em /reports/dashboard-totals:", err);
+    res.status(500).json({ error: "Erro ao calcular totais do dashboard" });
+  }
+});
 
 
 async function connectRabbitMQ() {

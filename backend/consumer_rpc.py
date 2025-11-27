@@ -124,6 +124,9 @@ def on_request(ch, method, props, body):
             
             elif action == "list_by_user_status":
                 response = reports.list_by_user_status(data)
+           
+            elif action == "dashboard_totals":
+                response = reports.dashboard_totals(data)
 
             else:
                 response = {"status": False, "message": "invalid reports action"}

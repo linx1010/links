@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Chart, registerables } from 'chart.js';
 import { Router } from '@angular/router';
+import { TasksService, DashboardTotals } from './tasks.service'; // importa o service
 
 Chart.register(...registerables);
 
@@ -17,49 +18,52 @@ export class TasksComponent implements OnInit {
   totalAprovacaoPendentes: number = 0;
   isTechLead: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private tasksService: TasksService) {}
 
   ngOnInit() {
     const role = localStorage.getItem('userRole') || '';
     this.isTechLead = role === 'manager' || role === 'admin';
 
-    // dados mockados
-    this.totalUploadPendentes = 5;
-    this.totalAprovacaoPendentes = 3;
+    const userIdStr = localStorage.getItem('userId');
+    const userId = userIdStr ? Number(userIdStr) : NaN;
+    const leadIdStr = localStorage.getItem('userId');
+    const leadId = leadIdStr ? Number(leadIdStr) : NaN;
 
-    this.renderBarChart();
-   if (this.isTechLead) {
-      setTimeout(() => this.renderPieChart(), 0);
+    if (!isNaN(userId) && !isNaN(leadId)) {
+      this.tasksService.getDashboardTotals(userId, leadId).subscribe((res: DashboardTotals) => {
+        // cards
+        this.totalUploadPendentes = res.upload.missing + res.upload.pending + res.upload.rejected;
+        this.totalAprovacaoPendentes = res.approval.missing + res.approval.pending + res.approval.rejected;
+
+        // gráficos
+        this.renderBarChart(res.monthly);
+        if (this.isTechLead) {
+          this.renderPieChart(res.global);
+        }
+      });
     }
   }
+
   goToApproval(): void {
     this.router.navigate(['/dashboard/pending-schedules']);
   }
+
   goToPending(groupBy: 'client' | 'day'): void {
     this.router.navigate(['/dashboard/pending-schedules'], {
       queryParams: { groupBy }
     });
   }
 
-
-  renderBarChart() {
+  renderBarChart(monthlyData: any[]) {
     new Chart('barChart', {
       type: 'bar',
       data: {
-        labels: ['Setembro', 'Outubro', 'Novembro'],
+        labels: monthlyData.map(m => m.month),
         datasets: [
-          {
-            label: 'Enviados',
-            data: [8, 10, 7],
-            backgroundColor: '#27ae60',
-            stack:'RADs'
-          },
-          {
-            label: 'Pendentes',
-            data: [3, 2, 5],
-            backgroundColor: '#c0392b',
-            stack:'RADs'
-          }
+          { label: 'Missing', data: monthlyData.map(m => m.missing), backgroundColor: '#e74c3c', stack: 'RADs' },
+          { label: 'Pending', data: monthlyData.map(m => m.pending), backgroundColor: '#f1c40f', stack: 'RADs' },
+          { label: 'Rejected', data: monthlyData.map(m => m.rejected), backgroundColor: '#c0392b', stack: 'RADs' },
+          { label: 'Approved', data: monthlyData.map(m => m.approved), backgroundColor: '#27ae60', stack: 'RADs' }
         ]
       },
       options: {
@@ -71,16 +75,15 @@ export class TasksComponent implements OnInit {
     });
   }
 
-  renderPieChart() {
-    
+  renderPieChart(globalData: any) {
     new Chart('pieChart', {
       type: 'pie',
       data: {
-        labels: ['Não enviados', 'Enviados pendentes', 'Aprovados'],
+        labels: Object.keys(globalData),
         datasets: [
           {
-            data: [4, 3, 6],
-            backgroundColor: ['#e74c3c', '#f1c40f', '#2ecc71']
+            data: Object.values(globalData),
+            backgroundColor: ['#e74c3c', '#f1c40f', '#c0392b', '#27ae60']
           }
         ]
       },
