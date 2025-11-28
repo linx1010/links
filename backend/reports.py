@@ -25,30 +25,56 @@ class Reports:
             safe_name = re.sub(r'[^a-zA-Z0-9._-]', '_', data['file_name'])
             filename = os.path.join(
                 upload_dir,
-                f"{data['schedule_id']}_{int(datetime.datetime.now().timestamp())}_{safe_name}"
+                f"{data['schedule_id']}_{int(datetime.now().timestamp())}_{safe_name}"
             )
 
             file_bytes = base64.b64decode(data["file_base64"])
             with open(filename, "wb") as f:
                 f.write(file_bytes)
 
-            sql = """
-                INSERT INTO schedule_reports 
-                (schedule_id, user_id, report_date, file_path, file_name, notes, status, created_at) 
-                VALUES (%s, %s, %s, %s, %s, %s, 'pending', NOW())
+            # 1️⃣ Verifica se já existe registro para schedule_id + user_id
+            sql_check = """
+                SELECT id FROM schedule_reports
+                WHERE schedule_id = %s AND user_id = %s
             """
-            params = (
-                data["schedule_id"],
-                data["user_id"],
-                data["report_date"],
-                filename,
-                safe_name,
-                data.get("notes", "")
-            )
+            cursor.execute(sql_check, (data["schedule_id"], data["user_id"]))
+            existing = cursor.fetchone()
 
-            cursor.execute(sql, params)
+            if existing:
+                # 2️⃣ Atualiza registro existente
+                sql_update = """
+                    UPDATE schedule_reports
+                    SET report_date=%s, file_path=%s, file_name=%s, notes=%s, status='pending'
+                    WHERE schedule_id=%s AND user_id=%s
+                """
+                params = (
+                    data["report_date"],
+                    filename,
+                    safe_name,
+                    data.get("notes", ""),
+                    data["schedule_id"],
+                    data["user_id"]
+                )
+                cursor.execute(sql_update, params)
+
+            else:
+                # 3️⃣ Insere novo registro
+                sql_insert = """
+                    INSERT INTO schedule_reports
+                    (schedule_id, user_id, report_date, file_path, file_name, notes, status, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, 'pending', NOW())
+                """
+                params = (
+                    data["schedule_id"],
+                    data["user_id"],
+                    data["report_date"],
+                    filename,
+                    safe_name,
+                    data.get("notes", "")
+                )
+                cursor.execute(sql_insert, params)
+
             self.conn.commit()
-
             return {"status": True, "message": "Relatório enviado com sucesso"}
 
         except Exception as e:

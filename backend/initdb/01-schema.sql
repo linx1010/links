@@ -91,24 +91,6 @@ CREATE TABLE `projects` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
--- `left`.schedules definition
-
-CREATE TABLE `schedules` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `client_id` bigint NOT NULL,
-  `title` text NOT NULL,
-  `description` text,
-  `start_time` timestamp NOT NULL,
-  `end_time` timestamp NULL DEFAULT NULL,
-  `location` text,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `status` enum('open','completed') NOT NULL DEFAULT 'open',
-  PRIMARY KEY (`id`),
-  KEY `client_id` (`client_id`),
-  CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
 -- `left`.tags definition
 
 CREATE TABLE `tags` (
@@ -203,17 +185,25 @@ CREATE TABLE `rate_cards` (
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
--- `left`.schedule_users definition
+-- `left`.schedules definition
 
-CREATE TABLE `schedule_users` (
-  `schedule_id` bigint NOT NULL,
-  `user_id` bigint NOT NULL,
-  `role` text,
-  PRIMARY KEY (`schedule_id`,`user_id`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `schedule_users_ibfk_1` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`),
-  CONSTRAINT `schedule_users_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+CREATE TABLE `schedules` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `client_id` bigint NOT NULL,
+  `title` text NOT NULL,
+  `description` text,
+  `start_time` timestamp NOT NULL,
+  `end_time` timestamp NULL DEFAULT NULL,
+  `location` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` enum('open','completed') NOT NULL DEFAULT 'open',
+  `lead_id` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  KEY `fk_schedules_lead` (`lead_id`),
+  CONSTRAINT `fk_schedules_lead` FOREIGN KEY (`lead_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- `left`.task_tags definition
@@ -263,6 +253,45 @@ CREATE TABLE `user_modules` (
   CONSTRAINT `user_modules_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `user_modules_ibfk_2` FOREIGN KEY (`module_code`, `organization_id`) REFERENCES `modules` (`code`, `organization_id`) ON DELETE CASCADE,
   CONSTRAINT `user_modules_chk_1` CHECK ((`proficiency_score` between 1 and 5))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- `left`.schedule_reports definition
+
+CREATE TABLE `schedule_reports` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `schedule_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  `report_date` date NOT NULL,
+  `file_path` text NOT NULL,
+  `file_name` varchar(255) NOT NULL,
+  `mime_type` varchar(100) DEFAULT NULL,
+  `notes` text,
+  `status` enum('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  `reviewed_by` bigint DEFAULT NULL,
+  `reviewed_at` datetime(6) DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  KEY `schedule_id` (`schedule_id`),
+  KEY `user_id` (`user_id`),
+  KEY `status` (`status`),
+  KEY `reviewed_by` (`reviewed_by`),
+  CONSTRAINT `schedule_reports_ibfk_1` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`),
+  CONSTRAINT `schedule_reports_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  CONSTRAINT `schedule_reports_ibfk_3` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- `left`.schedule_users definition
+
+CREATE TABLE `schedule_users` (
+  `schedule_id` bigint NOT NULL,
+  `user_id` bigint NOT NULL,
+  `role` text,
+  PRIMARY KEY (`schedule_id`,`user_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `schedule_users_ibfk_1` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`),
+  CONSTRAINT `schedule_users_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 

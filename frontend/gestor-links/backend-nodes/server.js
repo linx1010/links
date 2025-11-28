@@ -5,7 +5,8 @@ import cors from "cors";
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' })); // ou mais, se necessário
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 // const RABBITMQ_URL = "amqp://localhost";
 const rabbitHost = process.env.RABBITMQ_HOST || "localhost";

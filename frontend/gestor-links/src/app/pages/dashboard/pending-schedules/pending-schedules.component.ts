@@ -4,6 +4,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatDialog } from '@angular/material/dialog';
+import { UploadReportComponent } from '../../../shared/upload-report/upload-report.component';
 import {
   PendingSchedulesService,
   PendingScheduleGroup,
@@ -35,7 +37,11 @@ export class PendingSchedulesComponent implements OnInit {
   error = '';
   expandedClientId: number | null = null;
 
-  constructor(private service: PendingSchedulesService,private route: ActivatedRoute) {}
+  constructor(
+    private service: PendingSchedulesService,
+    private route: ActivatedRoute,
+    private dialog:MatDialog  
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -116,8 +122,23 @@ export class PendingSchedulesComponent implements OnInit {
 
   onUpload(report: UserReportStatus): void {
     console.log('Upload clicado para:', report);
-    // aqui você pode abrir um dialog, chamar serviço de upload, etc.
+
+    const dialogRef = this.dialog.open(UploadReportComponent, {
+      width: '500px',
+      data: { event: report } // passa o report como "event"
+    });
+
+    dialogRef.componentInstance.finished.subscribe((updatedReport: UserReportStatus) => {
+      dialogRef.close();
+      report.status = updatedReport.status;
+      this.loadPendingSchedules(); // recarrega a lista após upload
+    });
   }
+
+  loadPendingSchedules() {
+    // sua lógica para recarregar os reports pendentes
+  }
+
 
   getReportsGroupedByDate(): { date: string; reports: UserReportStatus[] }[] {
     const grouped: { [key: string]: UserReportStatus[] } = {};

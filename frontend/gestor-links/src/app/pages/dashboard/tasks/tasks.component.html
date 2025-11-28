@@ -4,13 +4,13 @@
     <div class="cards">
   <!-- Card: pendências de upload -->
   <div class="card upload" (click)="goToPending('day')">
-    <h3>RADs não enviados</h3>
+    <h3>RODs não enviados</h3>
     <p class="kpi-value">{{ totalUploadPendentes }}</p>
   </div>
 
   <!-- Card: pendências de aprovação (apenas se tech lead) -->
   <div class="card approval" *ngIf="isTechLead" (click)="goToPending('client')">
-    <h3>RADs aguardando aprovação</h3>
+    <h3>RODs aguardando aprovação</h3>
     <p class="kpi-value">{{ totalAprovacaoPendentes }}</p>
   </div>
 </div>
@@ -19,7 +19,7 @@
     <div class="chart-row">
         <!-- Gráfico de barras -->
         <div class="chart-box">
-            <h3>RADs enviados vs pendentes (últimos 3 meses)</h3>
+            <h3>RODs enviados vs pendentes (últimos 3 meses)</h3>
             <canvas id="barChart"></canvas>
         </div>
 
@@ -30,3 +30,4 @@
         </div>
     </div> 
 </div>
+<p><abbr title="ROD">ROD</abbr> Relatório Operacional Diário.</p>
