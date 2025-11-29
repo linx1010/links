@@ -13,6 +13,7 @@ import {
 } from './pending-schedules.service';
 
 import { ActivatedRoute } from '@angular/router';
+import{ToastService}from '../../../shared/toast.service'
 @Component({
   selector: 'app-pending-schedules',
   standalone: true,
@@ -40,7 +41,8 @@ export class PendingSchedulesComponent implements OnInit {
   constructor(
     private service: PendingSchedulesService,
     private route: ActivatedRoute,
-    private dialog:MatDialog  
+    private dialog:MatDialog,
+    private toast:ToastService  
   ) {}
 
   ngOnInit(): void {
@@ -138,6 +140,43 @@ export class PendingSchedulesComponent implements OnInit {
   loadPendingSchedules() {
     // sua lógica para recarregar os reports pendentes
   }
+
+  onDownload(report: any): void {
+    this.service.downloadReport(report.id).subscribe({
+      next: (res: any) => {
+        if (res.status) {
+          const byteCharacters = atob(res.file_base64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: res.mime_type || 'application/octet-stream' });
+
+          const url = URL.createObjectURL(blob);
+
+          // abre em nova aba
+          window.open(url);
+
+          // ou força download
+          // const a = document.createElement('a');
+          // a.href = url;
+          // a.download = res.file_name;
+          // a.click();
+          // URL.revokeObjectURL(url);
+
+          this.toast.show('Arquivo aberto com sucesso.', 'sucess');
+        } else {
+          this.toast.show(res.message, 'error');
+        }
+      },
+      error: (err) => {
+        this.toast.show(err?.error?.message || 'Erro ao baixar relatório.', 'error');
+        console.log(err)
+      }
+    });
+  }
+
 
 
   getReportsGroupedByDate(): { date: string; reports: UserReportStatus[] }[] {

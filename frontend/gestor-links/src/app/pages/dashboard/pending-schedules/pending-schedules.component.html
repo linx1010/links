@@ -40,6 +40,10 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef> Actions </th>
         <td mat-cell *matCellDef="let s">
+          <!-- Download / Visualizar -->
+          <button mat-icon-button color="accent"*ngIf="s.status === 'pending'" (click)="onDownload(s)">
+            <mat-icon>download</mat-icon>
+          </button>
           <button mat-icon-button color="primary" *ngIf="s.status === 'pending'" (click)="approve(s.schedule_id, s.user_id)">
             <mat-icon>check_circle</mat-icon>
           </button>

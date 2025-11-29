@@ -240,6 +240,8 @@ app.get("/timesheet/pending", async (req, res) => {
 });
 
 
+
+
 // *************************************Rota de login*************************************
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
@@ -293,14 +295,31 @@ app.post("/reports/list", async (req, res) => {
   res.json(response);
 });
 
-app.post("/reports/download", async (req, res) => {
-  const response = await sendRpcMessage({
-    source: "reports",
-    action: "download",
-    data: req.body
-  });
+// app.post("/reports/download", async (req, res) => {
+//   const response = await sendRpcMessage({
+//     source: "reports",
+//     action: "download",
+//     data: req.body
+//   });
 
-  res.json(response);
+//   res.json(response);
+// });
+
+// Rotas de download de arquivo
+
+app.post('/reports/download', async (req, res) => {
+  try {
+    const data = req.body; // { report_id: ... }
+    const result = await reportService.download(data);
+
+    if (result.status) {
+      res.json(result);
+    } else {
+      res.status(404).json(result);
+    }
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
 });
 
 app.post("/reports/approve", async (req, res) => {
