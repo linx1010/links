@@ -295,16 +295,9 @@ app.post("/reports/list", async (req, res) => {
   res.json(response);
 });
 
-// app.post("/reports/download", async (req, res) => {
-//   const response = await sendRpcMessage({
-//     source: "reports",
-//     action: "download",
-//     data: req.body
-//   });
 
-//   res.json(response);
-// });
 
+//*************************************Rotas reports*************************************
 // Rotas de download de arquivo
 
 app.post('/reports/download', async (req, res) => {
@@ -331,6 +324,23 @@ app.post("/reports/approve", async (req, res) => {
 
   res.json(response);
 });
+app.post("/reports/update-status", async (req, res) => {
+  try {
+    const { schedule_id, user_id, status, reviewed_by } = req.body;
+
+    const response = await sendRpcMessage({
+      source: "reports",
+      action: "update_status",
+      data: { schedule_id, user_id, status, reviewed_by }
+    });
+
+    res.json(response);
+  } catch (err) {
+    console.error("Erro em /reports/update-status:", err);
+    res.status(500).json({ error: "Erro ao atualizar status do relatório" });
+  }
+});
+
 
 //*************************************Rotas tasks*************************************
 app.get("/reports/pending-by-lead/:leadId", async (req, res) => {

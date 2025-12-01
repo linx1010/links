@@ -1,31 +1,36 @@
 <div class="dashboard-kpi">
   <h2>Dashboard de Pendências</h2>
 
-    <div class="cards">
-  <!-- Card: pendências de upload -->
-  <div class="card upload" (click)="goToPending('day')">
-    <h3>RODs não enviados</h3>
-    <p class="kpi-value">{{ totalUploadPendentes }}</p>
-  </div>
+  <div class="cards">
+    <!-- Card: pendências de upload -->
+    <div class="card upload" (click)="goToPending('day')">
+      <h3>RODs não enviados</h3>
+      <p class="kpi-value">{{ totalUploadPendentes }}</p>
+    </div>
+    <!-- Card: aguardando aprovação do envio -->
+    <div class="card pending" (click)="goToPending('day')">
+      <h3>RODs aguardando aprovação</h3>
+      <p class="kpi-value">{{ totalUploadAguardando }}</p>
+    </div>
 
-  <!-- Card: pendências de aprovação (apenas se tech lead) -->
-  <div class="card approval" *ngIf="isTechLead" (click)="goToPending('client')">
-    <h3>RODs aguardando aprovação</h3>
-    <p class="kpi-value">{{ totalAprovacaoPendentes }}</p>
+    <!-- Card: pendências de aprovação (apenas se tech lead) -->
+    <div class="card approval" *ngIf="isTechLead" (click)="goToPending('client')">
+      <h3>RODs aguardando aprovação</h3>
+      <p class="kpi-value">{{ totalAprovacaoPendentes }}</p>
+    </div>
   </div>
-</div>
 
 
     <div class="chart-row">
         <!-- Gráfico de barras -->
         <div class="chart-box">
-            <h3>RODs enviados vs pendentes (últimos 3 meses)</h3>
+            <h3>RODs enviados vs pendentes de envio (últimos 3 meses)</h3>
             <canvas id="barChart"></canvas>
         </div>
 
         <!-- Gráfico de pizza -->
         <div class="chart-box" *ngIf="isTechLead">
-            <h3>Status dos relatórios</h3>
+            <h3>Status dos relatórios como TechLead</h3>
             <canvas id="pieChart"></canvas>
         </div>
     </div> 

@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {ToastService}from '../../shared/toast.service'
+import { MatInput, MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-upload-report',
@@ -14,6 +15,7 @@ import {ToastService}from '../../shared/toast.service'
   styleUrls: ['./upload-report.component.scss'],
   imports: [
     MatFormFieldModule, 
+    MatInputModule,
     MatProgressBarModule,
     CommonModule,
     FormsModule
@@ -94,6 +96,6 @@ export class UploadReportComponent {
     this.notes = '';
     this.uploading = false;
     this.uploadProgress = 0;
-    this.finished.emit();
+    this.finished.emit({ ...this.event, status: this.event.status }); 
   }
 }

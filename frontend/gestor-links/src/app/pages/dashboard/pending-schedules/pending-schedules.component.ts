@@ -205,12 +205,17 @@ export class PendingSchedulesComponent implements OnInit {
   }
 
   approve(scheduleId: number, userId: number): void {
-    this.service.approve(scheduleId, userId).subscribe(() => this.loadGroupedSchedules());
+    const reviewerId = Number(localStorage.getItem('userId')) || 0;
+    this.service.updateStatus(scheduleId, userId, 'approved',reviewerId)
+      .subscribe(() => this.loadGroupedSchedules());
   }
 
   reject(scheduleId: number, userId: number): void {
-    this.service.reject(scheduleId, userId).subscribe(() => this.loadGroupedSchedules());
+    const reviewerId = Number(localStorage.getItem('userId')) || 0;
+    this.service.updateStatus(scheduleId, userId, 'rejected',reviewerId)
+      .subscribe(() => this.loadGroupedSchedules());
   }
+
 
   remind(scheduleId: number, userId: number): void {
     this.service.remind(scheduleId, userId).subscribe(() => alert('Reminder sent'));

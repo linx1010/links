@@ -52,6 +52,15 @@ export class PendingSchedulesService {
   reject(scheduleId: number, userId: number): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/reports/reject`, { schedule_id: scheduleId, user_id: userId });
   }
+  updateStatus(scheduleId: number, userId: number, status: 'approved' | 'rejected',reviewerId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/reports/update-status`, {
+      schedule_id: scheduleId,
+      user_id: userId,
+      status,
+      reviewed_by: reviewerId
+    });
+  }
+
 
   remind(scheduleId: number, userId: number): Observable<void> {
     // Se tiver rota específica para remind, ajuste aqui

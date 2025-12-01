@@ -133,6 +133,39 @@ class Reports:
         except Exception as e:
             return {"status": False, "message": str(e)}
 
+    
+    def update_status(self, data):
+        try:
+            cursor = self.conn.cursor()
+
+            sql = """
+                UPDATE schedule_reports
+                SET status = %s,
+                    reviewed_by = %s,
+                    reviewed_at = NOW()
+                WHERE schedule_id = %s AND user_id = %s AND status = 'pending'
+            """
+
+            # status deve ser 'approved' ou 'rejected'
+            status_text = data.get("status")
+            if status_text not in ("approved", "rejected"):
+                return {"status": False, "message": "Invalid status"}
+
+            cursor.execute(sql, (
+                status_text,
+                data.get("reviewed_by", 0),
+                data["schedule_id"],
+                data["user_id"]
+            ))
+            self.conn.commit()
+
+            if cursor.rowcount == 0:
+                return {"status": False, "message": "Report not found or not pending"}
+
+            return {"status": True, "message": f"Relatório {status_text}"}
+
+        except Exception as e:
+            return {"status": False, "message": str(e)}
 
     # --------------------------------------------------
     # APROVAR / REJEITAR RELATÓRIO
@@ -206,9 +239,18 @@ class Reports:
 
         return list(grouped.values())
     
-    def list_by_user_status(self, data):
+    def list_by_user_status(self, data, detail=True):
         user_id = data.get("user_id")
         cursor = self.conn.cursor(dictionary=True)
+
+        pending = ""
+        if detail:
+            pending = """
+                AND (
+                    sr.id IS NULL           -- sem envio -> missing
+                    OR sr.status IN ('pending', 'rejected')  -- enviados mas não aprovados
+                )
+            """
 
         query = """
             SELECT
@@ -228,49 +270,36 @@ class Reports:
                 ON sr.schedule_id = su.schedule_id
                 AND sr.user_id = su.user_id
             WHERE su.user_id = %s
-            AND (
-                sr.id IS NULL           -- sem envio -> missing
-                OR sr.status IN ('pending', 'rejected')  -- enviados mas não aprovados
-            )
+            {0}
             ORDER BY s.start_time ASC
-        """
+        """.format(pending)
+
         cursor.execute(query, (user_id,))
         rows = cursor.fetchall()
 
         return rows
+
     
     def dashboard_totals(self, data):
         lead_id = data.get("lead_id")
         user_id = data.get("user_id")
 
-        # usa os defs já existentes
         approval_data = self.pending_by_lead({"lead_id": lead_id})
-        upload_data = self.list_by_user_status({"user_id": user_id})
+        upload_data = self.list_by_user_status({"user_id": user_id},detail=False)
 
-        # inicializa acumuladores
         approval_totals = {"missing": 0, "pending": 0, "rejected": 0, "approved": 0}
         upload_totals = {"missing": 0, "pending": 0, "rejected": 0}
         global_totals = defaultdict(int)
         monthly_totals = defaultdict(lambda: {"missing": 0, "pending": 0, "rejected": 0, "approved": 0})
 
-        # percorre approval
+        # percorre approval → só acumula nos totais, não mexe no monthly
         for client in approval_data:
             for s in client["schedules"]:
                 status = s["status"]
                 approval_totals[status] = approval_totals.get(status, 0) + 1
                 global_totals[status] += 1
 
-                # agrupar por mês/ano
-                start_time = s["start_time"]
-                if isinstance(start_time, datetime):
-                    dt = start_time
-                else:
-                    dt = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
-
-                key = dt.strftime("%Y-%m")
-                monthly_totals[key][status] += 1
-
-        # percorre upload
+        # percorre upload → acumula nos totais e no monthly
         for r in upload_data:
             status = r["status"]
             upload_totals[status] = upload_totals.get(status, 0) + 1
@@ -285,21 +314,21 @@ class Reports:
             key = dt.strftime("%Y-%m")
             monthly_totals[key][status] += 1
 
-        # pegar últimos 3 meses ordenados
+        # últimos 3 meses
         sorted_months = sorted(monthly_totals.keys(), key=lambda m: datetime.strptime(m, "%Y-%m"))[-3:]
         monthly_data = [
             {
-                "month": datetime.strptime(m, "%Y-%m").strftime("%B/%Y"),  # ex: "Novembro/2025"
+                "month": datetime.strptime(m, "%Y-%m").strftime("%B/%Y"),
                 **monthly_totals[m]
             }
             for m in sorted_months
         ]
 
-
         return {
             "approval": approval_totals,
             "upload": upload_totals,
-            "global": dict(global_totals),   # para o pie chart
-            "monthly": monthly_data          # para o bar chart empilhado
+            "global": dict(global_totals),
+            "monthly": monthly_data   # agora só com upload
         }
+
 

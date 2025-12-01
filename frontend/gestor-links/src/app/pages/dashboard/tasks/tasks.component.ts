@@ -15,6 +15,7 @@ Chart.register(...registerables);
 })
 export class TasksComponent implements OnInit {
   totalUploadPendentes: number = 0;
+  totalUploadAguardando: number = 0; 
   totalAprovacaoPendentes: number = 0;
   isTechLead: boolean = false;
 
@@ -32,7 +33,8 @@ export class TasksComponent implements OnInit {
     if (!isNaN(userId) && !isNaN(leadId)) {
       this.tasksService.getDashboardTotals(userId, leadId).subscribe((res: DashboardTotals) => {
         // cards
-        this.totalUploadPendentes = res.upload.missing + res.upload.pending + res.upload.rejected;
+        this.totalUploadPendentes = res.upload.missing +  res.upload.rejected;
+        this.totalUploadAguardando = res.upload.pending; 
         this.totalAprovacaoPendentes = res.approval.missing + res.approval.pending + res.approval.rejected;
 
         // gráficos
