@@ -4,6 +4,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MatDialog } from '@angular/material/dialog';
+import { UploadReportComponent } from '../../../shared/upload-report/upload-report.component';
 import {
   PendingSchedulesService,
   PendingScheduleGroup,
@@ -11,6 +13,7 @@ import {
 } from './pending-schedules.service';
 
 import { ActivatedRoute } from '@angular/router';
+import{ToastService}from '../../../shared/toast.service'
 @Component({
   selector: 'app-pending-schedules',
   standalone: true,
@@ -35,7 +38,12 @@ export class PendingSchedulesComponent implements OnInit {
   error = '';
   expandedClientId: number | null = null;
 
-  constructor(private service: PendingSchedulesService,private route: ActivatedRoute) {}
+  constructor(
+    private service: PendingSchedulesService,
+    private route: ActivatedRoute,
+    private dialog:MatDialog,
+    private toast:ToastService  
+  ) {}
 
   ngOnInit(): void {
     this.loading = true;
@@ -116,8 +124,53 @@ export class PendingSchedulesComponent implements OnInit {
 
   onUpload(report: UserReportStatus): void {
     console.log('Upload clicado para:', report);
-    // aqui você pode abrir um dialog, chamar serviço de upload, etc.
+
+    const dialogRef = this.dialog.open(UploadReportComponent, {
+      width: '500px',
+      data: { event: report } // passa o report como "event"
+    });
+
+    dialogRef.componentInstance.finished.subscribe((updatedReport: UserReportStatus) => {
+      dialogRef.close();
+      report.status = updatedReport.status;
+      this.loadPendingSchedules(); // recarrega a lista após upload
+    });
   }
+
+  loadPendingSchedules() {
+    // sua lógica para recarregar os reports pendentes
+  }
+
+  onDownload(report: any): void {
+    this.service.downloadReport(report.id).subscribe({
+      next: (res: any) => {
+        if (res.status) {
+          const byteCharacters = atob(res.file_base64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: res.mime_type || 'application/octet-stream' });
+
+          const url = URL.createObjectURL(blob);
+
+          // abre em nova aba
+          window.open(url);
+
+          this.toast.show('Arquivo aberto com sucesso.', 'sucess');
+        } else {
+          this.toast.show(res.message, 'error');
+        }
+      },
+      error: (err) => {
+        this.toast.show(err?.error?.message || 'Erro ao baixar relatório.', 'error');
+        console.log(err)
+      }
+    });
+  }
+
+
 
   getReportsGroupedByDate(): { date: string; reports: UserReportStatus[] }[] {
     const grouped: { [key: string]: UserReportStatus[] } = {};
@@ -145,12 +198,57 @@ export class PendingSchedulesComponent implements OnInit {
   }
 
   approve(scheduleId: number, userId: number): void {
-    this.service.approve(scheduleId, userId).subscribe(() => this.loadGroupedSchedules());
+    const reviewerId = Number(localStorage.getItem('userId')) || 0;
+    this.service.updateStatus(scheduleId, userId, 'approved', reviewerId)
+      .subscribe(() => {
+        // Atualiza localmente sem recarregar tudo
+        const group = this.groupedSchedules.find(g =>
+          g.schedules.some(s => s.schedule_id === scheduleId && s.user_id === userId)
+        );
+        if (group) {
+          group.schedules = group.schedules.filter(s =>
+            !(s.schedule_id === scheduleId && s.user_id === userId)
+          );
+          // Se o grupo ficou vazio, remove-o para não mostrar um panel sem itens
+          if (group.schedules.length === 0) {
+            this.groupedSchedules = this.groupedSchedules.filter(g => g !== group);
+          }
+        }
+
+        // Se estiver na visualização por dia, remova também dali
+        this.userReports = this.userReports.filter(r =>
+          !(r.schedule_id === scheduleId && r.user_id === userId)
+        );
+        this.groupReportsByDate();
+
+        this.toast.show('Relatório aprovado com sucesso', 'sucess');
+      });
   }
 
   reject(scheduleId: number, userId: number): void {
-    this.service.reject(scheduleId, userId).subscribe(() => this.loadGroupedSchedules());
+    const reviewerId = Number(localStorage.getItem('userId')) || 0;
+    this.service.updateStatus(scheduleId, userId, 'rejected', reviewerId)
+      .subscribe(() => {
+        const group = this.groupedSchedules.find(g =>
+          g.schedules.some(s => s.schedule_id === scheduleId && s.user_id === userId)
+        );
+        if (group) {
+          const sched = group.schedules.find(s => s.schedule_id === scheduleId && s.user_id === userId);
+          if (sched) sched.status = 'rejected'; // mantém item visível, mas com novo status
+        }
+
+        const report = this.userReports.find(r => r.schedule_id === scheduleId && r.user_id === userId);
+        if (report) {
+          report.status = 'rejected';
+          this.groupReportsByDate();
+        }
+
+        this.toast.show('Relatório rejeitado', 'error');
+      });
   }
+
+
+
 
   remind(scheduleId: number, userId: number): void {
     this.service.remind(scheduleId, userId).subscribe(() => alert('Reminder sent'));

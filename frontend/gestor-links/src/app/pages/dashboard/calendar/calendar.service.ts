@@ -118,6 +118,15 @@ export class CalendarService {
       })
     );
   }
+  uploadReport(payload: any): Observable<any> {
+    return this.http.post<any>(`${this.reportsUrl}/upload`, payload).pipe(
+      catchError((err: any) => {
+        console.error('Error uploading report:', err);
+        return of(null);
+      })
+    );
+  }
+
 
   // ------------------------------------------------------------------------
   // LISTAR RELATÓRIOS

@@ -5,7 +5,8 @@ import cors from "cors";
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' })); // ou mais, se necessário
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 
 // const RABBITMQ_URL = "amqp://localhost";
 const rabbitHost = process.env.RABBITMQ_HOST || "localhost";
@@ -239,6 +240,8 @@ app.get("/timesheet/pending", async (req, res) => {
 });
 
 
+
+
 // *************************************Rota de login*************************************
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
@@ -292,14 +295,24 @@ app.post("/reports/list", async (req, res) => {
   res.json(response);
 });
 
-app.post("/reports/download", async (req, res) => {
-  const response = await sendRpcMessage({
-    source: "reports",
-    action: "download",
-    data: req.body
-  });
 
-  res.json(response);
+
+//*************************************Rotas reports*************************************
+// Rotas de download de arquivo
+
+app.post('/reports/download', async (req, res) => {
+  try {
+    const data = req.body; // { report_id: ... }
+    const result = await reportService.download(data);
+
+    if (result.status) {
+      res.json(result);
+    } else {
+      res.status(404).json(result);
+    }
+  } catch (err) {
+    res.status(500).json({ status: false, message: err.message });
+  }
 });
 
 app.post("/reports/approve", async (req, res) => {
@@ -311,6 +324,23 @@ app.post("/reports/approve", async (req, res) => {
 
   res.json(response);
 });
+app.post("/reports/update-status", async (req, res) => {
+  try {
+    const { schedule_id, user_id, status, reviewed_by } = req.body;
+
+    const response = await sendRpcMessage({
+      source: "reports",
+      action: "update_status",
+      data: { schedule_id, user_id, status, reviewed_by }
+    });
+
+    res.json(response);
+  } catch (err) {
+    console.error("Erro em /reports/update-status:", err);
+    res.status(500).json({ error: "Erro ao atualizar status do relatório" });
+  }
+});
+
 
 //*************************************Rotas tasks*************************************
 app.get("/reports/pending-by-lead/:leadId", async (req, res) => {
