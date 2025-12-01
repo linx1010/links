@@ -158,13 +158,6 @@ export class PendingSchedulesComponent implements OnInit {
           // abre em nova aba
           window.open(url);
 
-          // ou força download
-          // const a = document.createElement('a');
-          // a.href = url;
-          // a.download = res.file_name;
-          // a.click();
-          // URL.revokeObjectURL(url);
-
           this.toast.show('Arquivo aberto com sucesso.', 'sucess');
         } else {
           this.toast.show(res.message, 'error');
@@ -206,15 +199,55 @@ export class PendingSchedulesComponent implements OnInit {
 
   approve(scheduleId: number, userId: number): void {
     const reviewerId = Number(localStorage.getItem('userId')) || 0;
-    this.service.updateStatus(scheduleId, userId, 'approved',reviewerId)
-      .subscribe(() => this.loadGroupedSchedules());
+    this.service.updateStatus(scheduleId, userId, 'approved', reviewerId)
+      .subscribe(() => {
+        // Atualiza localmente sem recarregar tudo
+        const group = this.groupedSchedules.find(g =>
+          g.schedules.some(s => s.schedule_id === scheduleId && s.user_id === userId)
+        );
+        if (group) {
+          group.schedules = group.schedules.filter(s =>
+            !(s.schedule_id === scheduleId && s.user_id === userId)
+          );
+          // Se o grupo ficou vazio, remove-o para não mostrar um panel sem itens
+          if (group.schedules.length === 0) {
+            this.groupedSchedules = this.groupedSchedules.filter(g => g !== group);
+          }
+        }
+
+        // Se estiver na visualização por dia, remova também dali
+        this.userReports = this.userReports.filter(r =>
+          !(r.schedule_id === scheduleId && r.user_id === userId)
+        );
+        this.groupReportsByDate();
+
+        this.toast.show('Relatório aprovado com sucesso', 'sucess');
+      });
   }
 
   reject(scheduleId: number, userId: number): void {
     const reviewerId = Number(localStorage.getItem('userId')) || 0;
-    this.service.updateStatus(scheduleId, userId, 'rejected',reviewerId)
-      .subscribe(() => this.loadGroupedSchedules());
+    this.service.updateStatus(scheduleId, userId, 'rejected', reviewerId)
+      .subscribe(() => {
+        const group = this.groupedSchedules.find(g =>
+          g.schedules.some(s => s.schedule_id === scheduleId && s.user_id === userId)
+        );
+        if (group) {
+          const sched = group.schedules.find(s => s.schedule_id === scheduleId && s.user_id === userId);
+          if (sched) sched.status = 'rejected'; // mantém item visível, mas com novo status
+        }
+
+        const report = this.userReports.find(r => r.schedule_id === scheduleId && r.user_id === userId);
+        if (report) {
+          report.status = 'rejected';
+          this.groupReportsByDate();
+        }
+
+        this.toast.show('Relatório rejeitado', 'error');
+      });
   }
+
+
 
 
   remind(scheduleId: number, userId: number): void {

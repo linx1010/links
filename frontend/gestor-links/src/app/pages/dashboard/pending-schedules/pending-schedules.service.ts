@@ -7,7 +7,7 @@ export interface PendingScheduleDetail {
   start_time: string;
   user_id: number;
   user_name: string;
-  status: 'missing' | 'pending';
+  status: 'missing' | 'pending'| 'approved'| 'rejected';
 }
 
 export interface PendingScheduleGroup {
