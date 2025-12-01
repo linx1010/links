@@ -196,6 +196,10 @@ class Reports:
         except Exception as e:
             return {"status": False, "message": str(e)}
         
+    # --------------------------------------------------
+    # APROVAR / REJEITAR RELATÓRIO
+    # --------------------------------------------------
+    
     def pending_by_lead(self, data):
         lead_id = data.get("lead_id")
         cursor = self.conn.cursor(dictionary=True)
@@ -215,6 +219,7 @@ class Reports:
             LEFT JOIN users u ON u.id = su.user_id
             LEFT JOIN schedule_reports sr ON sr.schedule_id = s.id AND sr.user_id = su.user_id
             WHERE s.lead_id = %s
+            AND DATE(s.start_time) <= CURDATE() - INTERVAL 1 DAY
         """
         cursor.execute(query, (lead_id,))
         rows = cursor.fetchall()
@@ -271,6 +276,7 @@ class Reports:
                 AND sr.user_id = su.user_id
             WHERE su.user_id = %s
             {0}
+            AND DATE(s.start_time) <= CURDATE() - INTERVAL 1 DAY;
             ORDER BY s.start_time ASC
         """.format(pending)
 
