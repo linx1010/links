@@ -165,12 +165,12 @@ export class CalendarComponent {
         });
         this.generateCalendar();
       },
-      error: (err: any) => console.error('Erro ao carregar agenda:', err)
+      error: (err: any) => this.toast.show(`Erro ao carregar agenda: ${err}`,'error') 
     });
 
     this.recursosService.getUsers().subscribe({
       next: (data: any[]) => this.recursos = data,
-      error: (err: any) => console.error('Erro ao carregar recursos:', err)
+      error: (err: any) => this.toast.show(`Erro ao carregar recursos: ${err}`,'error')
     });
   }
 
@@ -217,7 +217,7 @@ Local: ${e.location || 'N/A'}`);
     e.status = newStatus;
     this.calendarService.completeAgenda(e).subscribe({
       next: () => this.carregarAgenda(),
-      error: (err: any) => console.error('Erro ao concluir agenda:', err)
+      error: (err: any) => this.toast.show(`Erro ao concluir agenda: ${err}`,'error')
     });
   }
 
@@ -225,7 +225,7 @@ Local: ${e.location || 'N/A'}`);
     if (confirm(`🗑️ Deseja excluir o evento "${e.title}"?`)) {
       this.calendarService.deleteEvento('client', this.id, this.formatDateKey(e.start_time), e.title).subscribe({
         next: () => this.carregarAgenda(),
-        error: (err: any) => console.error('Erro ao excluir evento:', err)
+        error: (err: any) => this.toast.show(`Erro ao excluir evento: ${err}`,'error')
       });
     }
   }
@@ -300,7 +300,7 @@ Local: ${e.location || 'N/A'}`);
         },
         error: (err: any) => {
           // ❌ Erro HTTP ou exceção
-          console.error('Erro ao enviar relatório:', err);
+          this.toast.show(`Erro ao enviar relatório: ${err}`,'error')
           this.uploading = false;
           this.uploadProgress = 0;
           const msg = err?.error?.message || 'Erro ao enviar relatório.';
@@ -323,7 +323,7 @@ Local: ${e.location || 'N/A'}`);
         this.relatorios = data.reports || [];
       },
       error: (err: any) => {
-        console.error('Erro ao carregar relatórios:', err);
+        this.toast.show(`Erro ao carregar relatórios: ${err}`,'error')
         this.relatorios = [];
       }
     });
@@ -358,8 +358,7 @@ Local: ${e.location || 'N/A'}`);
         window.URL.revokeObjectURL(url);
       },
       error: (err: any) => {
-        console.error('Erro ao baixar relatório:', err);
-        this.toast.show('Erro ao baixar relatório.','error');
+        this.toast.show(`Erro ao baixar relatório: ${err}`,'error')
       }
     });
   }
@@ -389,8 +388,7 @@ Local: ${e.location || 'N/A'}`);
         }
       },
       error: (err: any) => {
-        console.error('Erro ao processar aprovação:', err);
-        this.toast.show('Erro ao processar aprovação.','error');
+        this.toast.show(`Erro ao processar aprovação: ${err}`,'error')
       }
     });
   }
@@ -417,16 +415,36 @@ Local: ${e.location || 'N/A'}`);
     };
 
     this.calendarService.createAgenda(payload).subscribe({
-      next: () => {
-        this.carregarAgenda();
-        const diaAtualizado = this.days.find(d => d.day === day);
-        if (diaAtualizado) this.selectedDay = diaAtualizado;
+      next: (res: any) => {
+        if (res.success) {
+          // sucesso → atualiza agenda normalmente
+          this.carregarAgenda();
+          const diaAtualizado = this.days.find(d => d.day === day);
+          if (diaAtualizado) this.selectedDay = diaAtualizado;
+          this.toast.show('Agenda criada com sucesso!', 'sucess');
+        } else {
+          // falha → montar mensagem usando nome do usuário
+          let mensagem = res.error;
+          if (res.user_id) {
+            const usuario = this.recursos.find(r => r.id === res.user_id);
+            console.log(res)
+            console.log(this.recursos)
+            if (usuario) {
+              mensagem = `Usuário ${usuario.name} já possui 2 agendas neste dia.`;
+            }
+          }
+          this.toast.show(mensagem, 'error');
+        }
       },
-      error: (err: any) => console.error('Erro ao criar agenda:', err)
+      error: (err: any) => {
+        this.toast.show(`Erro ao criar agenda: ${err}`, 'error');
+      }
     });
+
 
     this.formEvento = { title: '', description: '', user_id: [] };
   }
+
 
   // ---------------------------
   // Dialog de replicação em bloco
@@ -472,8 +490,7 @@ Local: ${e.location || 'N/A'}`);
         }
       },
       error: (err: any) => {
-        console.error('Erro ao replicar agendas:', err);
-        this.toast.show('Erro ao replicar agendas.','error');
+        this.toast.show(`Erro ao replicar agendas: ${err}`,'error')
       }
     });
 

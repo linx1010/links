@@ -29,8 +29,8 @@ class Users():
         password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
         cursor.execute("""
-            INSERT INTO users (organization_id, name, email, role, hourly_rate, active, password_hash)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO users (organization_id, name, email, role, hourly_rate, active, password_hash, resource_type,availability_expression)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             data["organization_id"],
             data["name"],
@@ -38,7 +38,9 @@ class Users():
             data.get("role", "member"),
             data.get("hourly_rate", 0.0),
             data.get("active", True),
-            password_hash
+            password_hash,
+            data.get("resource_type"),
+            data.get("availability_expression")  
         ))
         self.conn.commit()
         user_id = cursor.lastrowid
@@ -53,7 +55,10 @@ class Users():
 
         # ✅ Verifica se usuário existe e se senha confere com hash
         if user and bcrypt.checkpw(data['password'].encode('utf-8'), user['password_hash'].encode('utf-8')):
-            return {"status": True, "token": generate_jwt(user), "role": user['role'],"id":user['id']}
+            if user['active'] == 0:
+                return {"status": False, "message": 'Contate um Adminstrador'}
+            else:
+                return {"status": True, "token": generate_jwt(user), "role": user['role'],"id":user['id']}
         else:
             return {"status": False, "message": "Usuário ou senha inválidos"}
 
@@ -104,7 +109,7 @@ class Users():
         set_fields = []
         values = []
 
-        for field in ["name", "email", "role", "hourly_rate", "active", "password"]:
+        for field in ["name", "email", "role", "hourly_rate", "active", "password","resource_type", "availability_expression"]:
             if field in data:
                 if field == "password":
                     # ✅ Atualiza senha com hash

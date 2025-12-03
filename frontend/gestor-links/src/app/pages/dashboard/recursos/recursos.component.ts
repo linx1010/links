@@ -63,6 +63,8 @@ export class RecursosComponent implements OnInit {
     hourly_rate: null,
     organization_id:'1',
     active: true,
+    resource_type: '',              // 👈 novo campo
+    availability_expression: '',    // 👈 novo campo
     modulos: [] as { code: string, proficiency: number }[]
   };
 
