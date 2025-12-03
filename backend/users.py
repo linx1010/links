@@ -29,8 +29,8 @@ class Users():
         password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
         cursor.execute("""
-            INSERT INTO users (organization_id, name, email, role, hourly_rate, active, password_hash)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO users (organization_id, name, email, role, hourly_rate, active, password_hash, resource_type,availability_expression)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             data["organization_id"],
             data["name"],
@@ -38,7 +38,9 @@ class Users():
             data.get("role", "member"),
             data.get("hourly_rate", 0.0),
             data.get("active", True),
-            password_hash
+            password_hash,
+            data.get("resource_type"),
+            data.get("availability_expression")  
         ))
         self.conn.commit()
         user_id = cursor.lastrowid
@@ -104,7 +106,7 @@ class Users():
         set_fields = []
         values = []
 
-        for field in ["name", "email", "role", "hourly_rate", "active", "password"]:
+        for field in ["name", "email", "role", "hourly_rate", "active", "password","resource_type", "availability_expression"]:
             if field in data:
                 if field == "password":
                     # ✅ Atualiza senha com hash

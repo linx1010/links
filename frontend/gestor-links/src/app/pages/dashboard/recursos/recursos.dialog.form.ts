@@ -28,6 +28,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class RecursosFormDialog {
   modulosFiltrados: any[] = [];
   modulosFiltro: string = '';
+  selectedDays: string[] = [];
+  selectedHour: number = 9; // default
 
   constructor(
     public dialogRef: MatDialogRef<RecursosFormDialog>,
@@ -49,5 +51,24 @@ export class RecursosFormDialog {
     this.modulosFiltrados = this.data.modulos.filter((m: any) =>
       m.code.toLowerCase().includes(filtro) || m.label.toLowerCase().includes(filtro)
     );
+  }
+
+  updateQuartz(): void {
+    const days = this.selectedDays.length > 0 ? this.selectedDays.join(',') : '*';
+    const hour = this.selectedHour ?? 8;
+
+    // Monta expressão Quartz básica
+    this.data.novoUser.availability_expression = `0 0 ${hour} ? * ${days}`;
+  }
+  onResourceTypeChange(): void {
+    // Ajusta defaults conforme tipo
+    if (this.data.novoUser.resource_type === 'hourly_full') {
+      this.selectedHour = 8;
+      this.selectedDays = ['MON','TUE','WED','THU','FRI'];
+    } else if (this.data.novoUser.resource_type === 'full_time') {
+      this.selectedHour = 8;
+      this.selectedDays = ['MON','TUE','WED','THU','FRI'];
+    }
+    this.updateQuartz();
   }
 }

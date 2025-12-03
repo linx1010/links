@@ -61,6 +61,53 @@
       </mat-form-field>
     </div>
   </form>
+
+  <!-- Tipo de Recurso -->
+  <div class="form-group">
+    <mat-form-field class="full-width">
+      <mat-label>Tipo de Recurso</mat-label>
+      <mat-select [(ngModel)]="data.novoUser.resource_type" name="resource_type" required (selectionChange)="onResourceTypeChange()">
+        <mat-option value="hourly_full">Horista Integral</mat-option>
+        <mat-option value="hourly_partial">Horista Parcial</mat-option>
+        <mat-option value="scope">Escopo</mat-option>
+        <mat-option value="full_time">Full</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Dias da Semana -->
+  <div class="form-group">
+    <mat-form-field class="full-width">
+      <mat-label>Dias da Semana</mat-label>
+      <mat-select [(ngModel)]="selectedDays" name="days" multiple (selectionChange)="updateQuartz()">
+        <mat-option value="MON">Segunda</mat-option>
+        <mat-option value="TUE">Terça</mat-option>
+        <mat-option value="WED">Quarta</mat-option>
+        <mat-option value="THU">Quinta</mat-option>
+        <mat-option value="FRI">Sexta</mat-option>
+        <mat-option value="SAT">Sábado</mat-option>
+        <mat-option value="SUN">Domingo</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!-- Horário -->
+  <div class="form-group" *ngIf="data.novoUser.resource_type !== 'full_time'">
+    <mat-form-field class="full-width">
+      <mat-label>Hora</mat-label>
+      <input matInput type="number" [(ngModel)]="selectedHour" name="hour" (input)="updateQuartz()" min="0" max="23">
+    </mat-form-field>
+  </div>
+
+  <!-- Expressão Quartz (readonly) -->
+  <div class="form-group">
+    <mat-form-field class="full-width">
+      <mat-label>Availability Expression</mat-label>
+      <input matInput [(ngModel)]="data.novoUser.availability_expression" name="availability_expression" readonly>
+    </mat-form-field>
+  </div>
+
+  
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
