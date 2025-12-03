@@ -1,0 +1,37 @@
+<div class="dashboard-kpi">
+  <h2>Painel Financeiro</h2>
+
+  <div class="cards">
+    <div class="card completed">
+      <h3>Agendas concluídas</h3>
+      <p class="kpi-value">{{ indicadores.totalAgendasConcluidas }}</p>
+    </div>
+
+    <div class="card revenue">
+      <h3>Receita estimada</h3>
+      <p class="kpi-value">{{ indicadores.receitaEstimada | currency:'BRL':'symbol':'1.0-0' }}</p>
+    </div>
+
+    <div class="card approval">
+      <h3>Taxa de aprovação</h3>
+      <p class="kpi-value">{{ indicadores.taxaAprovacaoRelatorios }}%</p>
+    </div>
+
+    <div class="card time">
+      <h3>Tempo médio de execução</h3>
+      <p class="kpi-value">{{ indicadores.tempoMedioExecucao }} min</p>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Agendas por Cliente</h3>
+      <canvas id="barChartClientes"></canvas>
+    </div>
+
+    <div class="chart-box">
+      <h3>Agendas por Tipo de Atuação</h3>
+      <canvas id="pieChartAtuacao"></canvas>
+    </div>
+  </div>
+</div>
