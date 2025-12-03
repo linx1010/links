@@ -55,7 +55,10 @@ class Users():
 
         # ✅ Verifica se usuário existe e se senha confere com hash
         if user and bcrypt.checkpw(data['password'].encode('utf-8'), user['password_hash'].encode('utf-8')):
-            return {"status": True, "token": generate_jwt(user), "role": user['role'],"id":user['id']}
+            if user['active'] == 0:
+                return {"status": False, "message": 'Contate um Adminstrador'}
+            else:
+                return {"status": True, "token": generate_jwt(user), "role": user['role'],"id":user['id']}
         else:
             return {"status": False, "message": "Usuário ou senha inválidos"}
 
