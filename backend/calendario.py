@@ -92,15 +92,41 @@ class Calendar:
         cursor = self.conn.cursor()
 
         try:
-            # 1. Inserir na tabela schedules com lead_id
+            # Extrair dados principais
+            start_time = f"{data['date']} 00:00:00"
+            location = data.get('location', None)
+            lead_id = data.get('lead_id')
+            role = data.get('role', 'participant')
+            user_ids = data.get('user_id', [])
+
+            # Normalizar lista de usuários
+            if not isinstance(user_ids, list):
+                user_ids = [user_ids]
+
+            # 🔎 Validação: máximo 2 agendas por usuário no mesmo dia
+            for user_id in user_ids:
+                check_query = """
+                    SELECT COUNT(*) 
+                    FROM schedules s
+                    INNER JOIN schedule_users su ON su.schedule_id = s.id
+                    WHERE su.user_id = %s
+                    AND DATE(s.start_time) = DATE(%s)
+                """
+                cursor.execute(check_query, (user_id, start_time))
+                (count,) = cursor.fetchone()
+
+                if count >= 2:
+                    return {
+                        "success": False,
+                        "error": "Usuário já possui 2 agendas neste dia.",
+                        "user_id": user_id
+                    }
+
+            # 1. Inserir na tabela schedules
             insert_schedule = """
                 INSERT INTO schedules (client_id, title, start_time, location, lead_id)
                 VALUES (%s, %s, %s, %s, %s)
             """
-            start_time = f"{data['date']} 00:00:00"
-            location = data.get('location', None)
-            lead_id = data.get('lead_id') 
-
             cursor.execute(insert_schedule, (data['id'], data['title'], start_time, location, lead_id))
             schedule_id = cursor.lastrowid
 
@@ -109,21 +135,20 @@ class Calendar:
                 INSERT INTO schedule_users (schedule_id, user_id, role)
                 VALUES (%s, %s, %s)
             """
-            role = data.get('role', 'participant')  # padrão
-
-            user_ids = data.get('user_id', [])
-            if isinstance(user_ids, list):
-                for user_id in user_ids:
-                    cursor.execute(insert_user, (schedule_id, user_id, role))
-            else:
-                cursor.execute(insert_user, (schedule_id, user_ids, role))
+            for user_id in user_ids:
+                cursor.execute(insert_user, (schedule_id, user_id, role))
 
             self.conn.commit()
-            return { "success": True, "schedule_id": schedule_id }
+            return {"success": True, "schedule_id": schedule_id}
 
         except Exception as e:
             self.conn.rollback()
-            return { "success": False, "error": str(e) }
+            return {"success": False, "error": str(e)}
+
+        finally:
+            cursor.close()
+            self.conn.close()
+
 
         
     def createCalendarBatch(self, data):
