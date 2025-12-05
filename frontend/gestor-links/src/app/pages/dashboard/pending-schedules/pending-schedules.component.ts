@@ -142,7 +142,8 @@ export class PendingSchedulesComponent implements OnInit {
   }
 
   onDownload(report: any): void {
-    this.service.downloadReport(report.id).subscribe({
+    console.log(report);
+    this.service.downloadReport(report).subscribe({
       next: (res: any) => {
         if (res.status) {
           const byteCharacters = atob(res.file_base64);
@@ -155,20 +156,26 @@ export class PendingSchedulesComponent implements OnInit {
 
           const url = URL.createObjectURL(blob);
 
-          // abre em nova aba
-          window.open(url);
+          // ✅ força o download com o nome correto
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = res.file_name || 'arquivo';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
 
-          this.toast.show('Arquivo aberto com sucesso.', 'sucess');
+          this.toast.show('Arquivo baixado com sucesso.', 'sucess');
         } else {
           this.toast.show(res.message, 'error');
         }
       },
       error: (err) => {
         this.toast.show(err?.error?.message || 'Erro ao baixar relatório.', 'error');
-        console.log(err)
+        console.log(err);
       }
     });
   }
+
 
 
 

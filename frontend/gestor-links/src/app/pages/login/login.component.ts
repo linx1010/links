@@ -51,6 +51,7 @@ export class LoginComponent {
             localStorage.setItem('token', res.token);
             localStorage.setItem('userRole', res.role);
             localStorage.setItem('userId', res.id);
+            localStorage.setItem('userName', res.name);
             this.router.navigate(['/dashboard']);
           } else {
             this.error = res.message;

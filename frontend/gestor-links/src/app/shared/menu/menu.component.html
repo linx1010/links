@@ -12,8 +12,8 @@
     <li *ngIf="isAdmin||isManager">
       <a routerLink="/dashboard/projetos" routerLinkActive="active"><span class="material-icons">folder</span> Projetos</a>
     </li>
-    <li *ngIf="isAdmin||isManager">
-      <a routerLink="/dashboard/timesheet" routerLinkActive="active"><span class="material-icons">schedule</span> Tarefas</a>
+    <li *ngIf="isAdmin">
+      <a routerLink="/dashboard/financial-indicators" routerLinkActive="active"><span class="material-icons">paid</span> Indicadores Financeiros</a>
     </li>
     <!-- <li><a routerLink="/dashboard/calendar" routerLinkActive="active"><span class="material-icons">calendar_today</span> Calendário</a></li> -->
     <li>

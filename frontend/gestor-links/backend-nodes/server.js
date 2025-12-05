@@ -300,20 +300,30 @@ app.post("/reports/list", async (req, res) => {
 //*************************************Rotas reports*************************************
 // Rotas de download de arquivo
 
-app.post('/reports/download', async (req, res) => {
-  try {
-    const data = req.body; // { report_id: ... }
-    const result = await reportService.download(data);
+  app.post("/reports/download", async (req, res) => {
+    try {
+      const data = req.body; // { report_id: ... }
+      console.log("📨 Requisição recebida para download:", data);
 
-    if (result.status) {
-      res.json(result);
-    } else {
-      res.status(404).json(result);
+      // envia mensagem via RabbitMQ para o worker Python
+      const result = await sendRpcMessage({
+        source: "reports",
+        action: "download",
+        data: data,
+      });
+
+      if (result.status) {
+        res.json(result);
+      } else {
+        res.status(404).json(result);
+      }
+    } catch (err) {
+      console.error("❌ Erro no endpoint /reports/download:", err);
+      res.status(500).json({ status: false, message: err.message });
     }
-  } catch (err) {
-    res.status(500).json({ status: false, message: err.message });
-  }
-});
+  });
+
+
 
 app.post("/reports/approve", async (req, res) => {
   const response = await sendRpcMessage({

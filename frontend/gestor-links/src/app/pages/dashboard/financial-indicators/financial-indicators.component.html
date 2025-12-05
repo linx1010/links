@@ -1,0 +1,39 @@
+<div class="dashboard-kpi">
+  <h2>Painel Financeiro</h2>
+
+  <div class="cards">
+    <div class="card completed">
+      <h3>Agendas concluídas</h3>
+      <p class="kpi-value">{{ indicadores.totalAgendasConcluidas }}</p>
+    </div>
+
+    <div class="card revenue">
+      <h3>Receita estimada</h3>
+      <p class="kpi-value">{{ indicadores.receitaEstimada | currency:'BRL':'symbol':'1.0-0' }}</p>
+    </div>
+
+    <div class="card approval">
+      <h3>Taxa de aprovação</h3>
+      <p class="kpi-value">{{ indicadores.taxaAprovacaoRelatorios }}%</p>
+    </div>
+
+    <div class="card pending">
+      <h3>Percentual de Pendências</h3>
+      <p class="kpi-value">{{ indicadores.percentualPendencias }}%</p>
+    </div>
+  </div>
+
+  <div class="chart-row">
+    <!-- Gráfico stacked: agendas aprovadas vs pendentes -->
+    <div class="chart-box">
+      <h3>Agendas criadas nos últimos 3 meses</h3>
+      <canvas id="stackedChartClientes"></canvas>
+    </div>
+
+    <!-- Gráfico polar/radar: distribuição por tipo de recurso -->
+    <div class="chart-box">
+      <h3>Distribuição por Tipo de Recurso</h3>
+      <canvas id="polarChartRecursos"></canvas>
+    </div>
+  </div>
+</div>
