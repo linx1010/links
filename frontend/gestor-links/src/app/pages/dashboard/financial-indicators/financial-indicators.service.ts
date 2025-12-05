@@ -1,22 +1,43 @@
-// financial-indicators.service.ts
+
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+
+// Tipos do retorno do backend
+export interface StatusCounts {
+  missing: number;
+  pending: number;
+  approved: number;
+  [key: string]: number; // permite outros status
+}
+
+export interface ReceitaUsuarioItem {
+  user_id: number;
+  name: string;
+  contract_type: string;
+  total_mes: number;
+}
+
+export interface FinancialKpisResponse {
+  statusCounts: StatusCounts;
+  totalAgendas: number;
+  receitaPorUsuario: Record<string, ReceitaUsuarioItem[]>;
+  receitaPorMes: Record<string, number>;
+}
 
 @Injectable({
   providedIn: 'root'
 })
-export class FinancialIndicatorsService {
 
-  constructor() {}
+export class FinancialIndicatorsService {
+  private apiUrl = 'http://localhost:3000'; // ajuste conforme porta do seu server.js
+
+  constructor(private http: HttpClient) {}
 
   // Indicadores principais
   getIndicadores() {
-    return {
-      totalAgendasConcluidas: 120,
-      receitaEstimada: 45000,
-      taxaAprovacaoRelatorios: 87,
-      percentualPendencias: 20 // % de agendas não aprovadas pelo TechLead
-    };
-  }
+  return this.http.get<FinancialKpisResponse>(`${this.apiUrl}/financial/kpis`);
+}
 
   // Agendas concluídas por cliente
   getAgendasPorCliente() {

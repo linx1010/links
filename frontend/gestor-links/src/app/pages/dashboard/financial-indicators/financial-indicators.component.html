@@ -3,12 +3,12 @@
 
   <div class="cards">
     <div class="card completed">
-      <h3>Agendas concluídas</h3>
+      <h3>Agendas concluídas<sup>*</sup></h3>
       <p class="kpi-value">{{ indicadores.totalAgendasConcluidas }}</p>
     </div>
 
     <div class="card revenue">
-      <h3>Receita estimada</h3>
+      <h3>Receita estimada<sup>*</sup></h3>
       <p class="kpi-value">{{ indicadores.receitaEstimada | currency:'BRL':'symbol':'1.0-0' }}</p>
     </div>
 
@@ -37,3 +37,4 @@
     </div>
   </div>
 </div>
+<p><sup>*</sup>Considerando RODs aprovadas e em análise.</p>

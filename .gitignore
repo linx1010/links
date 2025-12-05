@@ -1,0 +1,6 @@
+# Ignorar __pycache__ do Python
+backend/__pycache__/
+
+# Ignorar arquivos dentro de backend/uploads mas manter a pasta
+backend/uploads/*
+!backend/uploads/.gitkeep
