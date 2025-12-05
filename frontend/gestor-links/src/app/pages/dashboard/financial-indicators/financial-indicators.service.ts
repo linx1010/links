@@ -14,7 +14,7 @@ export class FinancialIndicatorsService {
       totalAgendasConcluidas: 120,
       receitaEstimada: 45000,
       taxaAprovacaoRelatorios: 87,
-      tempoMedioExecucao: 75 // minutos
+      percentualPendencias: 20 // % de agendas não aprovadas pelo TechLead
     };
   }
 
@@ -33,6 +33,25 @@ export class FinancialIndicatorsService {
       { tipo: 'Consultor', total: 60 },
       { tipo: 'Técnico', total: 40 },
       { tipo: 'Analista', total: 20 }
+    ];
+  }
+
+  // Agendas concluídas por tipo de recurso
+  getAgendasPorTipoRecurso() {
+    return [
+      { tipo: 'hourly_full', total: 35 },
+      { tipo: 'hourly_partial', total: 25 },
+      { tipo: 'scope', total: 30 },
+      { tipo: 'full_time', total: 20 }
+    ];
+  }
+
+  // Agendas criadas nos últimos 3 meses (para gráfico stacked)
+  getAgendasUltimos3Meses() {
+    return [
+      { mes: 'Outubro', aprovadas: 30, pendentes: 10 },
+      { mes: 'Novembro', aprovadas: 40, pendentes: 15 },
+      { mes: 'Dezembro', aprovadas: 50, pendentes: 20 }
     ];
   }
 }

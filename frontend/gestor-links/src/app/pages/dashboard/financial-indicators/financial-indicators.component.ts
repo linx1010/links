@@ -6,61 +6,77 @@ import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
 @Component({
-   selector: 'app-financial-indicators',
+  selector: 'app-financial-indicators',
   standalone: true,
-  imports: [CommonModule],   // <-- necessário para pipes como currency, date, number, ngFor etc.
+  imports: [CommonModule],
   templateUrl: './financial-indicators.component.html',
   styleUrls: ['./financial-indicators.component.scss']
 })
 export class FinancialIndicatorsComponent implements OnInit {
   indicadores: any;
-  agendasPorCliente: any[] = [];
-  agendasPorTipo: any[] = [];
+  agendasUltimos3Meses: any[] = [];
+  agendasPorTipoRecurso: any[] = [];
 
   constructor(private financialService: FinancialIndicatorsService) {}
 
   ngOnInit(): void {
+    // KPIs
     this.indicadores = this.financialService.getIndicadores();
-    this.agendasPorCliente = this.financialService.getAgendasPorCliente();
-    this.agendasPorTipo = this.financialService.getAgendasPorTipoAtuacao();
 
-    this.initBarChart();
-    this.initPieChart();
+    // Dados para gráficos
+    this.agendasUltimos3Meses = this.financialService.getAgendasUltimos3Meses();
+    this.agendasPorTipoRecurso = this.financialService.getAgendasPorTipoRecurso();
+
+    // Inicializa gráficos
+    this.initStackedChart();
+    this.initPolarChart();
   }
 
-  initBarChart() {
-    new Chart('barChartClientes', {
+  // Gráfico stacked: agendas aprovadas vs pendentes nos últimos 3 meses
+  initStackedChart() {
+    new Chart('stackedChartClientes', {
       type: 'bar',
       data: {
-        labels: this.agendasPorCliente.map(c => c.cliente),
-        datasets: [{
-          label: 'Agendas',
-          data: this.agendasPorCliente.map(c => c.total),
-          backgroundColor: '#42A5F5'
-        }]
+        labels: this.agendasUltimos3Meses.map(a => a.mes),
+        datasets: [
+          {
+            label: 'Aprovadas',
+            data: this.agendasUltimos3Meses.map(a => a.aprovadas),
+            backgroundColor: '#66BB6A'
+          },
+          {
+            label: 'Pendentes',
+            data: this.agendasUltimos3Meses.map(a => a.pendentes),
+            backgroundColor: '#EF5350'
+          }
+        ]
       },
       options: {
         responsive: true,
         plugins: {
-          legend: { display: false }
+          legend: { position: 'top' }
+        },
+        scales: {
+          x: { stacked: true },
+          y: { stacked: true }
         }
       }
     });
   }
 
-  initPieChart() {
-    new Chart('pieChartAtuacao', {
-      type: 'pie',
+  // Gráfico polar/radar: distribuição por tipo de recurso
+  initPolarChart() {
+    new Chart('polarChartRecursos', {
+      type: 'polarArea', // pode trocar para 'radar'
       data: {
-        labels: this.agendasPorTipo.map(t => t.tipo),
+        labels: this.agendasPorTipoRecurso.map(r => r.tipo),
         datasets: [{
-          data: this.agendasPorTipo.map(t => t.total),
-          backgroundColor: ['#66BB6A', '#FFA726', '#AB47BC']
+          label: 'Total Alocado',
+          data: this.agendasPorTipoRecurso.map(r => r.total),
+          backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#AB47BC']
         }]
       },
-      options: {
-        responsive: true
-      }
+      options: { responsive: true }
     });
   }
 }

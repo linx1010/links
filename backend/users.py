@@ -58,7 +58,7 @@ class Users():
             if user['active'] == 0:
                 return {"status": False, "message": 'Contate um Adminstrador'}
             else:
-                return {"status": True, "token": generate_jwt(user), "role": user['role'],"id":user['id']}
+                return {"status": True, "token": generate_jwt(user), "role": user['role'],"id":user['id'],"name":user['name']}
         else:
             return {"status": False, "message": "Usuário ou senha inválidos"}
 

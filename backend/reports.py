@@ -113,25 +113,41 @@ class Reports:
         try:
             cursor = self.conn.cursor(dictionary=True)
 
-            cursor.execute("SELECT file_path FROM schedule_reports WHERE id=%s", (data["report_id"],))
-            result = cursor.fetchone()
+            # se report_id for dict, extrai schedule_id e user_id
+            report = data.get("report_id")
+            if isinstance(report, dict):
+                schedule_id = report.get("schedule_id")
+                user_id = report.get("user_id")
+                cursor.execute("""
+                    SELECT file_path, file_name, mime_type
+                    FROM schedule_reports
+                    WHERE schedule_id=%s AND user_id=%s
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                """, (schedule_id, user_id))
+            else:
+                # caso seja um número (id direto)
+                cursor.execute("SELECT file_path, file_name, mime_type FROM schedule_reports WHERE id=%s", (report,))
 
+            result = cursor.fetchone()
             if not result:
                 return {"status": False, "message": "Relatório não encontrado"}
 
             path = result["file_path"]
-
             with open(path, "rb") as f:
                 encoded = base64.b64encode(f.read()).decode()
 
             return {
                 "status": True,
+                "file_name": result["file_name"],
                 "file_base64": encoded,
-                "file_name": path.split("/")[-1]
+                "mime_type": result.get("mime_type") or "application/octet-stream"
             }
 
         except Exception as e:
             return {"status": False, "message": str(e)}
+
+
 
     
     def update_status(self, data):

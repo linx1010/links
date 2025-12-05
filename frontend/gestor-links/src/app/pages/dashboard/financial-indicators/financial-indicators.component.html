@@ -17,21 +17,23 @@
       <p class="kpi-value">{{ indicadores.taxaAprovacaoRelatorios }}%</p>
     </div>
 
-    <div class="card time">
-      <h3>Tempo médio de execução</h3>
-      <p class="kpi-value">{{ indicadores.tempoMedioExecucao }} min</p>
+    <div class="card pending">
+      <h3>Percentual de Pendências</h3>
+      <p class="kpi-value">{{ indicadores.percentualPendencias }}%</p>
     </div>
   </div>
 
   <div class="chart-row">
+    <!-- Gráfico stacked: agendas aprovadas vs pendentes -->
     <div class="chart-box">
-      <h3>Agendas por Cliente</h3>
-      <canvas id="barChartClientes"></canvas>
+      <h3>Agendas criadas nos últimos 3 meses</h3>
+      <canvas id="stackedChartClientes"></canvas>
     </div>
 
+    <!-- Gráfico polar/radar: distribuição por tipo de recurso -->
     <div class="chart-box">
-      <h3>Agendas por Tipo de Atuação</h3>
-      <canvas id="pieChartAtuacao"></canvas>
+      <h3>Distribuição por Tipo de Recurso</h3>
+      <canvas id="polarChartRecursos"></canvas>
     </div>
   </div>
 </div>
