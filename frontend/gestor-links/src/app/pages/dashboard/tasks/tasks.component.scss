@@ -57,3 +57,24 @@
     height: auto !important;
   }
 }
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.btn-agenda {
+  background-color: #1976d2; /* azul primário */
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-agenda:hover {
+  background-color: #1565c0; /* tom mais escuro no hover */
+}

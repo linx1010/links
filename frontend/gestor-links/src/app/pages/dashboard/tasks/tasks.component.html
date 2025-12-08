@@ -1,5 +1,11 @@
 <div class="dashboard-kpi">
-  <h2>Dashboard de Pendências</h2>
+  <div class="dashboard-header">
+    <h2>Dashboard de Pendências</h2>
+    <button class="btn-agenda" (click)="abrirCalendarioDoUsuario()">
+      📅 Ver Agenda de {{ userName }}
+    </button>
+  </div>
+
 
   <div class="cards">
     <!-- Card: pendências de upload -->

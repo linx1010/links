@@ -39,13 +39,21 @@ export class FinancialIndicatorsComponent implements OnInit {
         pendentes: data.statusCounts.pending
       }));
 
-      // Gráfico polar: distribuição por tipo de recurso no último mês
-      const ultimoMes = meses[meses.length - 1];
-      const usuariosUltimoMes = data.receitaPorUsuario[ultimoMes] || [];
-      this.agendasPorTipoRecurso = usuariosUltimoMes.map((u: ReceitaUsuarioItem) => ({
-        tipo: u.contract_type,
-        total: u.total_mes
+      // Gráfico polar: somar todos os meses por tipo de contrato
+      const receitasPorTipo: Record<string, number> = {};
+
+      Object.values(data.receitaPorUsuario).forEach((usuariosMes: ReceitaUsuarioItem[]) => {
+        usuariosMes.forEach((u: ReceitaUsuarioItem) => {
+          receitasPorTipo[u.contract_type] = (receitasPorTipo[u.contract_type] || 0) + u.total_mes;
+        });
+      });
+
+      // Transforma em array para o gráfico
+      this.agendasPorTipoRecurso = Object.entries(receitasPorTipo).map(([tipo, total]) => ({
+        tipo,
+        total
       }));
+
 
       // Inicializa gráficos
       this.initStackedChart();
