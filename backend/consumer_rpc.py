@@ -8,6 +8,7 @@ from calendario import Calendar
 from timesheet import Timesheet
 from modules import Modules
 from reports import Reports
+from financial import Financial
 
 # Configurações do RabbitMQ
 rabbitmq_host = os.getenv("RABBITMQ_HOST")
@@ -131,10 +132,18 @@ def on_request(ch, method, props, body):
             elif action == "update_status":
                 response = reports.update_status(data)
 
-
             else:
                 response = {"status": False, "message": "invalid reports action"}
                 status = False
+        
+        elif source == "financial":
+            financial = Financial(conn)
+            if action=="kpis":
+                response = financial.get_kpis()
+            else:
+                response = {"status": False, "message": "invalid financial action"}
+                status = False
+        
         
 
     except Exception as e:

@@ -390,6 +390,21 @@ app.post("/reports/dashboard-totals", async (req, res) => {
   }
 });
 
+// *************************************Rotas REST financial*************************************
+app.get("/financial/kpis", async (req, res) => {
+  try {
+    const response = await sendRpcMessage({
+      source: "financial",
+      action: "kpis"
+    });
+    res.json(response);
+  } catch (err) {
+    console.error("Erro ao obter KPIs financeiros:", err);
+    res.status(500).json({ status: false, message: "Erro interno ao obter KPIs financeiros" });
+  }
+});
+
+
 
 async function connectRabbitMQ() {
   try {

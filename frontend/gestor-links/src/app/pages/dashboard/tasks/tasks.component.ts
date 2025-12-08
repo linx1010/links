@@ -18,6 +18,8 @@ export class TasksComponent implements OnInit {
   totalUploadAguardando: number = 0; 
   totalAprovacaoPendentes: number = 0;
   isTechLead: boolean = false;
+  userId: number = 0;
+  userName: string = ''
 
   constructor(private router: Router, private tasksService: TasksService) {}
 
@@ -25,13 +27,15 @@ export class TasksComponent implements OnInit {
     const role = localStorage.getItem('userRole') || '';
     this.isTechLead = role === 'manager' || role === 'admin';
 
-    const userIdStr = localStorage.getItem('userId');
-    const userId = userIdStr ? Number(userIdStr) : NaN;
+    const userIdStr = (localStorage.getItem('userId'));
+    this.userId = userIdStr ? Number(userIdStr) : NaN;
     const leadIdStr = localStorage.getItem('userId');
     const leadId = leadIdStr ? Number(leadIdStr) : NaN;
+    const userName = localStorage.getItem('userName');
+    this.userName = userName ? userName : 'Usuário';
 
-    if (!isNaN(userId) && !isNaN(leadId)) {
-      this.tasksService.getDashboardTotals(userId, leadId).subscribe((res: DashboardTotals) => {
+    if (!isNaN(this.userId) && !isNaN(leadId)) {
+      this.tasksService.getDashboardTotals(this.userId, leadId).subscribe((res: DashboardTotals) => {
         // cards
         this.totalUploadPendentes = res.upload.missing +  res.upload.rejected;
         this.totalUploadAguardando = res.upload.pending; 
@@ -49,12 +53,21 @@ export class TasksComponent implements OnInit {
   goToApproval(): void {
     this.router.navigate(['/dashboard/pending-schedules']);
   }
+  
 
   goToPending(groupBy: 'client' | 'day'): void {
     this.router.navigate(['/dashboard/pending-schedules'], {
       queryParams: { groupBy }
     });
   }
+  abrirCalendarioDoUsuario(): void {
+    if (this.userName && this.userId) {
+      sessionStorage.setItem('nameOrig', this.userName);
+      sessionStorage.setItem('pageOrig', 'recursos');
+      this.router.navigate(['/dashboard/calendar', 'user', this.userId]);
+    }
+  }
+
 
   renderBarChart(monthlyData: any[]) {
     new Chart('barChart', {

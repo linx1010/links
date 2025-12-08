@@ -1,39 +1,86 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FinancialIndicatorsService } from './financial-indicators.service';
+import { FinancialIndicatorsService, FinancialKpisResponse, StatusCounts, ReceitaUsuarioItem } from './financial-indicators.service';
 import { Chart, registerables } from 'chart.js';
+import { HttpClientModule } from '@angular/common/http';
+
 
 Chart.register(...registerables);
 
 @Component({
   selector: 'app-financial-indicators',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './financial-indicators.component.html',
   styleUrls: ['./financial-indicators.component.scss']
 })
 export class FinancialIndicatorsComponent implements OnInit {
-  indicadores: any;
-  agendasUltimos3Meses: any[] = [];
-  agendasPorTipoRecurso: any[] = [];
+  indicadores: any = {};
+  agendasUltimos3Meses: Array<{ mes: string; aprovadas: number; pendentes: number }> = [];
+  agendasPorTipoRecurso: Array<{ tipo: string; total: number }> = [];
 
   constructor(private financialService: FinancialIndicatorsService) {}
 
   ngOnInit(): void {
-    // KPIs
-    this.indicadores = this.financialService.getIndicadores();
+    this.financialService.getIndicadores().subscribe((data: FinancialKpisResponse) => {
+      // KPIs principais
+      this.indicadores = {
+        totalAgendasConcluidas: data.statusCounts.approved + data.statusCounts.pending,
+        receitaEstimada: this.getUltimaReceita(data.receitaPorMes),
+        taxaAprovacaoRelatorios: this.calcTaxaAprovacao(data.statusCounts),
+        percentualPendencias: this.calcPercentualPendencias(data.statusCounts)
+      };
 
-    // Dados para gráficos
-    this.agendasUltimos3Meses = this.financialService.getAgendasUltimos3Meses();
-    this.agendasPorTipoRecurso = this.financialService.getAgendasPorTipoRecurso();
+      // Gráfico stacked: aprovadas vs pendentes por mês
+      const meses = Object.keys(data.receitaPorMes);
+      this.agendasUltimos3Meses = meses.map(mes => ({
+        mes,
+        aprovadas: data.statusCounts.approved,
+        pendentes: data.statusCounts.pending
+      }));
 
-    // Inicializa gráficos
-    this.initStackedChart();
-    this.initPolarChart();
+      // Gráfico polar: somar todos os meses por tipo de contrato
+      const receitasPorTipo: Record<string, number> = {};
+
+      Object.values(data.receitaPorUsuario).forEach((usuariosMes: ReceitaUsuarioItem[]) => {
+        usuariosMes.forEach((u: ReceitaUsuarioItem) => {
+          receitasPorTipo[u.contract_type] = (receitasPorTipo[u.contract_type] || 0) + u.total_mes;
+        });
+      });
+
+      // Transforma em array para o gráfico
+      this.agendasPorTipoRecurso = Object.entries(receitasPorTipo).map(([tipo, total]) => ({
+        tipo,
+        total
+      }));
+
+
+      // Inicializa gráficos
+      this.initStackedChart();
+      this.initPolarChart();
+    });
   }
 
-  // Gráfico stacked: agendas aprovadas vs pendentes nos últimos 3 meses
-  initStackedChart() {
+  private getUltimaReceita(receitaPorMes: Record<string, number>): number {
+    const meses = Object.keys(receitaPorMes);
+    const ultimoMes = meses[meses.length - 1];
+    return receitaPorMes[ultimoMes] ?? 0;
+  }
+
+  private calcTaxaAprovacao(statusCounts: StatusCounts): number {
+    const values = Object.values(statusCounts) as number[]; // cast explícito
+    const total = values.reduce((acc, v) => acc + v, 0);
+    return total > 0 ? Math.round((statusCounts.approved / total) * 100) : 0;
+  }
+
+  private calcPercentualPendencias(statusCounts: StatusCounts): number {
+    const values = Object.values(statusCounts) as number[]; // cast explícito
+    const total = values.reduce((acc, v) => acc + v, 0);
+    return total > 0 ? Math.round((statusCounts.pending / total) * 100) : 0;
+  }
+
+
+  private initStackedChart() {
     new Chart('stackedChartClientes', {
       type: 'bar',
       data: {
@@ -53,21 +100,15 @@ export class FinancialIndicatorsComponent implements OnInit {
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { position: 'top' }
-        },
-        scales: {
-          x: { stacked: true },
-          y: { stacked: true }
-        }
+        plugins: { legend: { position: 'top' } },
+        scales: { x: { stacked: true }, y: { stacked: true } }
       }
     });
   }
 
-  // Gráfico polar/radar: distribuição por tipo de recurso
-  initPolarChart() {
+  private initPolarChart() {
     new Chart('polarChartRecursos', {
-      type: 'polarArea', // pode trocar para 'radar'
+      type: 'polarArea',
       data: {
         labels: this.agendasPorTipoRecurso.map(r => r.tipo),
         datasets: [{
