@@ -15,13 +15,13 @@
     </div>
     <!-- Card: aguardando aprovação do envio -->
     <div class="card pending" (click)="goToPending('day')">
-      <h3>RODs aguardando aprovação</h3>
+      <h3>RODs enviadas</h3>
       <p class="kpi-value">{{ totalUploadAguardando }}</p>
     </div>
 
     <!-- Card: pendências de aprovação (apenas se tech lead) -->
     <div class="card approval" *ngIf="isTechLead" (click)="goToPending('client')">
-      <h3>RODs aguardando aprovação</h3>
+      <h3>RODs aguardando aprovação Tech Lead</h3>
       <p class="kpi-value">{{ totalAprovacaoPendentes }}</p>
     </div>
   </div>

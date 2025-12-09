@@ -1,0 +1,34 @@
+<div class="operation-metrics">
+  <h2>Indicadores Operacionais</h2>
+
+  <!-- KPIs -->
+  <div class="cards">
+    <div class="card" (click)="irParaTimesheet()">
+      <h3>Alocação Total</h3>
+      <p class="kpi-value">{{ totalWorkforceAllocated }} hours</p>
+    </div>
+
+    <div class="card">
+      <h3>Agenda de Clientes cadastrada</h3>
+      <p class="kpi-value">{{ totalClientAgenda }} hours</p>
+    </div>
+  </div>
+
+  <!-- Gráficos -->
+  <div class="chart-row">
+    <div class="chart-box">
+      <h3>Taxa de aprovação</h3>
+      <canvas #approvalRateCanvas></canvas>
+    </div>
+
+    <div class="chart-box">
+      <h3>Agendado vs Horas realizadas</h3>
+      <canvas #hoursComparisonCanvas></canvas>
+    </div>
+
+    <div class="chart-box">
+      <h3>Utilização de recursos</h3>
+      <canvas #resourceUtilizationCanvas></canvas>
+    </div>
+  </div>
+</div>

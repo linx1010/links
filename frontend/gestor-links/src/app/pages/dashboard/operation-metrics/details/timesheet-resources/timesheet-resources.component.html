@@ -1,0 +1,21 @@
+<div class="timesheet-resources">
+  <h2>Timesheet - Recursos</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Recurso</th>
+        <th *ngFor="let dia of dias">{{ dia }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let recurso of recursos">
+        <td>{{ recurso.nome }}</td>
+        <td *ngFor="let hora of recurso.horas"[ngClass]="getColorClass(hora)">
+            {{ hora !== undefined ? hora : '' }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
