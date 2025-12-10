@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import{CommonModule} from '@angular/common'
+import { MatExpansionModule } from '@angular/material/expansion';
 @Component({
   selector: 'app-timesheet-resources',
   templateUrl: './timesheet-resources.component.html',
   styleUrls: ['./timesheet-resources.component.scss'],
-  imports:[CommonModule]
+  imports:[CommonModule,MatExpansionModule]
 })
 export class TimesheetResourcesComponent implements OnInit {
   dias: number[] = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -61,17 +62,19 @@ export class TimesheetResourcesComponent implements OnInit {
       {nome:'WILLIAN', horas:['8','8','8','8','8','','','8','8','8','8','8','','','8','8','8','8','8','','','8','8','4','','8','','','8','8','8']},
   ];
   getColorClass(hora: string): string {
-    if (hora === "" || hora === "0") {
-      return 'valor-vazio';
-    } else if (hora === "4") {
-      return 'valor-quatro';
-    } else if (hora === "8") {
-      return 'valor-oito';
-    } else if (!isNaN(Number(hora)) && Number(hora) > 8) {
-      return 'valor-maior';
+    if (hora === "" || isNaN(Number(hora)) || Number(hora) < 4) {
+      return 'valor-vermelho';
+    } else if (Number(hora) < 8) {
+      return 'valor-amarelo';
+    } else if (Number(hora) === 8) {
+      return 'valor-verde';
+    } else if (Number(hora) > 8) {
+      return 'valor-azul';
     }
     return '';
   }
 
   ngOnInit(): void {}
 }
+
+

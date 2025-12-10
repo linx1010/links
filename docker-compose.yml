@@ -1,6 +1,10 @@
 services:
   angular:
-    build: ./frontend/gestor-links
+    build:
+      context: ./frontend/gestor-links
+      dockerfile: Dockerfile   # opcional, se o nome for diferente
+    image: linxfsa/linksproject:angular
+    platform: linux/amd64
     ports:
       - "4200:4200"
     depends_on:
@@ -9,7 +13,11 @@ services:
       - app-network
 
   server-js:
-    build: ./frontend/gestor-links/backend-nodes
+    build:
+      context: ./frontend/gestor-links/backend-nodes
+      dockerfile: dockerfile
+    image: server-js
+    platform: linux/amd64
     container_name: node-server
     ports:
       - "3000:3000"
@@ -22,7 +30,11 @@ services:
       - app-network
 
   python-consumer:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: dockerfile
+    image: pyton-consumer
+    platform: linux/amd64
     volumes:
       - ./uploads:/var/uploads
     environment:

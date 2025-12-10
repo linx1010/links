@@ -1,13 +1,5 @@
-FROM node:18
-
-WORKDIR /app
-
-# Instala dependências
-COPY package*.json ./
-RUN npm install
-
-# Copia o restante do projeto
-COPY . .
-
-# Executa o Angular em modo dev
-CMD ["npm", "run", "start:docker"]
+FROM nginx:alpine
+RUN rm -rf /etc/nginx/conf.d
+COPY dist/gestor-links/browser /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
