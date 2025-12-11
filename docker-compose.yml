@@ -6,7 +6,7 @@ services:
     image: linxfsa/linksproject:angular
     platform: linux/amd64
     ports:
-      - "4200:4200"
+      - "4200:80"
     depends_on:
       - server-js
     networks:
@@ -15,7 +15,7 @@ services:
   server-js:
     build:
       context: ./frontend/gestor-links/backend-nodes
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     image: server-js
     platform: linux/amd64
     container_name: node-server
@@ -32,7 +32,7 @@ services:
   python-consumer:
     build:
       context: ./backend
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     image: pyton-consumer
     platform: linux/amd64
     volumes:
