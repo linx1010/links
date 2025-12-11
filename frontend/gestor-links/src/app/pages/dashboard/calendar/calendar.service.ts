@@ -93,15 +93,16 @@ export class CalendarService {
   // ------------------------------------------------------------------------
   // 🔴 EXCLUIR EVENTO
   // ------------------------------------------------------------------------
-  deleteEvento(tipo: string, id: number, date: string, title: string): Observable<any> {
-    const payload = { type: tipo, id, date, title };
-    return this.http.post<any>(`${this.apiUrl}/delete`, payload).pipe(
+  deleteEvento(schedule_id: number): Observable<any> {
+    const payload = { schedule_id };
+    return this.http.delete<any>(`${this.apiUrl}`, { body: payload }).pipe(
       catchError((err: any) => {
         console.error('Erro ao excluir evento:', err);
         return of(null);
       })
     );
   }
+
 
   // ========================================================================
   //                🔴 🔴 🔴  FUNÇÕES PARA RELATÓRIOS  🔴 🔴 🔴

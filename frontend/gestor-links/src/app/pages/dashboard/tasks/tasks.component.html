@@ -21,7 +21,7 @@
 
     <!-- Card: pendências de aprovação (apenas se tech lead) -->
     <div class="card approval" *ngIf="isTechLead" (click)="goToPending('client')">
-      <h3>RODs aguardando aprovação Tech Lead</h3>
+      <h3>RODs pendentes como Tech Lead</h3>
       <p class="kpi-value">{{ totalAprovacaoPendentes }}</p>
     </div>
   </div>
