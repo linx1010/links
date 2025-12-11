@@ -62,6 +62,15 @@
   <div *ngIf="selectedDay.events.length > 0; else noEvents">
     <table mat-table [dataSource]="selectedDay.events" class="event-table">
       <!-- Colunas -->
+      <ng-container *ngIf="tipo === 'user'" matColumnDef="client_name">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let e">{{ e.client_name }}</td>
+      </ng-container>
+      <ng-container *ngIf="tipo === 'client'" matColumnDef="techlead_name">
+        <th mat-header-cell *matHeaderCellDef>Tech Lead</th>
+        <td mat-cell *matCellDef="let e">{{ e.techlead_name }}</td>
+      </ng-container>
+
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Título</th>
         <td mat-cell *matCellDef="let e">{{ e.title }}</td>
@@ -104,8 +113,9 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="['title','start_time','end_time','location','actions']"></tr>
-      <tr mat-row *matRowDef="let row; columns: ['title','start_time','end_time','location','actions']"></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
     </table>
   </div>
 
@@ -132,6 +142,16 @@
     </mat-form-field>
 
     <mat-form-field appearance="fill">
+      <mat-label>Turno</mat-label>
+      <mat-select [(ngModel)]="formEvento.turno" name="turno" required>
+        <mat-option value="integral">Integral</mat-option>
+        <mat-option value="manha">Manhã</mat-option>
+        <mat-option value="tarde">Tarde</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+
+    <mat-form-field appearance="fill">
       <mat-label>Participantes</mat-label>
       <mat-select [(ngModel)]="formEvento.user_id" name="user_id" multiple>
         <mat-option *ngFor="let u of recursos" [value]="u.id">{{ u.name }}</mat-option>
@@ -152,6 +172,15 @@
     <mat-form-field appearance="fill" style="display:block;">
       <mat-label>Título</mat-label>
       <input matInput [(ngModel)]="formEvento.title" />
+    </mat-form-field>
+    
+    <mat-form-field appearance="fill">
+      <mat-label>Turno</mat-label>
+      <mat-select [(ngModel)]="formEvento.turno" name="turno" required>
+        <mat-option value="manha">Manhã</mat-option>
+        <mat-option value="tarde">Tarde</mat-option>
+        <mat-option value="integral">Integral</mat-option>
+      </mat-select>
     </mat-form-field>
 
     <mat-form-field appearance="fill" style="display:block;">

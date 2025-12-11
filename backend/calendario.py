@@ -8,12 +8,7 @@ class Calendar:
         cursor = self.conn.cursor(dictionary=True)
         eventos = []
 
-        client_name = None
         if data['type'] == 'client':
-            cursor.execute("SELECT name FROM clients WHERE id = %s", (data['id'],))
-            result = cursor.fetchone()
-            client_name = result['name'] if result else None
-
             query = """
                 SELECT 
                     'schedule' AS source,
@@ -23,8 +18,12 @@ class Calendar:
                     s.end_time,
                     s.location,
                     s.status,
-                    NULL AS description
+                    s.description,
+                    c.name AS client_name,
+                    u.name AS techlead_name
                 FROM schedules s
+                INNER JOIN clients c ON s.client_id = c.id
+                LEFT JOIN users u ON s.lead_id = u.id
                 WHERE s.client_id = %s
 
                 UNION ALL
@@ -37,8 +36,11 @@ class Calendar:
                     p.end_date AS end_time,
                     NULL AS location,
                     p.status,
-                    NULL AS description
+                    null as description,
+                    c.name AS client_name,
+                    NULL AS techlead_name
                 FROM projects p
+                INNER JOIN clients c ON p.client_id = c.id
                 WHERE p.client_id = %s
                 ORDER BY start_time ASC;
             """
@@ -56,34 +58,47 @@ class Calendar:
                     s.location,
                     s.status,
                     s.description,
-                    c.name AS client_name
+                    c.name AS client_name,
+                    u.name AS techlead_name
                 FROM schedule_users su
                 INNER JOIN schedules s ON su.schedule_id = s.id
                 INNER JOIN clients c ON s.client_id = c.id
+                LEFT JOIN users u ON s.lead_id = u.id
                 WHERE su.user_id = %s
                 ORDER BY s.start_time ASC;
             """
             cursor.execute(query, (data['id'],))
             eventos = cursor.fetchall()
 
-        cursor.close()
-        self.conn.close()
-
         resultado = []
         for e in eventos:
+            # Buscar participantes da agenda (apenas para schedules)
+            participants = []
+            if e["source"] == "schedule":
+                cursor.execute("""
+                    SELECT u.id, u.name
+                    FROM schedule_users su
+                    INNER JOIN users u ON su.user_id = u.id
+                    WHERE su.schedule_id = %s
+                """, (e["id"],))
+                participants = cursor.fetchall()
+
             resultado.append({
                 "id": e["id"],
                 "title": e["title"] or "Evento",
                 "start_time": e["start_time"],
                 "end_time": e["end_time"],
-                "title": e["title"],
                 "location": e["location"],
                 "source": e["source"],
                 "status": e["status"],
                 "description": e.get("description"),
-                "client_name": e.get("client_name") or client_name
+                "client_name": e.get("client_name"),
+                "techlead_name": e.get("techlead_name"),
+                "participants": participants  # lista de usuários vinculados
             })
 
+        cursor.close()
+        self.conn.close()
         return resultado
 
 
@@ -93,11 +108,12 @@ class Calendar:
 
         try:
             # Extrair dados principais
-            start_time = f"{data['date']} 00:00:00"
-            location = data.get('location', None)
-            lead_id = data.get('lead_id')
-            role = data.get('role', 'participant')
-            user_ids = data.get('user_id', [])
+            start_time = data.get('start_time')  # já vem pronto do frontend
+            end_time   = data.get('end_time')    # idem
+            location   = data.get('location', None)
+            lead_id    = data.get('lead_id')
+            role       = data.get('role', 'participant')
+            user_ids   = data.get('user_id', [])
 
             # Normalizar lista de usuários
             if not isinstance(user_ids, list):
@@ -124,10 +140,18 @@ class Calendar:
 
             # 1. Inserir na tabela schedules
             insert_schedule = """
-                INSERT INTO schedules (client_id, title, start_time, location, lead_id)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO schedules (client_id, title, description, start_time, end_time, location, lead_id)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(insert_schedule, (data['id'], data['title'], start_time, location, lead_id))
+            cursor.execute(insert_schedule, (
+                data['id'],
+                data['title'],
+                data.get('description'),
+                start_time,
+                end_time,
+                location,
+                lead_id
+            ))
             schedule_id = cursor.lastrowid
 
             # 2. Associar múltiplos usuários na tabela schedule_users

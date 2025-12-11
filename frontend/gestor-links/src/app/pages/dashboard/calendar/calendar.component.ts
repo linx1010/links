@@ -52,7 +52,13 @@ export class CalendarComponent {
   // Variáveis principais
   // ---------------------------
   /** Formulário do evento (título, descrição e usuários) */
-  formEvento = { title: '', description: '', user_id: [] as number[] };
+  formEvento = { 
+    title: '', 
+    description: '', 
+    user_id: [] as number[], 
+    turno: 'integral' as 'manha' | 'tarde' | 'integral' // novo campo
+  };
+
 
   /** Lista de recursos carregada do backend */
   recursos: any[] = [];
@@ -92,6 +98,7 @@ export class CalendarComponent {
   uploading: boolean = false;
   uploadProgress: number = 0;
   relatorios: any[] = [];
+  displayedColumns: string[] = [];
 
   // ---------------------------
   // Painel de relatórios para tech lead
@@ -116,7 +123,6 @@ export class CalendarComponent {
     private dialog: MatDialog,
     private toast:ToastService,
   ) {}
-
   // ---------------------------
   // Ciclo de vida
   // ---------------------------
@@ -129,6 +135,12 @@ export class CalendarComponent {
     this.isTechLead = roles.some(r => r === 'tech_lead');
     this.isAdmin = roles.some(r => r === 'admin');
     this.canCreateAgenda = this.tipo === 'client' || this.isTechLead || this.isAdmin;
+    // Definir colunas da tabela conforme tipo
+    if (this.tipo === 'user') {
+      this.displayedColumns = ['client_name','title','start_time','end_time','location','actions'];
+    } else {
+      this.displayedColumns = ['techlead_name','title','start_time','end_time','location','actions'];
+    }
 
     this.carregarAgenda();
   }
@@ -404,6 +416,25 @@ Local: ${e.location || 'N/A'}`);
     const day = this.selectedDay.day;
     const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
+
+  // Definir horários conforme turno
+    let start_time: string | null = null;
+    let end_time: string | null = null;
+    switch (this.formEvento.turno) {
+      case 'manha':
+        start_time = `${date}T08:00:00`;
+        end_time   = `${date}T12:00:00`;
+        break;
+      case 'tarde':
+        start_time = `${date}T13:00:00`;
+        end_time   = `${date}T17:00:00`;
+        break;
+      case 'integral':
+        start_time = `${date}T09:00:00`;
+        end_time   = `${date}T18:00:00`;
+        break;
+  }
+
     const payload = {
       type: this.tipo,
       id: this.id,
@@ -411,7 +442,9 @@ Local: ${e.location || 'N/A'}`);
       title: this.formEvento.title,
       description: this.formEvento.description,
       user_id: this.formEvento.user_id,
-      lead_id: localStorage.getItem('userId') 
+      lead_id: localStorage.getItem('userId'),
+      start_time,
+      end_time 
     };
 
     this.calendarService.createAgenda(payload).subscribe({
@@ -442,7 +475,7 @@ Local: ${e.location || 'N/A'}`);
     });
 
 
-    this.formEvento = { title: '', description: '', user_id: [] };
+    this.formEvento = { title: '', description: '', user_id: [],turno: 'integral' as 'manha' | 'tarde' | 'integral' };
   }
 
 
