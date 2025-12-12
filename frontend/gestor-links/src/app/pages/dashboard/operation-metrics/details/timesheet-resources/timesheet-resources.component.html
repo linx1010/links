@@ -1,0 +1,29 @@
+<div class="timesheet-resources">
+  <h2>Timesheet - Recursos</h2>
+<mat-accordion>
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          Dezembro 2025
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+  <table>
+    <thead>
+      <tr>
+        <th>Recurso</th>
+        <th *ngFor="let dia of dias">{{ dia }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let recurso of recursos">
+        <td>{{ recurso.nome }}</td>
+        <td *ngFor="let hora of recurso.horas"[ngClass]="getColorClass(hora)">
+            {{ hora !== undefined ? hora : '' }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  </mat-expansion-panel>
+  </mat-accordion>
+</div>
+

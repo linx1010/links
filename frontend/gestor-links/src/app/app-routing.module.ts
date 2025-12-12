@@ -9,7 +9,9 @@ import {CalendarComponent} from './pages/dashboard/calendar/calendar.component';
 import { TimesheetComponent } from './pages/dashboard/timesheet/timesheet.component';
 import { TasksComponent } from './pages/dashboard/tasks/tasks.component';
 import { PendingSchedulesComponent } from './pages/dashboard/pending-schedules/pending-schedules.component';
-import {FinancialIndicatorsComponent} from './pages/dashboard/financial-indicators/financial-indicators.component'
+import {FinancialIndicatorsComponent} from './pages/dashboard/financial-indicators/financial-indicators.component';
+import {OperationMetricsComponent} from './pages/dashboard/operation-metrics/operation-metrics.component';
+import{TimesheetResourcesComponent}from './pages/dashboard/operation-metrics/details/timesheet-resources/timesheet-resources.component'
 export const routes: Routes = [
   { path: '', component: LoginComponent },
   {
@@ -21,9 +23,11 @@ export const routes: Routes = [
       { path: 'clientes', component: ClientesComponent, canActivate:[authGuard] },
       { path: 'projetos', component: ProjetosComponent, canActivate:[authGuard] },
       { path: 'calendar/:tipo/:id', component: CalendarComponent, canActivate:[authGuard] },
-      { path: 'timesheet/:id',component: TimesheetComponent, canActivate:[authGuard]},
+      // { path: 'timesheet/:id',component: TimesheetComponent, canActivate:[authGuard]},
       { path: 'pending-schedules',component: PendingSchedulesComponent, canActivate:[authGuard]},
       { path: 'financial-indicators',component: FinancialIndicatorsComponent, canActivate:[authGuard]},
+      { path: 'operation-metrics',component: OperationMetricsComponent, canActivate:[authGuard]},
+      { path: 'operation-metrics/details/timesheet-resources',component: TimesheetResourcesComponent, canActivate:[authGuard]},
 
       { path: '', redirectTo: 'tasks', pathMatch: 'full' }
     ]

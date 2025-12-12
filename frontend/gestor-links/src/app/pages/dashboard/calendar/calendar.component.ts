@@ -15,6 +15,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
 
 import { CalendarService } from './calendar.service';
 import { RecursosService } from '../recursos/recursos.service';
@@ -42,9 +44,10 @@ import { error } from 'console';
     MatCheckboxModule,
     MatDialogModule,
     MatProgressBarModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDatepickerModule
   ],
-  providers: [DatePipe],
+  providers: [DatePipe,provideNativeDateAdapter()],
   styleUrls: ['calendar.component.scss']
 })
 export class CalendarComponent {
@@ -52,7 +55,13 @@ export class CalendarComponent {
   // Variáveis principais
   // ---------------------------
   /** Formulário do evento (título, descrição e usuários) */
-  formEvento = { title: '', description: '', user_id: [] as number[] };
+  formEvento = { 
+    title: '', 
+    description: '', 
+    user_id: [] as number[], 
+    turno: 'integral' as 'manha' | 'tarde' | 'integral' // novo campo
+  };
+
 
   /** Lista de recursos carregada do backend */
   recursos: any[] = [];
@@ -92,6 +101,7 @@ export class CalendarComponent {
   uploading: boolean = false;
   uploadProgress: number = 0;
   relatorios: any[] = [];
+  displayedColumns: string[] = [];
 
   // ---------------------------
   // Painel de relatórios para tech lead
@@ -116,7 +126,6 @@ export class CalendarComponent {
     private dialog: MatDialog,
     private toast:ToastService,
   ) {}
-
   // ---------------------------
   // Ciclo de vida
   // ---------------------------
@@ -129,6 +138,12 @@ export class CalendarComponent {
     this.isTechLead = roles.some(r => r === 'tech_lead');
     this.isAdmin = roles.some(r => r === 'admin');
     this.canCreateAgenda = this.tipo === 'client' || this.isTechLead || this.isAdmin;
+    // Definir colunas da tabela conforme tipo
+    if (this.tipo === 'user') {
+      this.displayedColumns = ['client_name','title','start_time','end_time','location','actions'];
+    } else {
+      this.displayedColumns = ['techlead_name','title','start_time','end_time','location','actions'];
+    }
 
     this.carregarAgenda();
   }
@@ -150,29 +165,48 @@ export class CalendarComponent {
     this.carregarAgenda();
   }
 
-  // ---------------------------
-  // Carga de dados
-  // ---------------------------
-  carregarAgenda() {
-    this.calendarService.getAgenda(this.tipo, this.id).subscribe({
-      next: (agenda: any[]) => {
-        this.events = {};
-        agenda.forEach(evento => {
-          if (!evento.start_time) return;
-          const dateKey = this.formatDateKey(evento.start_time);
-          if (!this.events[dateKey]) this.events[dateKey] = [];
-          this.events[dateKey].push(evento);
-        });
-        this.generateCalendar();
-      },
-      error: (err: any) => this.toast.show(`Erro ao carregar agenda: ${err}`,'error') 
-    });
+ // ---------------------------
+// Carga de dados
+// ---------------------------
+carregarAgenda() {
+  this.calendarService.getAgenda(this.tipo, this.id).subscribe({
+    next: (agenda: any[]) => {
+      // 1. Monta o mapa de eventos por chave YYYY-MM-DD
+      this.events = {};
+      agenda.forEach(evento => {
+        if (!evento.start_time) return;
+        const dateKey = this.formatDateKey(evento.start_time);
+        if (!this.events[dateKey]) this.events[dateKey] = [];
+        this.events[dateKey].push(evento);
+      });
 
-    this.recursosService.getUsers().subscribe({
-      next: (data: any[]) => this.recursos = data,
-      error: (err: any) => this.toast.show(`Erro ao carregar recursos: ${err}`,'error')
-    });
-  }
+      // 2. Gera a grade do calendário
+      this.generateCalendar();
+
+      // 3. Se houver um dia selecionado, atualiza os detalhes também
+      if (this.selectedDay) {
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+
+        // monta chave no formato YYYY-MM-DD
+        const selectedDateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(this.selectedDay.day).padStart(2, '0')}`;
+
+        const eventosDoDia = this.events[selectedDateKey] || [];
+        this.selectedDay = { day: this.selectedDay.day, events: eventosDoDia };
+      }
+    },
+    error: (err: any) => this.toast.show(`Erro ao carregar agenda: ${err}`, 'error')
+  });
+
+  // 4. Carrega recursos (usuários) para seleção
+  this.recursosService.getUsers().subscribe({
+    next: (data: any[]) => this.recursos = data,
+    error: (err: any) => this.toast.show(`Erro ao carregar recursos: ${err}`, 'error')
+  });
+
+
+}
+
 
   // ---------------------------
   // Utilitários de data
@@ -221,14 +255,15 @@ Local: ${e.location || 'N/A'}`);
     });
   }
 
-  excluirEvento(e: any) {
-    if (confirm(`🗑️ Deseja excluir o evento "${e.title}"?`)) {
-      this.calendarService.deleteEvento('client', this.id, this.formatDateKey(e.start_time), e.title).subscribe({
-        next: () => this.carregarAgenda(),
-        error: (err: any) => this.toast.show(`Erro ao excluir evento: ${err}`,'error')
-      });
-    }
+excluirEvento(e: any) {
+  if (confirm(`🗑️ Deseja excluir o evento "${e.title}"?`)) {
+    this.calendarService.deleteEvento(e.id).subscribe({
+      next: () => this.carregarAgenda(),
+      error: (err: any) => this.toast.show(`Erro ao excluir evento: ${err}`, 'error')
+    });
   }
+}
+
 
   // ---------------------------
   // Upload de relatórios
@@ -404,6 +439,25 @@ Local: ${e.location || 'N/A'}`);
     const day = this.selectedDay.day;
     const date = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
+
+  // Definir horários conforme turno
+    let start_time: string | null = null;
+    let end_time: string | null = null;
+    switch (this.formEvento.turno) {
+      case 'manha':
+        start_time = `${date}T08:00:00`;
+        end_time   = `${date}T12:00:00`;
+        break;
+      case 'tarde':
+        start_time = `${date}T13:00:00`;
+        end_time   = `${date}T17:00:00`;
+        break;
+      case 'integral':
+        start_time = `${date}T09:00:00`;
+        end_time   = `${date}T18:00:00`;
+        break;
+  }
+
     const payload = {
       type: this.tipo,
       id: this.id,
@@ -411,7 +465,9 @@ Local: ${e.location || 'N/A'}`);
       title: this.formEvento.title,
       description: this.formEvento.description,
       user_id: this.formEvento.user_id,
-      lead_id: localStorage.getItem('userId') 
+      lead_id: localStorage.getItem('userId'),
+      start_time,
+      end_time 
     };
 
     this.calendarService.createAgenda(payload).subscribe({
@@ -442,34 +498,40 @@ Local: ${e.location || 'N/A'}`);
     });
 
 
-    this.formEvento = { title: '', description: '', user_id: [] };
+    this.formEvento = { title: '', description: '', user_id: [],turno: 'integral' as 'manha' | 'tarde' | 'integral' };
   }
 
 
   // ---------------------------
   // Dialog de replicação em bloco
   // ---------------------------
-  abrirDialogReplicacao() {
+  abrirDialogReplicacao(evento: any) {
     if (!this.dialogReplicacaoTemplate) {
       this.toast.show('Template do diálogo não encontrado.','error');
       return;
     }
-    // Pré-popula data inicial com hoje
-    const hoje = new Date();
-    this.dataInicial = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
-    this.replicarMes = true;
+
+    // Pré-popula os campos do formulário com os dados da linha selecionada
+    this.formEvento.title = evento.title || '';
+    this.formEvento.description = evento.description || '';
+    this.formEvento.turno = evento.turno || 'integral'; // valor padrão se não vier
+    this.formEvento.user_id = evento.participants?.map((p: any) => p.id) || [];
+
 
     this.dialog.open(this.dialogReplicacaoTemplate);
   }
 
+
+  dateRange = { start: null as Date | null, end: null as Date | null };
+
   confirmarReplicacao() {
-    if (!this.formEvento.title.trim() || !this.dataInicial) {
-      this.toast.show('Preencha título e data inicial.','error');
+    if (!this.formEvento.title.trim() || !this.dateRange.start || !this.dateRange.end) {
+      this.toast.show('Preencha título e intervalo de datas.','error');
       return;
     }
 
-    const startDate = new Date(this.dataInicial);
-    const diasUteis = this.replicarMes ? this.getDiasUteis(startDate) : [this.dataInicial];
+    // usa o método para gerar os dias úteis
+    const diasUteis = this.getDiasUteisIntervalo(this.dateRange.start, this.dateRange.end);
 
     const payload = {
       type: 'client',
@@ -477,31 +539,50 @@ Local: ${e.location || 'N/A'}`);
       title: this.formEvento.title,
       description: this.formEvento.description,
       user_id: this.formEvento.user_id,
-      dates: diasUteis
+      dates: diasUteis,
+      lead_id: localStorage.getItem('userId')
     };
 
     this.calendarService.createAgendaBatch(payload).subscribe({
       next: (res: any) => {
         if (res?.success) {
-          this.toast.show('Agendas criadas com sucesso!','sucess');
-          this.carregarAgenda();
+          this.toast.show('Agendas criadas com sucesso!', 'sucess');
+          this.carregarAgenda(); // 🔎 atualiza grade e detalhes
         } else {
-          this.toast.show('Erro ao criar agendas: ' + (res?.error || ''),'error');
+          this.toast.show('Erro ao criar agendas: ' + (res?.error || ''), 'error');
         }
       },
       error: (err: any) => {
-        this.toast.show(`Erro ao replicar agendas: ${err}`,'error')
+        this.toast.show(`Erro ao replicar agendas: ${err}`, 'error');
       }
     });
 
-    // Fecha todos os dialogs abertos
     this.dialog.closeAll();
   }
+
+
+getDiasUteisIntervalo(start: Date, end: Date): string[] {
+  const dias: string[] = [];
+  let data = new Date(start);
+  while (data <= end) {
+    const diaSemana = data.getDay(); // 0=domingo, 6=sábado
+    if (diaSemana !== 0 && diaSemana !== 6) {
+      dias.push(
+        `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-${String(data.getDate()).padStart(2, '0')}`
+      );
+    }
+    data.setDate(data.getDate() + 1);
+  }
+  return dias;
+}
+
+
+
 
   // ---------------------------
   // Util: gerar dias úteis até fim do mês
   // ---------------------------
-  getDiasUteis(start: Date): string[] {
+  getDiasUteis(start: Date, end?: Date): string[] {
     const dias: string[] = [];
     const today = new Date();
     const year = start.getFullYear();

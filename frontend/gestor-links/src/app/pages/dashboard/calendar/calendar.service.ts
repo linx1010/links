@@ -14,12 +14,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import {environment} from '../../../../environment'
 
 @Injectable({ providedIn: 'root' })
 export class CalendarService {
   
-  private apiUrl = 'http://localhost:3000/calendar';       // rotas já existentes do backend
-  private reportsUrl = 'http://localhost:3000/reports';    // rotas para relatórios
+  private apiUrl = environment.apiUrl+'/calendar';       // rotas já existentes do backend
+  private reportsUrl = environment.apiUrl+'/reports';    // rotas para relatórios
 
   constructor(private http: HttpClient) {}
 
@@ -93,15 +94,16 @@ export class CalendarService {
   // ------------------------------------------------------------------------
   // 🔴 EXCLUIR EVENTO
   // ------------------------------------------------------------------------
-  deleteEvento(tipo: string, id: number, date: string, title: string): Observable<any> {
-    const payload = { type: tipo, id, date, title };
-    return this.http.post<any>(`${this.apiUrl}/delete`, payload).pipe(
+  deleteEvento(schedule_id: number): Observable<any> {
+    const payload = { schedule_id };
+    return this.http.delete<any>(`${this.apiUrl}`, { body: payload }).pipe(
       catchError((err: any) => {
         console.error('Erro ao excluir evento:', err);
         return of(null);
       })
     );
   }
+
 
   // ========================================================================
   //                🔴 🔴 🔴  FUNÇÕES PARA RELATÓRIOS  🔴 🔴 🔴

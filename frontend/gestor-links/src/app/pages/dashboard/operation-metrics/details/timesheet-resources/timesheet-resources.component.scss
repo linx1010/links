@@ -1,0 +1,69 @@
+/* Painel branco com texto preto */
+::ng-deep mat-expansion-panel {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #ddd;
+  box-shadow: none;
+}
+
+/* Cabeçalho do painel */
+::ng-deep mat-expansion-panel-header {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  font-weight: 600;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Título do painel */
+::ng-deep mat-panel-title {
+  color: #000000 !important;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Tabela */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.4rem;
+    text-align: center;
+    color: #000000;
+  }
+
+  th {
+    background-color: #f0f0f0;
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) {
+    background-color: #fafafa;
+  }
+
+  td:first-child {
+    text-align: left;
+    font-weight: 500;
+    background-color: #f9f9f9;
+  }
+}
+
+/* Cores por valor */
+.valor-vermelho {
+  background-color: #ffdddd;
+}
+
+.valor-amarelo {
+  background-color: #fff8cc;
+}
+
+.valor-verde {
+  background-color: #d6f5d6;
+}
+
+.valor-azul {
+  background-color: #d6eaff;
+}
