@@ -16,7 +16,7 @@ services:
     build:
       context: ./frontend/gestor-links/backend-nodes
       dockerfile: Dockerfile
-    image: server-js
+    image: linxfsa/linksproject:server-js
     platform: linux/amd64
     container_name: node-server
     ports:
@@ -33,7 +33,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    image: pyton-consumer
+    image: linxfsa/linksproject:python-consumer
     platform: linux/amd64
     volumes:
       - ./uploads:/var/uploads

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import {environment} from '../../../../environment'
 
 export interface User {
   id: number;
@@ -29,8 +30,8 @@ export interface Module {
 })
 export class RecursosService {
 
-  private apiUrlUsers = 'http://localhost:3000/users';
-  private apiUrlModules = 'http://localhost:3000/modules';
+  private apiUrlUsers = environment.apiUrl+'/users';
+  private apiUrlModules = environment.apiUrl+'/modules';
 
   constructor(private http: HttpClient) {}
 

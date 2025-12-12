@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import {environment} from '../../../../environment'
 
 // Tipos do retorno do backend
 export interface StatusCounts {
@@ -30,7 +31,7 @@ export interface FinancialKpisResponse {
 })
 
 export class FinancialIndicatorsService {
-  private apiUrl = 'http://localhost:3000'; // ajuste conforme porta do seu server.js
+  private apiUrl = environment.apiUrl; // ajuste conforme porta do seu server.js
 
   constructor(private http: HttpClient) {}
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-
+import {environment} from '../../../../environment'
 // Interfaces para tipar o retorno do backend
 export interface DashboardTotals {
   approval: {
@@ -35,7 +35,7 @@ export interface DashboardTotals {
   providedIn: 'root'
 })
 export class TasksService {
-  private baseUrl = 'http://localhost:3000/reports';
+  private baseUrl = environment.apiUrl+'/reports';
 
   constructor(private http: HttpClient) {}
 

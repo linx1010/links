@@ -14,12 +14,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import {environment} from '../../../../environment'
 
 @Injectable({ providedIn: 'root' })
 export class CalendarService {
   
-  private apiUrl = 'http://localhost:3000/calendar';       // rotas já existentes do backend
-  private reportsUrl = 'http://localhost:3000/reports';    // rotas para relatórios
+  private apiUrl = environment.apiUrl+'/calendar';       // rotas já existentes do backend
+  private reportsUrl = environment.apiUrl+'/reports';    // rotas para relatórios
 
   constructor(private http: HttpClient) {}
 
