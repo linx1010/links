@@ -5,3 +5,28 @@
   min-height: 100vh;
   box-sizing: border-box;
 }
+.layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+
+body.menu-collapsed .main-content {
+  margin-left: 60px !important;
+}
+.layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+
+body.menu-collapsed .main-content {
+  margin-left: 60px !important;
+}
+
+.layout.full-width .main-content {
+  margin-left: 0 !important;
+}

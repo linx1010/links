@@ -11,28 +11,40 @@ import { RouterModule } from '@angular/router';
   styleUrls: ['./menu.component.scss']
 })
 export class MenuComponent {
+  isCollapsed = false;
   role: string | null = null;
 
   constructor(private router: Router) {
-    this.role = localStorage.getItem('userRole');
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      this.role = localStorage.getItem('userRole');
+      const savedState = localStorage.getItem('menuCollapsed');
+      if (savedState) this.isCollapsed = savedState === 'true';
+    }
   }
+
   get isAdmin(): boolean {
     return this.role === 'admin';
   }
-
   get isManager(): boolean {
     return this.role === 'manager';
   }
-
   get isMember(): boolean {
     return this.role === 'member';
   }
 
+  toggleMenu() {
+    this.isCollapsed = !this.isCollapsed;
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem('menuCollapsed', String(this.isCollapsed));
+    }
+  }
+
   logout() {
-    // Limpa qualquer informação de login
-    localStorage.removeItem('user');  // caso use localStorage para login
-    localStorage.removeItem('userRole');  // caso use localStorage para login
-    // Redireciona para a tela de login
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.removeItem('user');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('menuCollapsed');
+    }
     this.router.navigate(['/']);
   }
 }

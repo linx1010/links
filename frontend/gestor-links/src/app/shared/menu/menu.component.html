@@ -1,30 +1,65 @@
-<nav class="menu">
+<nav class="menu" [class.collapsed]="isCollapsed">
   <ul>
-    <li *ngIf="isAdmin||isManager||isMember">
-      <a routerLink="/dashboard/tasks" routerLinkActive="active"><span class="material-icons">bar_chart</span> Tarefas</a>
+   
+    <!-- Links do menu -->
+    <li *ngIf="isAdmin || isManager || isMember">
+      <a routerLink="/dashboard/tasks" routerLinkActive="active">
+        <span class="material-icons">bar_chart</span>
+        <span class="label" *ngIf="!isCollapsed">Tarefas</span>
+      </a>
     </li>
-    <li *ngIf="isAdmin||isManager||isMember">
-      <a routerLink="/dashboard/recursos" routerLinkActive="active"><span class="material-icons">group</span> Recursos</a>
+    <li *ngIf="isAdmin || isManager || isMember">
+      <a routerLink="/dashboard/recursos" routerLinkActive="active">
+        <span class="material-icons">group</span>
+        <span class="label" *ngIf="!isCollapsed">Recursos</span>
+      </a>
     </li>
-    <li *ngIf="isAdmin||isManager">
-      <a routerLink="/dashboard/clientes" routerLinkActive="active"><span class="material-icons">person</span> Clientes</a>
+    <li *ngIf="isAdmin || isManager">
+      <a routerLink="/dashboard/clientes" routerLinkActive="active">
+        <span class="material-icons">person</span>
+        <span class="label" *ngIf="!isCollapsed">Clientes</span>
+      </a>
     </li>
-    <li *ngIf="isAdmin||isManager">
-      <a routerLink="/dashboard/projetos" routerLinkActive="active"><span class="material-icons">folder</span> Projetos</a>
+    <li *ngIf="isAdmin || isManager">
+      <a routerLink="/dashboard/projetos" routerLinkActive="active">
+        <span class="material-icons">folder</span>
+        <span class="label" *ngIf="!isCollapsed">Projetos</span>
+      </a>
     </li>
     <li *ngIf="isAdmin">
-      <a routerLink="/dashboard/financial-indicators" routerLinkActive="active"><span class="material-icons">paid</span> Indicadores Financeiros</a>
+      <a routerLink="/dashboard/financial-indicators" routerLinkActive="active">
+        <span class="material-icons">paid</span>
+        <span class="label" *ngIf="!isCollapsed">Indicadores Financeiros</span>
+      </a>
     </li>
-    
     <li *ngIf="isAdmin">
-      <a routerLink="/dashboard/operation-metrics" routerLinkActive="active"><span class="material-icons">account_tree</span> Indicadores Operacionais</a>
+      <a routerLink="/dashboard/operation-metrics" routerLinkActive="active">
+        <span class="material-icons">account_tree</span>
+        <span class="label" *ngIf="!isCollapsed">Indicadores Operacionais</span>
+      </a>
     </li>
-        <li *ngIf="isAdmin||isManager||isMember">
-      <a routerLink="/dashboard/user-configurator" routerLinkActive="active"><span class="material-icons">manage_accounts</span>Meus Dados</a>
+    <li *ngIf="isAdmin || isManager || isMember">
+      <a routerLink="/dashboard/user-configurator" routerLinkActive="active">
+        <span class="material-icons">manage_accounts</span>
+        <span class="label" *ngIf="!isCollapsed">Meus Dados</span>
+      </a>
     </li>
-    
+
+    <!-- Botão de toggle -->
+    <li class="toggle-container">
+      <button class="toggle-btn" (click)="toggleMenu()">
+        <span class="material-icons">
+          {{ isCollapsed ? 'menu_open' : 'menu_open' }}
+        </span>
+        <span class="label" *ngIf="!isCollapsed">Ocultar Menu</span>
+      </button>
+    </li>
+    <!-- Botão de sair -->
     <li>
-      <button (click)="logout()" class="logout-btn"><span class="material-icons">logout</span> Sair</button>
+      <button (click)="logout()" class="logout-btn">
+        <span class="material-icons">logout</span>
+        <span class="label" *ngIf="!isCollapsed">Sair</span>
+      </button>
     </li>
   </ul>
 </nav>

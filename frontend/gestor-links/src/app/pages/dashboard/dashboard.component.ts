@@ -10,4 +10,11 @@ import { RouterModule } from '@angular/router';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent {}
+export class DashboardComponent {
+  isCollapsed = false;
+
+  toggleMenu() {
+    this.isCollapsed = !this.isCollapsed;
+  }
+}
+
