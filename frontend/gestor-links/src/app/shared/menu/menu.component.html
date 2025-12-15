@@ -19,6 +19,9 @@
     <li *ngIf="isAdmin">
       <a routerLink="/dashboard/operation-metrics" routerLinkActive="active"><span class="material-icons">account_tree</span> Indicadores Operacionais</a>
     </li>
+        <li *ngIf="isAdmin||isManager||isMember">
+      <a routerLink="/dashboard/user-configurator" routerLinkActive="active"><span class="material-icons">manage_accounts</span>Meus Dados</a>
+    </li>
     
     <li>
       <button (click)="logout()" class="logout-btn"><span class="material-icons">logout</span> Sair</button>
