@@ -1,0 +1,109 @@
+<mat-tab-group>
+  <!-- Aba Dados Pessoais -->
+  <mat-tab label="Dados Pessoais">
+    <div class="tab-content">
+      <label>Nome:</label>
+      <input [(ngModel)]="user.name" />
+
+      <label>Email (login):</label>
+      <input [(ngModel)]="user.email" />
+
+      <label>Email cobrança:</label>
+      <input [(ngModel)]="user.billing_email" />
+
+      <label>Email financeiro:</label>
+      <input [(ngModel)]="user.finance_email" />
+
+      <label>Empresa:</label>
+      <input [(ngModel)]="user.company_name" />
+
+      <label>CNPJ:</label>
+      <input [(ngModel)]="user.cnpj" />
+
+      <button (click)="updateUser()">Salvar</button>
+    </div>
+  </mat-tab>
+
+  <!-- Aba Recebimento -->
+  <mat-tab label="Recebimento">
+    <div class="tab-content">
+      <label>Banco:</label>
+      <input [(ngModel)]="user.bank_name" />
+
+      <label>Agência:</label>
+      <input [(ngModel)]="user.bank_agency" />
+
+      <label>Conta:</label>
+      <input [(ngModel)]="user.bank_account" />
+
+      <label>PIX:</label>
+      <input [(ngModel)]="user.pix_key" />
+
+      <button (click)="updateUser()">Salvar</button>
+    </div>
+  </mat-tab>
+
+  <!-- Aba Módulos -->
+  <mat-tab label="Módulos">
+    <div class="tab-content">
+      <table>
+        <tr><th>Módulo</th><th>Proficiência</th></tr>
+        <tr *ngFor="let mod of userModules">
+          <td>{{ mod.module_code }}</td>
+          <td>{{ mod.proficiency_score }}</td>
+        </tr>
+      </table>
+
+      <h4>Adicionar Módulo</h4>
+      <input #moduleCode placeholder="Código" />
+      <select #score>
+        <option *ngFor="let s of [1,2,3,4,5]" [value]="s">{{ s }}</option>
+      </select>
+      <button (click)="addModule(moduleCode.value, score.value)">Adicionar</button>
+    </div>
+  </mat-tab>
+
+  <!-- Aba Contratos -->
+  <mat-tab label="Contratos">
+    <div class="tab-content">
+      <table>
+        <tr><th>Tipo</th><th>Valor Base</th><th>Multiplicador</th><th>Validade</th></tr>
+        <tr *ngFor="let c of userContracts">
+          <td>{{ c.contract_type }}</td>
+          <td>{{ c.base_value }}</td>
+          <td>{{ c.multiplier }}</td>
+          <td>{{ c.valid_from }} - {{ c.valid_to }}</td>
+        </tr>
+      </table>
+
+      <h4>Novo Contrato</h4>
+      <!-- inputs para contrato -->
+      <button (click)="addContract({contract_type:'full_time', base_value:1000, multiplier:1, valid_from:'2025-01-01'})">
+        Adicionar
+      </button>
+    </div>
+  </mat-tab>
+
+  <!-- Aba Invoices -->
+  <mat-tab label="Invoices">
+    <div class="tab-content">
+      <table>
+        <tr><th>Número</th><th>Valor</th><th>Status</th><th>Arquivo</th></tr>
+        <tr *ngFor="let inv of userInvoices">
+          <td>{{ inv.invoice_number }}</td>
+          <td>{{ inv.amount }}</td>
+          <td>{{ inv.status }}</td>
+          <td><a *ngIf="inv.file_path" [href]="inv.file_path" target="_blank">Ver NF</a></td>
+        </tr>
+      </table>
+
+      <h4>Nova Invoice</h4>
+      <input #invoiceNumber placeholder="Número" />
+      <input #invoiceAmount type="number" placeholder="Valor" />
+      <input type="file" (change)="onFileSelected($event)" />
+      <button (click)="addInvoice({invoice_number: invoiceNumber.value, amount: invoiceAmount.value})">
+        Adicionar
+      </button>
+    </div>
+  </mat-tab>
+</mat-tab-group>

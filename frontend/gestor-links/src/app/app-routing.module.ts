@@ -12,6 +12,7 @@ import { PendingSchedulesComponent } from './pages/dashboard/pending-schedules/p
 import {FinancialIndicatorsComponent} from './pages/dashboard/financial-indicators/financial-indicators.component';
 import {OperationMetricsComponent} from './pages/dashboard/operation-metrics/operation-metrics.component';
 import{TimesheetResourcesComponent}from './pages/dashboard/operation-metrics/details/timesheet-resources/timesheet-resources.component'
+import{UserConfiguratorComponent} from './pages/dashboard/user-configurator/user-configurator.component'
 export const routes: Routes = [
   { path: '', component: LoginComponent },
   {
@@ -28,6 +29,7 @@ export const routes: Routes = [
       { path: 'financial-indicators',component: FinancialIndicatorsComponent, canActivate:[authGuard]},
       { path: 'operation-metrics',component: OperationMetricsComponent, canActivate:[authGuard]},
       { path: 'operation-metrics/details/timesheet-resources',component: TimesheetResourcesComponent, canActivate:[authGuard]},
+      { path: 'user-configurator',component: UserConfiguratorComponent, canActivate:[authGuard]},
 
       { path: '', redirectTo: 'tasks', pathMatch: 'full' }
     ]

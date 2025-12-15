@@ -2,7 +2,7 @@
   <h3>📤 Upload report for <strong>{{ event.title }}</strong></h3>
 
   <div class="upload-form">
-    <input type="file" (change)="selectFile($event)" />
+    <input type="file" (change)="selectFile($event)" accept="application/pdf" />
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Notes</mat-label>

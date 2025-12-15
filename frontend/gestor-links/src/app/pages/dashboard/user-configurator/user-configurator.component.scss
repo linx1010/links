@@ -1,0 +1,118 @@
+// Paleta de cores base
+$primary-color: #1976d2;
+$secondary-color: #f5f5f5;
+$accent-color: #4caf50;
+$error-color: #e53935;
+
+// Container principal
+:host {
+  display: block;
+  padding: 20px;
+  background: $secondary-color;
+  border-radius: 8px;
+}
+
+// Tabs
+::ng-deep .mat-tab-group {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+
+::ng-deep .mat-tab-label {
+  color: #000 !important;   // texto preto
+  font-weight: 600;         // opcional: deixa mais forte
+}
+
+
+::ng-deep .mat-tab-label.mat-tab-label-active {
+  color: #000 !important;   // mantém preto mesmo ativo
+}
+
+
+// Conteúdo das abas
+.tab-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  
+
+  label {
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #333;
+    display: block;
+  }
+
+  input, select {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color .2s;
+    
+
+    &:focus {
+      border-color: $primary-color;
+      outline: none;
+    }
+  }
+
+  button {
+    background: $primary-color;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background .2s;
+    align-self: flex-end; // <-- força o botão para a direita
+
+    &:hover {
+      background: darken($primary-color, 10%);
+    }
+  }
+}
+
+// Tabelas
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  text-align: center;
+  
+
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+  }
+
+  th {
+    background: $primary-color;
+    color: white;
+    font-weight: 600;
+  }
+
+  tr:hover {
+    background: #f9f9f9;
+  }
+}
+
+// Upload de arquivo
+input[type="file"] {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin-top: 10px;
+  text-align: right;
+}
+// Força o texto das labels das abas a ficar preto
+::ng-deep .mdc-tab__text-label {
+  color: #000 !important;   // texto preto
+  font-weight: 600;         // opcional: deixa mais forte
+}
+::ng-deep .mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #000 !important;   // mantém preto mesmo ativa
+}

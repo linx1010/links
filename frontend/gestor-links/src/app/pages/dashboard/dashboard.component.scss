@@ -1,16 +1,23 @@
 .dashboard {
   display: flex;
   height: 100vh;
+}
 
-  app-menu {
-    width: 220px;
-    background-color: #1f2937;
-  }
+.main-content {
+  flex: 1;
+  padding: 24px;
+  background-color: #f9fafb;
+  overflow-y: auto;
+}
 
-  .content {
-    flex: 1;
-    padding: 20px;
-    background-color: #f9fafb;
-    overflow-y: auto;
-  }
+.content {
+  flex: 1;
+
+  padding: 24px;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  overflow-y: auto;
+}
+body.menu-collapsed .content {
+  margin-left: 60px;
 }

@@ -285,8 +285,22 @@ excluirEvento(e: any) {
   }
 
   selecionarArquivo(ev: any) {
-    this.arquivoSelecionado = ev.target.files && ev.target.files[0] ? ev.target.files[0] : null;
+    const file = ev.target.files && ev.target.files[0] ? ev.target.files[0] : null;
+
+    if (file) {
+      // valida pelo MIME type
+      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        this.arquivoSelecionado = file;
+      } else {
+        this.arquivoSelecionado = null;
+        this.toast.show('Somente arquivos PDF são permitidos.', 'error');
+        ev.target.value = ''; // limpa o input
+      }
+    } else {
+      this.arquivoSelecionado = null;
+    }
   }
+
 
   enviarArquivo() {
     if (!this.eventoUpload || !this.arquivoSelecionado) {
