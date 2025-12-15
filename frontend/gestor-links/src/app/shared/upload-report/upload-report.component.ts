@@ -39,8 +39,22 @@ export class UploadReportComponent {
   }
 
   selectFile(event: any) {
-    this.selectedFile = event.target.files[0] || null;
+    const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+
+    if (file) {
+      // valida pelo MIME type e extensão
+      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        this.selectedFile = file;
+      } else {
+        this.selectedFile = null;
+        this.toast.show('Somente arquivos PDF são permitidos.', 'error');
+        event.target.value = ''; // limpa o input
+      }
+    } else {
+      this.selectedFile = null;
+    }
   }
+
 
   sendFile() {
     if (!this.event || !this.selectedFile) return;

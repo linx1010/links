@@ -29,7 +29,7 @@
   <h4>Upload de relatório para {{ eventoUpload.title }}</h4>
 
   <!-- Seleção de arquivo -->
-  <input type="file" (change)="selecionarArquivo($event)" />
+  <input type="file" (change)="selecionarArquivo($event)" accept="application/pdf" />
 
   <!-- Notas -->
   <mat-form-field appearance="fill">
