@@ -106,4 +106,47 @@
       </button>
     </div>
   </mat-tab>
+
+ <mat-tab label="Senha">
+  <div class="tab-content senha-tab">
+    <h4>Alterar Senha</h4>
+
+    <!-- Senha Atual -->
+    <mat-form-field appearance="outline">
+      <mat-label>Senha Atual</mat-label>
+      <input matInput [type]="hideCurrent ? 'password' : 'text'" [(ngModel)]="currentPassword" required>
+      <mat-icon matSuffix (click)="hideCurrent = !hideCurrent" class="eye-icon">
+        {{ hideCurrent ? 'visibility_off' : 'visibility' }}
+      </mat-icon>
+      <mat-error *ngIf="!currentPassword">Informe sua senha atual</mat-error>
+    </mat-form-field>
+
+    <!-- Nova Senha -->
+    <mat-form-field appearance="outline">
+      <mat-label>Nova Senha</mat-label>
+      <input matInput [type]="hideNew ? 'password' : 'text'" [(ngModel)]="newPassword" required>
+      <mat-icon matSuffix (click)="hideNew = !hideNew" class="eye-icon">
+        {{ hideNew ? 'visibility_off' : 'visibility' }}
+      </mat-icon>
+      <mat-error *ngIf="!newPassword">Informe a nova senha</mat-error>
+    </mat-form-field>
+
+    <!-- Repita Nova Senha -->
+    <mat-form-field appearance="outline">
+      <mat-label>Repita Nova Senha</mat-label>
+      <input matInput [type]="hideRepeat ? 'password' : 'text'" [(ngModel)]="repeatPassword" required>
+      <mat-icon matSuffix (click)="hideRepeat = !hideRepeat" class="eye-icon">
+        {{ hideRepeat ? 'visibility_off' : 'visibility' }}
+      </mat-icon>
+      <mat-error *ngIf="repeatPassword && repeatPassword !== newPassword">
+        As senhas não coincidem
+      </mat-error>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="changePassword()">Alterar</button>
+  </div>
+</mat-tab>
+
+
+
 </mat-tab-group>

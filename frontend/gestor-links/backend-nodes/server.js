@@ -129,6 +129,8 @@ app.delete("/clients/:id", async (req, res) => {
 app.get("/calendar", async (req, res) => {
   const origType = req.query.type; // 'cliente' ou 'recurso'
   const clientId = parseInt(req.query.id);
+  const year = parseInt(req.query.year); 
+  const month = parseInt(req.query.month);
 
   if (!origType || isNaN(clientId)) {
     return res.status(400).json({ error: "Parâmetros 'type' e 'id' são obrigatórios" });
@@ -139,7 +141,9 @@ app.get("/calendar", async (req, res) => {
     action: "read",
     data: { 
       type: origType,
-      id: clientId
+      id: clientId,
+      year: year,
+      month: month
     }
   });
 

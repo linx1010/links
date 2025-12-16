@@ -9,6 +9,9 @@ class Calendar:
         cursor = self.conn.cursor(dictionary=True)
         eventos = []
 
+        year = data.get("year")
+        month = data.get("month")
+
         if data['type'] == 'client':
             query = """
                 SELECT 
@@ -26,6 +29,8 @@ class Calendar:
                 INNER JOIN clients c ON s.client_id = c.id
                 LEFT JOIN users u ON s.lead_id = u.id
                 WHERE s.client_id = %s
+                AND YEAR(s.start_time) = %s
+                AND MONTH(s.start_time) = %s
 
                 UNION ALL
 
@@ -37,15 +42,18 @@ class Calendar:
                     p.end_date AS end_time,
                     NULL AS location,
                     p.status,
-                    null as description,
+                    NULL AS description,
                     c.name AS client_name,
                     NULL AS techlead_name
                 FROM projects p
                 INNER JOIN clients c ON p.client_id = c.id
                 WHERE p.client_id = %s
+                AND YEAR(p.start_date) = %s
+                AND MONTH(p.start_date) = %s
+
                 ORDER BY start_time ASC;
             """
-            cursor.execute(query, (data['id'], data['id']))
+            cursor.execute(query, (data['id'], year, month, data['id'], year, month))
             eventos = cursor.fetchall()
 
         elif data['type'] == 'user':
@@ -66,14 +74,15 @@ class Calendar:
                 INNER JOIN clients c ON s.client_id = c.id
                 LEFT JOIN users u ON s.lead_id = u.id
                 WHERE su.user_id = %s
+                AND YEAR(s.start_time) = %s
+                AND MONTH(s.start_time) = %s
                 ORDER BY s.start_time ASC;
             """
-            cursor.execute(query, (data['id'],))
+            cursor.execute(query, (data['id'], year, month))
             eventos = cursor.fetchall()
 
         resultado = []
         for e in eventos:
-            # Buscar participantes da agenda (apenas para schedules)
             participants = []
             if e["source"] == "schedule":
                 cursor.execute("""
@@ -92,15 +101,15 @@ class Calendar:
                 "location": e["location"],
                 "source": e["source"],
                 "status": e["status"],
-                "description": e.get("description"),
-                "client_name": e.get("client_name"),
-                "techlead_name": e.get("techlead_name"),
-                "participants": participants  # lista de usuários vinculados
+                "description": e["description"],
+                "client_name": e["client_name"],
+                "techlead_name": e["techlead_name"],
+                "participants": participants
             })
 
         cursor.close()
-        self.conn.close()
         return resultado
+
 
 
         

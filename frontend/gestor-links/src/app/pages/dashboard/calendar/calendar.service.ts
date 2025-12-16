@@ -27,8 +27,8 @@ export class CalendarService {
   // ------------------------------------------------------------------------
   // 🔵 BUSCAR AGENDA
   // ------------------------------------------------------------------------
-  getAgenda(tipo: string, id: number): Observable<any[]> {
-    const url = `${this.apiUrl}?type=${tipo}&id=${id}`;
+  getAgenda(tipo: string, id: number, year: number, month: number): Observable<any[]>{
+    const url = `${this.apiUrl}?type=${tipo}&id=${id}&year=${year}&month=${month}`;
     return this.http.get<any[]>(url).pipe(
       catchError((err: any) => {
         console.error('Erro ao buscar agenda:', err);
