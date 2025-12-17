@@ -11,6 +11,13 @@
             "url": "http://localhost:4200",
             "webRoot": "${workspaceFolder}"
         },
+        { 
+            "name": "Python Debugger: Consumer RPC", 
+            "type": "debugpy", 
+            "request": "launch", 
+            "program": "${workspaceFolder}/backend/consumer_rpc.py", 
+            "console": "integratedTerminal" 
+        },
     
         {
             "name": "Python Debugger: Current File",
@@ -18,6 +25,6 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
-        }
+        } 
     ]
 }

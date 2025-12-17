@@ -75,4 +75,14 @@ export class UserConfiguratorService {
     this.mockInvoices.push(newInvoice);
     return of(newInvoice);
   }
+  // Troca de senha mockada
+  changePassword(currentPassword: string, newPassword: string): Observable<any> {
+    console.log('Mock changePassword:', { currentPassword, newPassword });
+    // Aqui você pode simular validação
+    if (currentPassword === '123456') {
+      return of({ success: true, message: 'Senha alterada com sucesso!' });
+    } else {
+      return of({ success: false, message: 'Senha atual incorreta!' });
+    }
+  }
 }

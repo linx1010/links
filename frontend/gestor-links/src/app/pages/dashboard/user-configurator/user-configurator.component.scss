@@ -116,3 +116,30 @@ input[type="file"] {
 ::ng-deep .mdc-tab.mdc-tab--active .mdc-tab__text-label {
   color: #000 !important;   // mantém preto mesmo ativa
 }
+
+.senha-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+}
+
+mat-form-field {
+  width: 100%;
+
+  .mat-label,
+  .mat-placeholder,
+  input::placeholder {
+    color: #25514f !important;
+  }
+
+  .mat-error {
+    color: #25514f !important;
+    font-size: 12px;
+  }
+}
+
+.eye-icon {
+  cursor: pointer;
+  color: #25514f !important;
+}

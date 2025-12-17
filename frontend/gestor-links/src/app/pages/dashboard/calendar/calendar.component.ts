@@ -169,8 +169,9 @@ export class CalendarComponent {
 // Carga de dados
 // ---------------------------
 carregarAgenda() {
-  this.calendarService.getAgenda(this.tipo, this.id).subscribe({
-    next: (agenda: any[]) => {
+  const year = this.currentDate.getFullYear(); const month = this.currentDate.getMonth() + 1; // mês começa em 0
+  
+  this.calendarService.getAgenda(this.tipo, this.id, year, month).subscribe({    next: (agenda: any[]) => {
       // 1. Monta o mapa de eventos por chave YYYY-MM-DD
       this.events = {};
       agenda.forEach(evento => {
