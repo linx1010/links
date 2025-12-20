@@ -1,3 +1,6 @@
+// Importa o módulo moderno de cores
+@use "sass:color";
+
 // Paleta de cores base
 $primary-color: #1976d2;
 $secondary-color: #f5f5f5;
@@ -19,17 +22,14 @@ $error-color: #e53935;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-
 ::ng-deep .mat-tab-label {
   color: #000 !important;   // texto preto
   font-weight: 600;         // opcional: deixa mais forte
 }
 
-
 ::ng-deep .mat-tab-label.mat-tab-label-active {
   color: #000 !important;   // mantém preto mesmo ativo
 }
-
 
 // Conteúdo das abas
 .tab-content {
@@ -37,7 +37,6 @@ $error-color: #e53935;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  
 
   label {
     font-weight: 500;
@@ -51,7 +50,6 @@ $error-color: #e53935;
     border: 1px solid #ccc;
     border-radius: 4px;
     transition: border-color .2s;
-    
 
     &:focus {
       border-color: $primary-color;
@@ -67,10 +65,11 @@ $error-color: #e53935;
     border-radius: 4px;
     cursor: pointer;
     transition: background .2s;
-    align-self: flex-end; // <-- força o botão para a direita
+    align-self: flex-end; // força o botão para a direita
 
     &:hover {
-      background: darken($primary-color, 10%);
+      // substituímos darken() por color.adjust
+      background: color.adjust($primary-color, $lightness: -10%);
     }
   }
 }
@@ -81,7 +80,6 @@ table {
   border-collapse: collapse;
   margin-bottom: 20px;
   text-align: center;
-  
 
   th, td {
     padding: 10px;
@@ -108,13 +106,14 @@ input[type="file"] {
   margin-top: 10px;
   text-align: right;
 }
+
 // Força o texto das labels das abas a ficar preto
 ::ng-deep .mdc-tab__text-label {
-  color: #000 !important;   // texto preto
-  font-weight: 600;         // opcional: deixa mais forte
+  color: #000 !important;
+  font-weight: 600;
 }
 ::ng-deep .mdc-tab.mdc-tab--active .mdc-tab__text-label {
-  color: #000 !important;   // mantém preto mesmo ativa
+  color: #000 !important;
 }
 
 .senha-tab {

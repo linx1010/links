@@ -1,28 +1,48 @@
 <mat-tab-group>
   <!-- Aba Dados Pessoais -->
-  <mat-tab label="Dados Pessoais">
-    <div class="tab-content">
-      <label>Nome:</label>
-      <input [(ngModel)]="user.name" />
+  <mat-tab label="Dados Cadastrais">
+  <div class="tab-content">
+    <label>Nome:</label>
+    <input [(ngModel)]="user.name" />
 
-      <label>Email (login):</label>
-      <input [(ngModel)]="user.email" />
+    <label>Email (login):</label>
+    <input [(ngModel)]="user.email" />
 
-      <label>Email cobrança:</label>
-      <input [(ngModel)]="user.billing_email" />
+    <label>Email cobrança:</label>
+    <input [(ngModel)]="user.billing_email" />
 
-      <label>Email financeiro:</label>
-      <input [(ngModel)]="user.finance_email" />
+    <label>Email financeiro:</label>
+    <input [(ngModel)]="user.finance_email" />
 
-      <label>Empresa:</label>
-      <input [(ngModel)]="user.company_name" />
+    <label>Empresa:</label>
+    <input [(ngModel)]="user.company_name" />
 
-      <label>CNPJ:</label>
-      <input [(ngModel)]="user.cnpj" />
+    <label>CNPJ:</label>
+    <input [(ngModel)]="user.cnpj" />
 
-      <button (click)="updateUser()">Salvar</button>
-    </div>
-  </mat-tab>
+    <!-- Endereço -->
+    <label>CEP:</label>
+    <input [(ngModel)]="user.cep" (blur)="buscarCep()" />
+
+    <label>Rua:</label>
+    <input [(ngModel)]="user.street" />
+
+    <label>Número:</label>
+    <input [(ngModel)]="user.number" />
+
+    <label>Bairro:</label>
+    <input [(ngModel)]="user.neighborhood" />
+
+    <label>Cidade:</label>
+    <input [(ngModel)]="user.city" />
+
+    <label>Estado:</label>
+    <input [(ngModel)]="user.state" />
+
+    <button (click)="updateUser()">Salvar</button>
+  </div>
+</mat-tab>
+
 
   <!-- Aba Recebimento -->
   <mat-tab label="Recebimento">
@@ -64,7 +84,7 @@
   </mat-tab>
 
   <!-- Aba Contratos -->
-  <mat-tab label="Contratos">
+  <mat-tab label="Contratos"*ngIf="featureContratosReady">
     <div class="tab-content">
       <table>
         <tr><th>Tipo</th><th>Valor Base</th><th>Multiplicador</th><th>Validade</th></tr>
@@ -85,7 +105,7 @@
   </mat-tab>
 
   <!-- Aba Invoices -->
-  <mat-tab label="Invoices">
+  <mat-tab label="Invoices" *ngIf="featureInvoicesReady">
     <div class="tab-content">
       <table>
         <tr><th>Número</th><th>Valor</th><th>Status</th><th>Arquivo</th></tr>

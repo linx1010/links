@@ -1,88 +1,64 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import {environment} from '../../../../environment'
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserConfiguratorService {
-  private mockUser = {
-    id: 1,
-    name: 'Leandro',
-    email: 'leandro@login.com',
-    billing_email: 'cobranca@empresa.com',
-    finance_email: 'financeiro@empresa.com',
-    company_name: 'Minha Empresa LTDA',
-    cnpj: '12.345.678/0001-99',
-    bank_name: 'Banco XPTO',
-    bank_agency: '1234',
-    bank_account: '56789-0',
-    pix_key: 'leandro@pix.com'
-  };
+  private apiUrl = environment.apiUrl; // ajuste conforme sua porta/backend
 
-  private mockModules = [
-    { module_code: 'MOD001', proficiency_score: 4 },
-    { module_code: 'MOD002', proficiency_score: 3 }
-  ];
-
-  private mockContracts = [
-    { contract_type: 'full_time', base_value: 5000, multiplier: 1, valid_from: '2025-01-01', valid_to: '2025-12-31' }
-  ];
-
-  private mockInvoices = [
-    { invoice_number: 'INV001', amount: 1500, status: 'pending', file_path: null },
-    { invoice_number: 'INV002', amount: 2000, status: 'paid', file_path: '/mock/invoices/inv002.pdf' }
-  ];
-
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
   // Usuário
-  getUser(): Observable<any> {
-    return of(this.mockUser);
+  getUser(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/users/${id}`);
   }
 
   updateUser(user: any): Observable<any> {
-    this.mockUser = { ...this.mockUser, ...user };
-    return of(this.mockUser);
+    return this.http.put(`${this.apiUrl}/users/${user.id}`, user);
   }
 
   // Módulos
-  getUserModules(): Observable<any[]> {
-    return of(this.mockModules);
+  getUserModules(userId: number, organizationId: number): Observable<any[]> {
+    // Se os módulos vierem junto no read_user_by_id, pode não precisar dessa rota separada
+    return this.http.get<any[]>(`${this.apiUrl}/users/${userId}/modules?organization_id=${organizationId}`);
   }
 
-  addUserModule(module: any): Observable<any> {
-    this.mockModules.push(module);
-    return of(module);
+  addUserModule(userId: number, organizationId: number, module: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users/${userId}/modules`, { ...module, organization_id: organizationId });
   }
 
   // Contratos
-  getUserContracts(): Observable<any[]> {
-    return of(this.mockContracts);
+  getUserContracts(userId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/users/${userId}/contracts`);
   }
 
-  addUserContract(contract: any): Observable<any> {
-    this.mockContracts.push(contract);
-    return of(contract);
+  addUserContract(userId: number, contract: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users/${userId}/contracts`, contract);
   }
 
   // Invoices
-  getUserInvoices(): Observable<any[]> {
-    return of(this.mockInvoices);
+  getUserInvoices(userId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/users/${userId}/invoices`);
   }
 
-  addUserInvoice(invoice: any, file: File | null): Observable<any> {
-    const newInvoice = { ...invoice, status: 'pending', file_path: file ? file.name : null };
-    this.mockInvoices.push(newInvoice);
-    return of(newInvoice);
-  }
-  // Troca de senha mockada
-  changePassword(currentPassword: string, newPassword: string): Observable<any> {
-    console.log('Mock changePassword:', { currentPassword, newPassword });
-    // Aqui você pode simular validação
-    if (currentPassword === '123456') {
-      return of({ success: true, message: 'Senha alterada com sucesso!' });
-    } else {
-      return of({ success: false, message: 'Senha atual incorreta!' });
+  addUserInvoice(userId: number, invoice: any, file: File | null): Observable<any> {
+    const formData = new FormData();
+    formData.append('invoice_number', invoice.invoice_number);
+    formData.append('amount', invoice.amount);
+    if (file) {
+      formData.append('file', file);
     }
+    return this.http.post(`${this.apiUrl}/users/${userId}/invoices`, formData);
+  }
+
+  // Troca de senha
+  changePassword(userId: number, currentPassword: string, newPassword: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/users/${userId}/password`, {
+      currentPassword,
+      newPassword
+    });
   }
 }
