@@ -181,6 +181,6 @@ class Users():
         for code in modules:
             cursor.execute("""
                 INSERT INTO user_modules (user_id, module_code, organization_id, proficiency_score)
-                VALUES (%s, %s, %s, 1)
-            """, (user_id, code, org_id))
+                VALUES (%s, %s, %s, %s)
+            """, (user_id, code['module_code'], org_id,code['proficiency_score']))
         cursor.close()

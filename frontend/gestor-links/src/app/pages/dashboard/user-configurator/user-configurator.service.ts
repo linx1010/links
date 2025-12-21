@@ -2,7 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {environment} from '../../../../environment'
-
+export interface Module {
+  code: string;
+  organization_id: number;
+  label: string;
+  description: string;
+  active: number;
+  created_at: string;
+  updated_at: string;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -53,6 +61,10 @@ export class UserConfiguratorService {
     }
     return this.http.post(`${this.apiUrl}/users/${userId}/invoices`, formData);
   }
+  buscarCep(cep: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/cep/${cep}`);
+  }
+
 
   // Troca de senha
   changePassword(userId: number, currentPassword: string, newPassword: string): Observable<any> {
@@ -61,4 +73,10 @@ export class UserConfiguratorService {
       newPassword
     });
   }
+
+  // ---------------- MODULES ----------------
+    getModules(): Observable<Module[]> {
+      return this.http.get<Module[]>(this.apiUrl+'/modules');
+    }
+  
 }

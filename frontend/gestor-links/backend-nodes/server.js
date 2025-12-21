@@ -408,6 +408,18 @@ app.get("/financial/kpis", async (req, res) => {
   }
 });
 
+// *************************************Consulta CEP*************************************
+app.get("/cep/:cep", async (req, res) => {
+  try {
+    const cep = req.params.cep.replace(/\D/g, "");
+    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao consultar CEP" });
+  }
+});
+
 
 
 async function connectRabbitMQ() {

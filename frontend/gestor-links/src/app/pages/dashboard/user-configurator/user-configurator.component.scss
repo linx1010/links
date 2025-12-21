@@ -1,7 +1,6 @@
-// Importa o módulo moderno de cores
 @use "sass:color";
 
-// Paleta de cores base
+// Paleta
 $primary-color: #1976d2;
 $secondary-color: #f5f5f5;
 $accent-color: #4caf50;
@@ -15,7 +14,7 @@ $error-color: #e53935;
   border-radius: 8px;
 }
 
-// Tabs
+/* Tabs */
 ::ng-deep .mat-tab-group {
   background: white;
   border-radius: 8px;
@@ -23,26 +22,26 @@ $error-color: #e53935;
 }
 
 ::ng-deep .mat-tab-label {
-  color: #000 !important;   // texto preto
-  font-weight: 600;         // opcional: deixa mais forte
+  color: #000 !important;
+  font-weight: 600;
 }
 
 ::ng-deep .mat-tab-label.mat-tab-label-active {
-  color: #000 !important;   // mantém preto mesmo ativo
+  color: #000 !important;
 }
 
-// Conteúdo das abas
+/* Conteúdo padrão das abas */
 .tab-content {
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 15px;
+  text-align: center;
 
   label {
     font-weight: 500;
     margin-bottom: 5px;
     color: #333;
-    display: block;
   }
 
   input, select {
@@ -65,26 +64,54 @@ $error-color: #e53935;
     border-radius: 4px;
     cursor: pointer;
     transition: background .2s;
-    align-self: flex-end; // força o botão para a direita
+    align-self: flex-end;
 
     &:hover {
-      // substituímos darken() por color.adjust
       background: color.adjust($primary-color, $lightness: -10%);
     }
   }
 }
 
-// Tabelas
+/* Grid das abas Dados Cadastrais e Recebimento */
+.dados-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+  padding: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.form-field input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .dados-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tabelas */
 table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
-  text-align: center;
 
   th, td {
     padding: 10px;
     border-bottom: 1px solid #ddd;
-    text-align: center;
   }
 
   th {
@@ -98,24 +125,15 @@ table {
   }
 }
 
-// Upload de arquivo
+/* Upload */
 input[type="file"] {
   border: none;
   background: transparent;
   padding: 0;
   margin-top: 10px;
-  text-align: right;
 }
 
-// Força o texto das labels das abas a ficar preto
-::ng-deep .mdc-tab__text-label {
-  color: #000 !important;
-  font-weight: 600;
-}
-::ng-deep .mdc-tab.mdc-tab--active .mdc-tab__text-label {
-  color: #000 !important;
-}
-
+/* Aba Senha */
 .senha-tab {
   display: flex;
   flex-direction: column;
@@ -123,22 +141,82 @@ input[type="file"] {
   max-width: 400px;
 }
 
-mat-form-field {
-  width: 100%;
-
-  .mat-label,
-  .mat-placeholder,
-  input::placeholder {
-    color: #25514f !important;
-  }
-
-  .mat-error {
-    color: #25514f !important;
-    font-size: 12px;
-  }
-}
-
 .eye-icon {
   cursor: pointer;
   color: #25514f !important;
+}
+
+/* Botão Salvar Geral */
+.save-container {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.custom-save-button {
+  background: #1976d2;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    background: #1565c0;
+  }
+
+  .save-icon {
+    font-size: 20px;
+  }
+}
+::ng-deep .mdc-tab__text-label {
+  color: #000 !important;
+  font-weight: 600 !important;
+}
+.add-module-grid {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .add-module-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* Inputs e selects com fundo branco e texto preto */
+mat-form-field.mat-form-field {
+  background: white !important;
+  color: #000 !important;
+}
+
+mat-form-field.mat-form-field input,
+mat-form-field.mat-form-field textarea,
+mat-form-field.mat-form-field .mat-select-value {
+  background: white !important;
+  color: #000 !important;
+}
+
+/* Caixa interna do mat-input */
+.mat-mdc-text-field-wrapper {
+  background: white !important;
+}
+
+/* Texto digitado */
+.mdc-text-field__input {
+  color: #000 !important;
+}
+
+/* Placeholder */
+.mdc-text-field__input::placeholder {
+  color: #555 !important;
+}
+
+/* Label do mat-form-field */
+.mdc-floating-label {
+  color: #000 !important;
 }

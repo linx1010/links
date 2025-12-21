@@ -15,18 +15,29 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { UserConfiguratorService } from './user-configurator.service';
 import { ToastService } from '../../../shared/toast.service';
 
+import { Observable } from 'rxjs';
+import { FormControl } from '@angular/forms';
+import { startWith, map } from 'rxjs/operators';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+
+
+
+
 @Component({
   selector: 'app-user-configurator',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MatTabsModule,
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
     MatButtonModule,
     MatSelectModule,
+    MatAutocompleteModule,
     HttpClientModule // necessário para injetar HttpClient
   ],
   templateUrl: './user-configurator.component.html',
@@ -42,6 +53,12 @@ export class UserConfiguratorComponent implements OnInit {
   userContracts: any[] = [];
   userInvoices: any[] = [];
   userId = Number(localStorage.getItem('userId'));
+  selectedTabIndex = 0;
+
+  moduleList: any[] = []; 
+  filteredModules!: Observable<any[]>; 
+  moduleControl = new FormControl<string>(''); 
+  selectedModuleLabel = '';
 
   // Controle de visibilidade das senhas
   hideCurrent = true;
@@ -63,9 +80,14 @@ export class UserConfiguratorComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUser();
-    // this.loadContracts();
-    // this.loadInvoices();
+    this.loadModules(); // <-- você esqueceu de chamar isso aqui
+
+    this.filteredModules = this.moduleControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this.filterModules(value || ''))
+    );
   }
+
 
   // Usuário
   loadUser(): void {
@@ -78,33 +100,87 @@ export class UserConfiguratorComponent implements OnInit {
     });
   }
 
+
+  loadModules() {
+  this.userService.getModules().subscribe({
+    next: (data) => {
+      this.moduleList = data.map(m => ({
+        code: m.code,
+        label: m.label
+      }));
+    },
+    error: (err) => this.toast.show('Erro ao carregar módulos'+ err,'error')
+  });
+}
+
+filterModules(value: string) {
+  const filterValue = value.toLowerCase();
+  return this.moduleList.filter(m =>
+    m.code.toLowerCase().includes(filterValue) ||
+    m.label.toLowerCase().includes(filterValue)
+  );
+}
+
+  onModuleSelected(code: string) {
+    const mod = this.moduleList.find(m => m.code === code);
+    this.selectedModuleLabel = mod?.label || '';
+  }
+
+  addModule(code: string, score: number) {
+    const mod = this.moduleList.find(m => m.code === code);
+    if (!mod) return;
+
+    const novoModulo = {
+      module_code: mod.code,
+      label: mod.label,
+      proficiency_score: score
+    };
+
+    // Atualiza o array de forma imutável → Angular detecta a mudança
+    this.user.modulos = [...this.user.modulos, novoModulo];
+
+    // Limpa campos
+    this.moduleControl.setValue('');
+    this.selectedModuleLabel = '';
+  }
+  removeModule(index: number) {
+    this.user.modulos = this.user.modulos.filter((_: unknown, i: number) => i !== index);
+  }
+
+
+
+
+
   updateUser(): void {
     this.userService.updateUser(this.user).subscribe({
       next: () => this.toast.show('Usuário atualizado com sucesso', 'sucess'),
       error: () => this.toast.show('Erro ao atualizar usuário', 'error')
     });
   }
-
+  onTabChange(event: any) {
+    this.selectedTabIndex = event.index;
+    
+  }
   
 
-  addModule(moduleCode: string, score: any): void {
-    const numericScore = Number(score);
-    if (!moduleCode || Number.isNaN(numericScore)) {
-      this.toast.show('Informe módulo e proficiência válidos', 'error');
-      return;
-    }
+  // addModule(moduleCode: string, score: any): void {
+  //   const numericScore = Number(score);
+  //   if (!moduleCode || Number.isNaN(numericScore)) {
+  //     this.toast.show('Informe módulo e proficiência válidos', 'error');
+  //     return;
+  //   }
 
-    // Atualiza localmente
-    this.userModules.push(moduleCode);
+  //   // Atualiza localmente
+  //   this.userModules.push(moduleCode);
 
-    // Envia para o backend usando updateUser()
-    this.user.modulos = this.userModules;
+  //   // Envia para o backend usando updateUser()
+  //   this.user.modulos = this.userModules;
 
-    this.userService.updateUser(this.user).subscribe({
-      next: () => this.toast.show('Módulo adicionado', 'sucess'),
-      error: () => this.toast.show('Erro ao adicionar módulo', 'error')
-    });
-  }
+  //   this.userService.updateUser(this.user).subscribe({
+  //     next: () => this.toast.show('Módulo adicionado', 'sucess'),
+  //     error: () => this.toast.show('Erro ao adicionar módulo', 'error')
+  //   });
+  // }
 
 
   // Contratos
@@ -165,13 +241,14 @@ export class UserConfiguratorComponent implements OnInit {
       return;
     }
 
-    this.http.get<any>(`https://viacep.com.br/ws/${cep}/json/`).subscribe({
+    this.userService.buscarCep(cep).subscribe({
       next: (data) => {
         if (data?.erro) {
           this.toast.show('CEP não encontrado.', 'error');
           this.limparEndereco();
           return;
         }
+
         this.user.street = data.logradouro || '';
         this.user.neighborhood = data.bairro || '';
         this.user.city = data.localidade || '';
@@ -183,6 +260,7 @@ export class UserConfiguratorComponent implements OnInit {
       }
     });
   }
+
   private limparEndereco(): void {
     this.user.street = '';
     this.user.neighborhood = '';
