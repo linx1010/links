@@ -53,6 +53,9 @@ def on_request(ch, method, props, body):
                 response = users.delete_user(data)
             elif action == "login":
                 response = users.login(data)
+            elif action == "change_password":
+                response = users.change_password(data)
+
             else:
                 response = {"status": False, "message": "invalid action!"}
                 status = False

@@ -282,7 +282,7 @@ filterModules(value: string) {
 
     this.userService.changePassword(this.userId,this.currentPassword, this.newPassword).subscribe({
       next: (response) => {
-        if (response?.sucess) {
+        if (response?.status) {
           this.toast.show('Senha alterada com sucesso', 'sucess');
           this.currentPassword = '';
           this.newPassword = '';

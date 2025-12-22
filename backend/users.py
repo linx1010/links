@@ -2,6 +2,9 @@ import mysql.connector
 import jwt
 import datetime
 import bcrypt   # ✅ IMPORTANTE: faltava importar bcrypt
+import yagmail
+import os
+
 
 SECRET_KEY = "sua_chave_super_secreta"  # ⚠️ troque por algo seguro e mantenha fora do código (ex: variável de ambiente)
 
@@ -21,7 +24,9 @@ def generate_jwt(user):
 class Users():
     def __init__(self, conn):
         self.conn = conn
-
+        self.EMAIL_USER = os.getenv("EMAIL_USER","xxxxx@xxxxx.com.br")
+        self.EMAIL_PASS = os.getenv("EMAIL_PASS","xxxxx")
+        
     def create_user(self, data):
         cursor = self.conn.cursor()
         password = data.get("password", "")
@@ -61,6 +66,41 @@ class Users():
                 return {"status": True, "token": generate_jwt(user), "role": user['role'],"id":user['id'],"name":user['name']}
         else:
             return {"status": False, "message": "Usuário ou senha inválidos"}
+        
+    def change_password(self, data):
+        user_id = data["id"]
+        current_password = data["current_password"]
+        new_password = data["new_password"]
+
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT id, email, name, password_hash FROM users WHERE id=%s", (user_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            cursor.close()
+            return {"status": False, "message": "Usuário não encontrado"}
+
+        # Validar senha atual
+        if not bcrypt.checkpw(current_password.encode("utf-8"), user["password_hash"].encode("utf-8")):
+            cursor.close()
+            return {"status": False, "message": "Senha atual incorreta"}
+
+        # Gerar hash da nova senha
+        new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode()
+
+        # Atualizar no banco
+        cursor.execute(
+            "UPDATE users SET password_hash=%s WHERE id=%s",
+            (new_hash, user_id)
+        )
+        self.conn.commit()
+        cursor.close()
+
+        # Enviar e-mail
+        # self.send_password_change_email(user["email"], user["name"])
+
+        return {"status": True, "message": "Senha alterada com sucesso"}
+
 
     def read_users(self):
         cursor = self.conn.cursor(dictionary=True)
@@ -184,3 +224,26 @@ class Users():
                 VALUES (%s, %s, %s, %s)
             """, (user_id, code['module_code'], org_id,code['proficiency_score']))
         cursor.close()
+
+    def send_password_change_email(self, email, name):
+        yag = yagmail.SMTP(
+            user=self.EMAIL_USER,
+            password=self.EMAIL_PASS,
+            host="smtp.office365.com",
+            port=587,
+            smtp_starttls=True,
+            smtp_ssl=False
+        )
+
+        yag.send(
+            to=email,
+            subject="Sua senha foi alterada",
+            contents=f"""
+            Olá {name},
+
+            Sua senha foi alterada com sucesso.
+
+            Se você não fez essa alteração, entre em contato imediatamente com o suporte.
+            """
+        )
+

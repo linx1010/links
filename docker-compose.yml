@@ -45,6 +45,10 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=123456
       - MYSQL_DB=left
+
+      # === EMAIL CONFIG === 
+      - EMAIL_USER=xxx@xxx.com.br 
+      - EMAIL_PASS=xxxxx
     depends_on:
       - rabbitmq-compose
       - mysql-compose

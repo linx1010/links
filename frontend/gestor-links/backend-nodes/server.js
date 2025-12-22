@@ -268,6 +268,34 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+  app.put("/api/users/:id/password", async (req, res) => {
+    const userId = req.params.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ status: false, message: "Campos obrigatórios" });
+    }
+
+    try {
+      const response = await sendRpcMessage({
+        source: "users",
+        action: "change_password",
+        data: {
+          id: userId,
+          current_password: currentPassword,
+          new_password: newPassword
+        }
+      });
+
+      res.json(response);
+
+    } catch (err) {
+      console.error("Erro ao enviar para RabbitMQ:", err);
+      res.status(500).json({ status: false, message: "Erro interno no servidor" });
+    }
+  });
+
+
 
 //*************************************Rotas Módulos*************************************
 app.get("/modules", async (req, res) => {
