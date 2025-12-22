@@ -68,7 +68,7 @@ export class UserConfiguratorService {
 
   // Troca de senha
   changePassword(userId: number, currentPassword: string, newPassword: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/users/${userId}/password`, {
+    return this.http.put(`${this.apiUrl}/api/users/${userId}/password`, {
       currentPassword,
       newPassword
     });
