@@ -268,6 +268,34 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+  app.put("/api/users/:id/password", async (req, res) => {
+    const userId = req.params.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ status: false, message: "Campos obrigatórios" });
+    }
+
+    try {
+      const response = await sendRpcMessage({
+        source: "users",
+        action: "change_password",
+        data: {
+          id: userId,
+          current_password: currentPassword,
+          new_password: newPassword
+        }
+      });
+
+      res.json(response);
+
+    } catch (err) {
+      console.error("Erro ao enviar para RabbitMQ:", err);
+      res.status(500).json({ status: false, message: "Erro interno no servidor" });
+    }
+  });
+
+
 
 //*************************************Rotas Módulos*************************************
 app.get("/modules", async (req, res) => {
@@ -405,6 +433,18 @@ app.get("/financial/kpis", async (req, res) => {
   } catch (err) {
     console.error("Erro ao obter KPIs financeiros:", err);
     res.status(500).json({ status: false, message: "Erro interno ao obter KPIs financeiros" });
+  }
+});
+
+// *************************************Consulta CEP*************************************
+app.get("/cep/:cep", async (req, res) => {
+  try {
+    const cep = req.params.cep.replace(/\D/g, "");
+    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao consultar CEP" });
   }
 });
 

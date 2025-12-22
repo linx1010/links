@@ -86,6 +86,26 @@ export class RecursosComponent implements OnInit {
       this.loadUsers();
     }
     this.loadModules();
+     // 🔥 Adiciona o filtro customizado
+    this.dataSource.filterPredicate = (data: any, filter: string) => {
+      const search = filter.trim().toLowerCase();
+
+      // Campos normais
+      const matchesBasic =
+        data.name.toLowerCase().includes(search) ||
+        data.email.toLowerCase().includes(search) ||
+        data.role.toLowerCase().includes(search) ||
+        String(data.id).includes(search);
+
+      // 🔥 Filtro por módulos (array)
+      const matchesModules =
+        data.modulos &&
+        data.modulos.some((mod: string) =>
+          mod.toLowerCase().includes(search)
+        );
+
+      return matchesBasic || matchesModules;
+    };
   }
 
   loadUsers() {
@@ -224,6 +244,7 @@ export class RecursosComponent implements OnInit {
         error: (err) => console.error('Erro ao atualizar usuário', err)
       });
     } else {
+      this.novoUser.password = '123456';
       this.recursosService.createUser(this.novoUser).subscribe({
         next: () => {
           this.loadUsers();

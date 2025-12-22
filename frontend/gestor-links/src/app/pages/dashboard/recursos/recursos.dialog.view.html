@@ -1,14 +1,43 @@
 <h2 mat-dialog-title>Detalhes do Recurso</h2>
 
-<mat-dialog-content>
-  <p><strong>ID:</strong> {{ data.id }}</p>
-  <p><strong>Nome:</strong> {{ data.name }}</p>
-  <p><strong>Email:</strong> {{ data.email }}</p>
-  <p><strong>Função:</strong> {{ data.role }}</p>
-  <p><strong>Ativo:</strong> {{ data.active ? 'Sim' : 'Não' }}</p>
-</mat-dialog-content>
+<div mat-dialog-content class="dialog-content">
 
-<mat-dialog-actions align="end">
+  <div class="info-row">
+    <strong>ID:</strong> {{ data.id }}
+  </div>
+
+  <div class="info-row">
+    <strong>Nome:</strong> {{ data.name }}
+  </div>
+
+  <div class="info-row">
+    <strong>Email:</strong> {{ data.email }}
+  </div>
+
+  <div class="info-row">
+    <strong>Função:</strong> {{ data.role }}
+  </div>
+
+  <div class="info-row">
+    <strong>Ativo:</strong> 
+    <span [ngClass]="data.active ? 'ativo' : 'inativo'">
+      {{ data.active ? 'Sim' : 'Não' }}
+    </span>
+  </div>
+
+  <div class="info-row">
+    <strong>Módulos:</strong>
+    <div *ngIf="data.modulos?.length > 0; else semModulos" class="chips">
+      <span class="chip" *ngFor="let mod of data.modulos">{{ mod }}</span>
+    </div>
+
+    <ng-template #semModulos>
+      <span class="no-modules">Nenhum módulo associado</span>
+    </ng-template>
+  </div>
+
+</div>
+
+<div mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Fechar</button>
-</mat-dialog-actions>
-
+</div>

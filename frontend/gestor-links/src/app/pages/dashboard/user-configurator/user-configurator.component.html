@@ -1,70 +1,170 @@
-<mat-tab-group>
-  <!-- Aba Dados Pessoais -->
-  <mat-tab label="Dados Pessoais">
-    <div class="tab-content">
-      <label>Nome:</label>
-      <input [(ngModel)]="user.name" />
+<mat-tab-group (selectedTabChange)="onTabChange($event)">
 
-      <label>Email (login):</label>
-      <input [(ngModel)]="user.email" />
+  <!-- Aba Dados Cadastrais -->
+  <mat-tab label="Dados Cadastrais">
+    <div class="dados-grid">
 
-      <label>Email cobrança:</label>
-      <input [(ngModel)]="user.billing_email" />
+      <div class="form-field">
+        <label>Nome:</label>
+        <input [(ngModel)]="user.name" />
+      </div>
 
-      <label>Email financeiro:</label>
-      <input [(ngModel)]="user.finance_email" />
+      <div class="form-field">
+        <label>Email (login):</label>
+        <input [(ngModel)]="user.email" />
+      </div>
 
-      <label>Empresa:</label>
-      <input [(ngModel)]="user.company_name" />
+      <div class="form-field">
+        <label>Email cobrança:</label>
+        <input [(ngModel)]="user.billing_email" />
+      </div>
 
-      <label>CNPJ:</label>
-      <input [(ngModel)]="user.cnpj" />
+      <div class="form-field">
+        <label>Email financeiro:</label>
+        <input [(ngModel)]="user.finance_email" />
+      </div>
 
-      <button (click)="updateUser()">Salvar</button>
+      <div class="form-field">
+        <label>Empresa:</label>
+        <input [(ngModel)]="user.company_name" />
+      </div>
+
+      <div class="form-field">
+        <label>CNPJ:</label>
+        <input [(ngModel)]="user.cnpj" />
+      </div>
+
+      <div class="form-field">
+        <label>CEP:</label>
+        <input [(ngModel)]="user.cep" (blur)="buscarCep()" />
+      </div>
+
+      <div class="form-field">
+        <label>Rua:</label>
+        <input [(ngModel)]="user.street" />
+      </div>
+
+      <div class="form-field">
+        <label>Número:</label>
+        <input [(ngModel)]="user.number" />
+      </div>
+
+      <div class="form-field">
+        <label>Bairro:</label>
+        <input [(ngModel)]="user.neighborhood" />
+      </div>
+
+      <div class="form-field">
+        <label>Cidade:</label>
+        <input [(ngModel)]="user.city" />
+      </div>
+
+      <div class="form-field">
+        <label>Estado:</label>
+        <input [(ngModel)]="user.state" />
+      </div>
+
     </div>
   </mat-tab>
 
   <!-- Aba Recebimento -->
   <mat-tab label="Recebimento">
-    <div class="tab-content">
-      <label>Banco:</label>
-      <input [(ngModel)]="user.bank_name" />
+    <div class="dados-grid">
 
-      <label>Agência:</label>
-      <input [(ngModel)]="user.bank_agency" />
+      <div class="form-field">
+        <label>Banco:</label>
+        <input [(ngModel)]="user.bank_name" />
+      </div>
 
-      <label>Conta:</label>
-      <input [(ngModel)]="user.bank_account" />
+      <div class="form-field">
+        <label>Agência:</label>
+        <input [(ngModel)]="user.bank_agency" />
+      </div>
 
-      <label>PIX:</label>
-      <input [(ngModel)]="user.pix_key" />
+      <div class="form-field">
+        <label>Conta:</label>
+        <input [(ngModel)]="user.bank_account" />
+      </div>
 
-      <button (click)="updateUser()">Salvar</button>
+      <div class="form-field">
+        <label>PIX:</label>
+        <input [(ngModel)]="user.pix_key" />
+      </div>
+
     </div>
   </mat-tab>
 
   <!-- Aba Módulos -->
   <mat-tab label="Módulos">
     <div class="tab-content">
+      <h4>Adicionar Módulo</h4>
+
+        <div class="add-module-grid">
+
+          <!-- Autocomplete de código/label -->
+          <mat-form-field appearance="outline">
+            <mat-label>Módulo</mat-label>
+            <input
+              type="text"
+              matInput
+              [formControl]="moduleControl"
+              [matAutocomplete]="auto"
+              placeholder="Digite código ou nome">
+
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onModuleSelected($event.option.value)">
+              <mat-option *ngFor="let mod of filteredModules | async" [value]="mod.code">
+                <strong>{{ mod.code }}</strong> — {{ mod.label }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+
+          <!-- Campo label preenchido automaticamente -->
+          <mat-form-field appearance="outline">
+            <mat-label>Descrição</mat-label>
+            <input matInput [(ngModel)]="selectedModuleLabel" readonly>
+          </mat-form-field>
+
+          <!-- Score -->
+          <mat-form-field appearance="outline">
+            <mat-label>Proficiência</mat-label>
+            <mat-select #score>
+              <mat-option *ngFor="let s of [1,2,3,4,5]" [value]="s">{{ s }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Botão -->
+          <button class="custom-save-button" (click)="addModule(moduleControl.value|| '', score.value)">
+            Adicionar
+          </button>
+
+        </div>
       <table>
-        <tr><th>Módulo</th><th>Proficiência</th></tr>
-        <tr *ngFor="let mod of userModules">
+        <tr>
+          <th>Código</th>
+          <th>Descrição</th>
+          <th>Ação</th>
+        </tr>
+
+        <tr *ngFor="let mod of user.modulos; let i = index">
           <td>{{ mod.module_code }}</td>
-          <td>{{ mod.proficiency_score }}</td>
+          <td>{{ mod.label }}</td>
+          <td>
+            <button class="remove-button" (click)="removeModule(i)">
+              <mat-icon class="remove_circle_outline">delete</mat-icon>
+            </button>
+          </td>
         </tr>
       </table>
 
-      <h4>Adicionar Módulo</h4>
-      <input #moduleCode placeholder="Código" />
-      <select #score>
-        <option *ngFor="let s of [1,2,3,4,5]" [value]="s">{{ s }}</option>
-      </select>
-      <button (click)="addModule(moduleCode.value, score.value)">Adicionar</button>
+      
+
+
+
     </div>
   </mat-tab>
 
   <!-- Aba Contratos -->
-  <mat-tab label="Contratos">
+  <mat-tab label="Contratos" *ngIf="featureContratosReady">
     <div class="tab-content">
       <table>
         <tr><th>Tipo</th><th>Valor Base</th><th>Multiplicador</th><th>Validade</th></tr>
@@ -77,7 +177,6 @@
       </table>
 
       <h4>Novo Contrato</h4>
-      <!-- inputs para contrato -->
       <button (click)="addContract({contract_type:'full_time', base_value:1000, multiplier:1, valid_from:'2025-01-01'})">
         Adicionar
       </button>
@@ -85,7 +184,7 @@
   </mat-tab>
 
   <!-- Aba Invoices -->
-  <mat-tab label="Invoices">
+  <mat-tab label="Invoices" *ngIf="featureInvoicesReady">
     <div class="tab-content">
       <table>
         <tr><th>Número</th><th>Valor</th><th>Status</th><th>Arquivo</th></tr>
@@ -107,46 +206,45 @@
     </div>
   </mat-tab>
 
- <mat-tab label="Senha">
-  <div class="tab-content senha-tab">
-    <h4>Alterar Senha</h4>
+  <!-- Aba Senha (inalterada) -->
+  <mat-tab label="Senha">
+    <div class="tab-content senha-tab">
+      <h4>Alterar Senha</h4>
 
-    <!-- Senha Atual -->
-    <mat-form-field appearance="outline">
-      <mat-label>Senha Atual</mat-label>
-      <input matInput [type]="hideCurrent ? 'password' : 'text'" [(ngModel)]="currentPassword" required>
-      <mat-icon matSuffix (click)="hideCurrent = !hideCurrent" class="eye-icon">
-        {{ hideCurrent ? 'visibility_off' : 'visibility' }}
-      </mat-icon>
-      <mat-error *ngIf="!currentPassword">Informe sua senha atual</mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Senha Atual</mat-label>
+        <input matInput [type]="hideCurrent ? 'password' : 'text'" [(ngModel)]="currentPassword" required>
+        <mat-icon matSuffix (click)="hideCurrent = !hideCurrent" class="eye-icon">
+          {{ hideCurrent ? 'visibility_off' : 'visibility' }}
+        </mat-icon>
+      </mat-form-field>
 
-    <!-- Nova Senha -->
-    <mat-form-field appearance="outline">
-      <mat-label>Nova Senha</mat-label>
-      <input matInput [type]="hideNew ? 'password' : 'text'" [(ngModel)]="newPassword" required>
-      <mat-icon matSuffix (click)="hideNew = !hideNew" class="eye-icon">
-        {{ hideNew ? 'visibility_off' : 'visibility' }}
-      </mat-icon>
-      <mat-error *ngIf="!newPassword">Informe a nova senha</mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Nova Senha</mat-label>
+        <input matInput [type]="hideNew ? 'password' : 'text'" [(ngModel)]="newPassword" required>
+        <mat-icon matSuffix (click)="hideNew = !hideNew" class="eye-icon">
+          {{ hideNew ? 'visibility_off' : 'visibility' }}
+        </mat-icon>
+      </mat-form-field>
 
-    <!-- Repita Nova Senha -->
-    <mat-form-field appearance="outline">
-      <mat-label>Repita Nova Senha</mat-label>
-      <input matInput [type]="hideRepeat ? 'password' : 'text'" [(ngModel)]="repeatPassword" required>
-      <mat-icon matSuffix (click)="hideRepeat = !hideRepeat" class="eye-icon">
-        {{ hideRepeat ? 'visibility_off' : 'visibility' }}
-      </mat-icon>
-      <mat-error *ngIf="repeatPassword && repeatPassword !== newPassword">
-        As senhas não coincidem
-      </mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Repita Nova Senha</mat-label>
+        <input matInput [type]="hideRepeat ? 'password' : 'text'" [(ngModel)]="repeatPassword" required>
+        <mat-icon matSuffix (click)="hideRepeat = !hideRepeat" class="eye-icon">
+          {{ hideRepeat ? 'visibility_off' : 'visibility' }}
+        </mat-icon>
+      </mat-form-field>
 
-    <button mat-raised-button color="primary" (click)="changePassword()">Alterar</button>
-  </div>
-</mat-tab>
-
-
+      <button mat-raised-button color="primary" (click)="changePassword()">Alterar</button>
+    </div>
+  </mat-tab>
 
 </mat-tab-group>
+
+<!-- Botão Salvar -->
+<div class="save-container" *ngIf="selectedTabIndex !== 3">
+  <button class="custom-save-button" (click)="updateUser()">
+    <mat-icon class="save-icon">save</mat-icon>
+    Salvar
+  </button>
+</div>

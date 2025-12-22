@@ -1,0 +1,42 @@
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.info-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ativo {
+  color: #0a7d00;
+  font-weight: 600;
+}
+
+.inativo {
+  color: #b30000;
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  background: #e3e3e3;
+  color: #111 !important; /* texto escuro */  
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.no-modules {
+  color: #777;
+  font-style: italic;
+}

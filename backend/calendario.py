@@ -129,7 +129,7 @@ class Calendar:
             if not isinstance(user_ids, list):
                 user_ids = [user_ids]
 
-            # 🔎 Validação: máximo 2 agendas por usuário no mesmo dia
+            # Validação: máximo 2 agendas por usuário no mesmo dia
             for user_id in user_ids:
                 check_query = """
                     SELECT COUNT(*) 

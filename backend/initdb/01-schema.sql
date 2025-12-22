@@ -140,6 +140,20 @@ CREATE TABLE `users` (
   `updated_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
   `availability_expression` varchar(255) DEFAULT NULL,
   `resource_type` enum('hourly_full','hourly_partial','scope','full_time') NOT NULL,
+  `company_name` varchar(255) DEFAULT NULL,
+  `cnpj` varchar(20) DEFAULT NULL,
+  `billing_email` varchar(255) DEFAULT NULL,
+  `finance_email` varchar(255) DEFAULT NULL,
+  `bank_name` varchar(100) DEFAULT NULL,
+  `bank_agency` varchar(20) DEFAULT NULL,
+  `bank_account` varchar(30) DEFAULT NULL,
+  `pix_key` varchar(100) DEFAULT NULL,
+  `cep` varchar(10) DEFAULT NULL,
+  `street` varchar(255) DEFAULT NULL,
+  `number` varchar(20) DEFAULT NULL,
+  `neighborhood` varchar(100) DEFAULT NULL,
+  `city` varchar(100) DEFAULT NULL,
+  `state` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   KEY `organization_id` (`organization_id`),
@@ -205,7 +219,7 @@ CREATE TABLE `schedules` (
   KEY `fk_schedules_lead` (`lead_id`),
   CONSTRAINT `fk_schedules_lead` FOREIGN KEY (`lead_id`) REFERENCES `users` (`id`),
   CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=274 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- `left`.task_tags definition
@@ -236,6 +250,52 @@ CREATE TABLE `timesheets` (
   CONSTRAINT `timesheets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `timesheets_ibfk_2` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- `left`.user_contracts definition
+
+CREATE TABLE `user_contracts` (
+  `organization_id` bigint NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `contract_type` enum('hourly_full','hourly_partial','scope','full_time') NOT NULL,
+  `base_value` decimal(12,2) NOT NULL,
+  `multiplier` decimal(10,2) NOT NULL DEFAULT '1.00',
+  `valid_from` date NOT NULL,
+  `valid_to` date DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updated_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  KEY `idx_org_user` (`organization_id`,`user_id`),
+  KEY `idx_contract_type` (`contract_type`),
+  KEY `idx_validity` (`valid_from`,`valid_to`),
+  KEY `fk_uc_user` (`user_id`),
+  CONSTRAINT `fk_uc_org` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`),
+  CONSTRAINT `fk_uc_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- `left`.user_invoices definition
+
+CREATE TABLE `user_invoices` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL,
+  `organization_id` bigint NOT NULL,
+  `invoice_number` varchar(100) NOT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `currency` varchar(10) NOT NULL DEFAULT 'BRL',
+  `status` enum('pending','paid','canceled') NOT NULL DEFAULT 'pending',
+  `due_date` date NOT NULL,
+  `paid_at` datetime(6) DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `updated_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  KEY `idx_user_org` (`user_id`,`organization_id`),
+  KEY `fk_ui_org` (`organization_id`),
+  CONSTRAINT `fk_ui_org` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`),
+  CONSTRAINT `fk_ui_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- `left`.user_modules definition
@@ -281,7 +341,7 @@ CREATE TABLE `schedule_reports` (
   CONSTRAINT `schedule_reports_ibfk_1` FOREIGN KEY (`schedule_id`) REFERENCES `schedules` (`id`),
   CONSTRAINT `schedule_reports_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
   CONSTRAINT `schedule_reports_ibfk_3` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- `left`.schedule_users definition

@@ -2,6 +2,9 @@ import mysql.connector
 import jwt
 import datetime
 import bcrypt   # ✅ IMPORTANTE: faltava importar bcrypt
+import yagmail
+import os
+
 
 SECRET_KEY = "sua_chave_super_secreta"  # ⚠️ troque por algo seguro e mantenha fora do código (ex: variável de ambiente)
 
@@ -21,7 +24,9 @@ def generate_jwt(user):
 class Users():
     def __init__(self, conn):
         self.conn = conn
-
+        self.EMAIL_USER = os.getenv("EMAIL_USER","xxxxx@xxxxx.com.br")
+        self.EMAIL_PASS = os.getenv("EMAIL_PASS","xxxxx")
+        
     def create_user(self, data):
         cursor = self.conn.cursor()
         password = data.get("password", "")
@@ -61,6 +66,41 @@ class Users():
                 return {"status": True, "token": generate_jwt(user), "role": user['role'],"id":user['id'],"name":user['name']}
         else:
             return {"status": False, "message": "Usuário ou senha inválidos"}
+        
+    def change_password(self, data):
+        user_id = data["id"]
+        current_password = data["current_password"]
+        new_password = data["new_password"]
+
+        cursor = self.conn.cursor(dictionary=True)
+        cursor.execute("SELECT id, email, name, password_hash FROM users WHERE id=%s", (user_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            cursor.close()
+            return {"status": False, "message": "Usuário não encontrado"}
+
+        # Validar senha atual
+        if not bcrypt.checkpw(current_password.encode("utf-8"), user["password_hash"].encode("utf-8")):
+            cursor.close()
+            return {"status": False, "message": "Senha atual incorreta"}
+
+        # Gerar hash da nova senha
+        new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode()
+
+        # Atualizar no banco
+        cursor.execute(
+            "UPDATE users SET password_hash=%s WHERE id=%s",
+            (new_hash, user_id)
+        )
+        self.conn.commit()
+        cursor.close()
+
+        # Enviar e-mail
+        # self.send_password_change_email(user["email"], user["name"])
+
+        return {"status": True, "message": "Senha alterada com sucesso"}
+
 
     def read_users(self):
         cursor = self.conn.cursor(dictionary=True)
@@ -86,52 +126,84 @@ class Users():
 
     def read_user_by_id(self, data):
         cursor = self.conn.cursor(dictionary=True)
-        cursor.execute("SELECT id, organization_id, name, email, role, hourly_rate, active, created_at, updated_at FROM users WHERE id = %s", (data["id"],))
+        cursor.execute("SELECT * FROM users WHERE id = %s", (data["id"],))
         rows = cursor.fetchall()
         cursor.close()
+
         if rows:
             user = rows[0]
+
             cursor_mod = self.conn.cursor(dictionary=True)
             cursor_mod.execute("""
-                SELECT module_code
-                FROM user_modules
-                WHERE user_id = %s AND organization_id = %s
+                SELECT 
+                    um.module_code,
+                    m.label,
+                    um.proficiency_score
+                FROM user_modules um
+                INNER JOIN modules m ON um.module_code = m.code
+                WHERE um.user_id = %s AND um.organization_id = %s
             """, (user['id'], user['organization_id']))
-            user['modulos'] = [row['module_code'] for row in cursor_mod.fetchall()]
+
+            # Agora retorna objetos completos
+            user['modulos'] = cursor_mod.fetchall()
+
             cursor_mod.close()
             rows[0] = user
 
-        cursor.close()
         return rows[0] if rows else None
+
 
     def update_user(self, data):
         cursor = self.conn.cursor()
         set_fields = []
         values = []
 
-        for field in ["name", "email", "role", "hourly_rate", "active", "password","resource_type", "availability_expression"]:
+        # Campos válidos da tabela users
+        allowed_fields = [
+            "name", "email", "role", "hourly_rate", "active",
+            "resource_type", "availability_expression",
+            "cep", "street", "number", "neighborhood", "city", "state",
+            "company_name", "cnpj", "billing_email", "finance_email",
+            "bank_name", "bank_agency", "bank_account", "pix_key"
+        ]
+
+        # Monta o UPDATE apenas com campos válidos
+        for field in allowed_fields:
             if field in data:
-                if field == "password":
-                    # ✅ Atualiza senha com hash
-                    hashed = bcrypt.hashpw(data[field].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-                    set_fields.append("password_hash = %s")
-                    values.append(hashed)
-                else:
-                    set_fields.append(f"{field} = %s")
-                    values.append(data[field])
+                set_fields.append(f"{field} = %s")
+                values.append(data[field])
+
+        # Atualização de senha (se enviada)
+        if "password" in data and data["password"]:
+            hashed = bcrypt.hashpw(data["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            set_fields.append("password_hash = %s")
+            values.append(hashed)
 
         if not set_fields:
             return {"status": "error", "message": "Nenhum campo para atualizar"}
 
+        # WHERE id = ?
         values.append(data["id"])
-        query = f"UPDATE users SET {', '.join(set_fields)}, updated_at = NOW() WHERE id = %s"
+
+        query = f"""
+            UPDATE users 
+            SET {', '.join(set_fields)}, updated_at = NOW()
+            WHERE id = %s
+        """
+
         cursor.execute(query, tuple(values))
-        
-        # atualiza módulos vinculados
-        self._update_user_modules(data['id'], data['organization_id'], data.get('modulos', []))
+
+        # Atualiza módulos (se vierem)
+        if "modulos" in data:
+            self._update_user_modules(
+                data['id'],
+                data['organization_id'],
+                data['modulos']
+            )
 
         self.conn.commit()
         cursor.close()
+
         return {"status": "ok", "id": data["id"]}
 
     def delete_user(self, data):
@@ -149,6 +221,29 @@ class Users():
         for code in modules:
             cursor.execute("""
                 INSERT INTO user_modules (user_id, module_code, organization_id, proficiency_score)
-                VALUES (%s, %s, %s, 1)
-            """, (user_id, code, org_id))
+                VALUES (%s, %s, %s, %s)
+            """, (user_id, code['module_code'], org_id,code['proficiency_score']))
         cursor.close()
+
+    def send_password_change_email(self, email, name):
+        yag = yagmail.SMTP(
+            user=self.EMAIL_USER,
+            password=self.EMAIL_PASS,
+            host="smtp.office365.com",
+            port=587,
+            smtp_starttls=True,
+            smtp_ssl=False
+        )
+
+        yag.send(
+            to=email,
+            subject="Sua senha foi alterada",
+            contents=f"""
+            Olá {name},
+
+            Sua senha foi alterada com sucesso.
+
+            Se você não fez essa alteração, entre em contato imediatamente com o suporte.
+            """
+        )
+
