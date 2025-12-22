@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 @Component({
   selector: 'app-recursos-dialog',
   templateUrl: './recursos.dialog.view.html',
+  styleUrls: ['./recursos.dialog.view.scss'],
   standalone: true,
   imports: [
     CommonModule,

@@ -115,3 +115,27 @@ table.mat-mdc-table {
   color: #333 !important;
   stroke: #333 !important;  /* aplica nos outlines */
 }
+/* Fundo branco */
+:host ::ng-deep .filtro-custom .mdc-text-field--filled {
+  background-color: #fff !important;
+}
+
+/* Texto digitado */
+:host ::ng-deep .filtro-custom .mdc-text-field__input {
+  color: #000 !important;
+}
+
+/* Placeholder */
+:host ::ng-deep .filtro-custom .mdc-floating-label {
+  color: #555 !important;
+}
+
+/* Placeholder flutuante */
+:host ::ng-deep .filtro-custom .mdc-floating-label--float-above {
+  color: #555 !important;
+}
+
+/* Linha inferior */
+:host ::ng-deep .filtro-custom .mdc-line-ripple::after {
+  border-bottom-color: #000 !important;
+}
