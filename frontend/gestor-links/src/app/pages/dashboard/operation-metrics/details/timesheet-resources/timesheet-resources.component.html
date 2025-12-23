@@ -1,29 +1,39 @@
 <div class="timesheet-resources">
   <h2>Timesheet - Recursos</h2>
-<mat-accordion>
+
+  <mat-accordion>
     <mat-expansion-panel>
       <mat-expansion-panel-header>
         <mat-panel-title>
           Dezembro 2025
         </mat-panel-title>
       </mat-expansion-panel-header>
-  <table>
-    <thead>
-      <tr>
-        <th>Recurso</th>
-        <th *ngFor="let dia of dias">{{ dia }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let recurso of recursos">
-        <td>{{ recurso.nome }}</td>
-        <td *ngFor="let hora of recurso.horas"[ngClass]="getColorClass(hora)">
-            {{ hora !== undefined ? hora : '' }}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-  </mat-expansion-panel>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Recurso</th>
+            <th *ngFor="let dia of dias">{{ dia }}</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let recurso of recursos">
+            <td>{{ recurso.nome }}</td>
+
+            <td *ngFor="let dia of recurso.dias"
+                [ngClass]="getColorClass(dia.horas)"
+                [matTooltip]="formatTooltip(dia)"
+                matTooltipClass="tooltip-html"
+                matTooltipPosition="above"
+                matTooltipShowDelay="200">
+              {{ dia.horas || '' }}
+            </td>
+
+          </tr>
+        </tbody>
+      </table>
+
+    </mat-expansion-panel>
   </mat-accordion>
 </div>
-

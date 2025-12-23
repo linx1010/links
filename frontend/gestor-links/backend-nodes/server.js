@@ -453,6 +453,20 @@ app.get("/operational/hours-by-resource", async (req, res) => {
   res.json(response);
 });
 
+app.get("/operational/timesheet-resources/:mes/:ano", async (req, res) => {
+  const mes = parseInt(req.params.mes, 10);
+  const ano = parseInt(req.params.ano, 10);
+
+  const response = await sendRpcMessage({
+    source: "operational",
+    action: "timesheet_resources",
+    data: { mes, ano }
+  });
+
+  res.json(response);
+});
+
+
 
 // *************************************Consulta CEP*************************************
 app.get("/cep/:cep", async (req, res) => {

@@ -155,6 +155,10 @@ def on_request(ch, method, props, body):
                 response = operational.hours_by_client()
             elif action == "hours_by_resource":
                 response = operational.hours_by_resource()
+            elif action == "timesheet_resources":
+                mes = data.get("mes") 
+                ano = data.get("ano")
+                response = operational.get_timesheet_resources(mes,ano)
 
             else:
                 response = {"status": False, "message": "invalid operational action"}

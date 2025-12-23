@@ -67,3 +67,11 @@ table {
 .valor-azul {
   background-color: #d6eaff;
 }
+
+.tooltip-html {
+  white-space: pre-line !important;
+}
+
+.tooltip-html .mat-tooltip {
+  white-space: pre-line !important;
+}

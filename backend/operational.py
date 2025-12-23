@@ -162,3 +162,52 @@ class Operational:
             "total_geral": total_geral
         }
 
+    def get_timesheet_resources(self, mes, ano):
+        cursor = self.conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT 
+                su.user_id,
+                u.name AS recurso,
+                s.client_id,
+                c.name AS cliente,
+                s.start_time,
+                s.end_time
+            FROM schedules s
+            JOIN schedule_users su ON su.schedule_id = s.id
+            JOIN users u ON u.id = su.user_id
+            JOIN clients c ON c.id = s.client_id
+            WHERE MONTH(s.start_time) = %s
+            AND YEAR(s.start_time) = %s
+            ORDER BY u.name, s.start_time;
+        """, (mes, ano))
+
+        rows = cursor.fetchall()
+        cursor.close()
+
+        recursos = {}
+
+        for row in rows:
+            nome = row["recurso"]
+            dia = row["start_time"].day
+            horas = (row["end_time"] - row["start_time"]).seconds / 3600
+
+            if nome not in recursos:
+                recursos[nome] = [{"dia": d, "horas": None, "agendas": []} for d in range(1, 32)]
+
+            recursos[nome][dia - 1]["horas"] = horas
+            recursos[nome][dia - 1]["agendas"].append({
+                "cliente": row["cliente"],
+                "start_time": row["start_time"].strftime("%H:%M"),
+                "end_time": row["end_time"].strftime("%H:%M")
+            })
+
+        return {
+            "status": True,
+            "mes": mes,
+            "ano": ano,
+            "recursos": [
+                {"nome": nome, "dias": dias}
+                for nome, dias in recursos.items()
+            ]
+        }
