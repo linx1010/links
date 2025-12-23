@@ -436,6 +436,24 @@ app.get("/financial/kpis", async (req, res) => {
   }
 });
 
+// *************************************Rotas REST operational*************************************
+app.get("/operational/hours-by-client", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "operational",
+    action: "hours_by_client"
+  });
+  res.json(response);
+});
+
+app.get("/operational/hours-by-resource", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "operational",
+    action: "hours_by_resource"
+  });
+  res.json(response);
+});
+
+
 // *************************************Consulta CEP*************************************
 app.get("/cep/:cep", async (req, res) => {
   try {
@@ -447,6 +465,7 @@ app.get("/cep/:cep", async (req, res) => {
     res.status(500).json({ error: "Erro ao consultar CEP" });
   }
 });
+
 
 
 
