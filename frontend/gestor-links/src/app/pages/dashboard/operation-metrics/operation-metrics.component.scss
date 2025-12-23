@@ -82,3 +82,24 @@
     height: 220px !important;
   }
 }
+.card {
+  position: relative;
+  cursor: pointer;
+}
+
+.tooltip-box {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 10;
+  width: 200px;
+}
+
+.card:hover .tooltip-box {
+  display: block;
+}

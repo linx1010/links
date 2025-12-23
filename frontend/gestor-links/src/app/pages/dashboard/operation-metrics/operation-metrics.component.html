@@ -1,17 +1,38 @@
 <div class="operation-metrics">
   <h2>Indicadores Operacionais</h2>
 
-  <!-- KPIs -->
   <div class="cards">
-    <div class="card" (click)="irParaTimesheet()">
+
+    <!-- CARD 1: Recursos -->
+    <div class="card tooltip" (click)="irParaTimesheet()">
       <h3>Alocação Total</h3>
-      <p class="kpi-value">{{ totalWorkforceAllocated }} hours</p>
+      <p class="kpi-value">{{ totalWorkforceAllocated }}h</p>
+
+      <div class="tooltip-box">
+        <h4>Por Status</h4>
+        <ul>
+          <li *ngFor="let s of (statusRecurso | keyvalue)">
+            {{ s.key }}: {{ s.value }}
+          </li>
+        </ul>
+      </div>
     </div>
 
-    <div class="card">
-      <h3>Agenda de Clientes cadastrada</h3>
-      <p class="kpi-value">{{ totalClientAgenda }} hours</p>
+    <!-- CARD 2: Clientes -->
+    <div class="card tooltip">
+      <h3>Total de Agenda Cadastrada</h3>
+      <p class="kpi-value">{{ totalClientAgenda }} Agendas</p>
+
+      <div class="tooltip-box">
+        <h4>Por Status</h4>
+        <ul>
+          <li *ngFor="let s of (statusCliente | keyvalue)">
+            {{ s.key }}: {{ s.value }}
+          </li>
+        </ul>
+      </div>
     </div>
+
   </div>
 
   <!-- Gráficos -->

@@ -8,7 +8,6 @@ class Operational:
     def hours_by_client(self):
         cursor = self.conn.cursor(dictionary=True)
 
-        # Intervalo de 7 meses
         cursor.execute("""
             SET @start_date = DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 3 MONTH), '%Y-%m-01');
         """)
@@ -16,46 +15,68 @@ class Operational:
             SET @end_date = LAST_DAY(DATE_ADD(CURDATE(), INTERVAL 3 MONTH));
         """)
 
-        # 1) Apenas uma consulta ao banco
         cursor.execute("""
-            SELECT 
+            SELECT
+                s.id AS schedule_id,
                 s.client_id,
-                DATE_FORMAT(s.start_time, '%Y%m%d') AS referencia,
-                s.status,
-                TIMESTAMPDIFF(MINUTE, s.start_time, s.end_time) / 60 AS horas
+                DATE(s.start_time) AS data,
+                COUNT(DISTINCT su.user_id) AS total_recursos,
+                COUNT(DISTINCT sr.user_id) AS total_reports,
+                SUM(CASE WHEN sr.status = 'approved' THEN 1 ELSE 0 END) AS total_aprovados
             FROM schedules s
+            LEFT JOIN schedule_users su ON su.schedule_id = s.id
+            LEFT JOIN schedule_reports sr 
+                ON sr.schedule_id = s.id
+                AND sr.report_date = DATE(s.start_time)
             WHERE s.start_time BETWEEN @start_date AND @end_date
-              AND s.end_time IS NOT NULL
-              AND TIMESTAMPDIFF(MINUTE, s.start_time, s.end_time) <> 0
-            ORDER BY s.client_id, referencia, s.status;
+            GROUP BY s.id, s.client_id, DATE(s.start_time)
+            ORDER BY s.client_id, data;
         """)
 
         rows = cursor.fetchall()
         cursor.close()
 
-        # 2) Montagem dos totalizadores no Python
-        totais_status = {}
-        total_geral = 0
+        totais_por_status = {
+            "no_resources": 0,
+            "pending": 0,
+            "in_progress": 0,
+            "completed": 0
+        }
+
+        detalhes = []
 
         for row in rows:
-            horas = float(row["horas"])
-            status = row["status"]
+            total_recursos = row["total_recursos"]
+            total_reports = row["total_reports"]
+            total_aprovados = row["total_aprovados"] or 0
 
-            # total por status
-            if status not in totais_status:
-                totais_status[status] = 0
-            totais_status[status] += horas
+            # CLASSIFICAÇÃO FINAL
+            if total_recursos == 0:
+                status = "no_resources"
+            elif total_reports == 0:
+                status = "pending"
+            elif total_aprovados == total_recursos:
+                status = "completed"
+            else:
+                status = "in_progress"
 
-            # total geral
-            total_geral += horas
+            totais_por_status[status] += 1
+
+            detalhes.append({
+                "schedule_id": row["schedule_id"],
+                "client_id": row["client_id"],
+                "data": row["data"],
+                "status": status
+            })
 
         return {
             "status": True,
             "period": "3 months before and after current month",
-            "detalhes": rows,
-            "totais_por_status": totais_status,
-            "total_geral": total_geral
+            "detalhes": detalhes,
+            "totais_por_status": totais_por_status,
+            "total_agendas": len(rows)
         }
+
     
     def hours_by_resource(self):
         cursor = self.conn.cursor(dictionary=True)

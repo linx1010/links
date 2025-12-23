@@ -153,7 +153,7 @@ def on_request(ch, method, props, body):
             operational = Operational(conn)
             if action == "hours_by_client":
                 response = operational.hours_by_client()
-            if action == "hours_by_resource":
+            elif action == "hours_by_resource":
                 response = operational.hours_by_resource()
 
             else:
