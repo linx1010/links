@@ -75,3 +75,54 @@ table {
 .tooltip-html .mat-tooltip {
   white-space: pre-line !important;
 }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titulo-click {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.navegacao {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.mes-atual {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.filtro {
+  margin: 1rem 0;
+  width: 300px;
+}
+
+.tabela-timesheet {
+  width: 100%;
+  overflow: auto;
+}
+.col-total {
+  background-color: #ffffff !important;
+  font-weight: 600;
+  color: #000;
+  border-left: 2px solid #ccc;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.1);
+}
+
+
+.col-total:last-child {
+  border-right: 2px solid #ccc;
+}
+.titulo-click {
+  cursor: pointer;
+  text-decoration: none;   /* remove o sublinhado */
+  font-weight: 600;        /* opcional: deixa mais bonito */
+}
+.titulo-click:hover {
+  opacity: 0.8;
+}

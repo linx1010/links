@@ -1,39 +1,66 @@
-<div class="timesheet-resources">
-  <h2>Timesheet - Recursos</h2>
+<div class="header">
+  <h2 (click)="voltar()" class="titulo-click">Timesheet - Recursos</h2>
 
-  <mat-accordion>
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          Dezembro 2025
-        </mat-panel-title>
-      </mat-expansion-panel-header>
+  <div class="navegacao">
+    <button mat-icon-button (click)="mesAnterior()">&#9664;</button>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Recurso</th>
-            <th *ngFor="let dia of dias">{{ dia }}</th>
-          </tr>
-        </thead>
+    <span class="mes-atual">
+      {{ meses[mesAtual - 1] }} {{ anoAtual }}
+    </span>
 
-        <tbody>
-          <tr *ngFor="let recurso of recursos">
-            <td>{{ recurso.nome }}</td>
-
-            <td *ngFor="let dia of recurso.dias"
-                [ngClass]="getColorClass(dia.horas)"
-                [matTooltip]="formatTooltip(dia)"
-                matTooltipClass="tooltip-html"
-                matTooltipPosition="above"
-                matTooltipShowDelay="200">
-              {{ dia.horas || '' }}
-            </td>
-
-          </tr>
-        </tbody>
-      </table>
-
-    </mat-expansion-panel>
-  </mat-accordion>
+    <button mat-icon-button (click)="proximoMes()">&#9654;</button>
+  </div>
 </div>
+
+<mat-form-field appearance="outline" class="filtro">
+  <mat-label>Filtrar recurso</mat-label>
+  <input matInput (keyup)="applyFilter($event)" placeholder="Digite um nome">
+</mat-form-field>
+
+<table mat-table [dataSource]="dataSource" class="mat-elevation-z8 tabela-timesheet">
+
+  <!-- Nome -->
+  <ng-container matColumnDef="nome">
+    <th mat-header-cell *matHeaderCellDef> Recurso </th>
+    <td mat-cell *matCellDef="let row"> {{ row.nome }} </td>
+  </ng-container>
+
+  <!-- Dias 1 a 31 -->
+  <ng-container *ngFor="let dia of dias" [matColumnDef]="'d' + dia">
+    <th mat-header-cell *matHeaderCellDef> {{ dia }} </th>
+    <td mat-cell *matCellDef="let row"
+        [ngClass]="getColorClass(row['d' + dia])"
+        [matTooltip]="formatTooltip(row.diasOriginais['d' + dia])"
+        matTooltipClass="tooltip-html"
+        matTooltipPosition="above">
+      {{ row['d' + dia] }}
+    </td>
+
+  </ng-container>
+
+  <!-- Totais -->
+  <ng-container matColumnDef="totalPend">
+    <th mat-header-cell *matHeaderCellDef class="col-total"> Pend. </th>
+    <td mat-cell *matCellDef="let row" class="col-total"> {{ row.totalPend }} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="totalConc">
+    <th mat-header-cell *matHeaderCellDef class="col-total"> Conc. </th>
+    <td mat-cell *matCellDef="let row" class="col-total"> {{ row.totalConc }} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="totalHoras">
+    <th mat-header-cell *matHeaderCellDef class="col-total"> Total </th>
+    <td mat-cell *matCellDef="let row" class="col-total"> {{ row.totalHoras }} </td>
+  </ng-container>
+
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+  <tr class="mat-row" *matNoDataRow>
+    <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+      Nenhum recurso encontrado
+    </td>
+  </tr>
+</table>

@@ -1,5 +1,7 @@
 import mysql.connector
 from datetime import datetime
+import calendar
+
 
 class Operational:
     def __init__(self, conn):
@@ -172,11 +174,15 @@ class Operational:
                 s.client_id,
                 c.name AS cliente,
                 s.start_time,
-                s.end_time
+                s.end_time,
+                sr.status AS report_status
             FROM schedules s
             JOIN schedule_users su ON su.schedule_id = s.id
             JOIN users u ON u.id = su.user_id
             JOIN clients c ON c.id = s.client_id
+            LEFT JOIN schedule_reports sr 
+                ON sr.schedule_id = s.id
+                AND sr.report_date = DATE(s.start_time)
             WHERE MONTH(s.start_time) = %s
             AND YEAR(s.start_time) = %s
             ORDER BY u.name, s.start_time;
@@ -187,20 +193,35 @@ class Operational:
 
         recursos = {}
 
+        dias_no_mes = calendar.monthrange(ano, mes)[1]
+
         for row in rows:
             nome = row["recurso"]
             dia = row["start_time"].day
-            horas = (row["end_time"] - row["start_time"]).seconds / 3600
+
+            horas = (row["end_time"] - row["start_time"]).total_seconds() / 3600
 
             if nome not in recursos:
-                recursos[nome] = [{"dia": d, "horas": None, "agendas": []} for d in range(1, 32)]
+                recursos[nome] = [
+                    {"dia": d, "horas": 0, "pendente": 0, "concluido": 0, "agendas": []}
+                    for d in range(1, dias_no_mes + 1)
+                ]
 
-            recursos[nome][dia - 1]["horas"] = horas
-            recursos[nome][dia - 1]["agendas"].append({
+            dia_info = recursos[nome][dia - 1]
+
+            dia_info["horas"] += horas
+
+            dia_info["agendas"].append({
                 "cliente": row["cliente"],
                 "start_time": row["start_time"].strftime("%H:%M"),
-                "end_time": row["end_time"].strftime("%H:%M")
+                "end_time": row["end_time"].strftime("%H:%M"),
+                "status": row["report_status"] or "pending"
             })
+
+            if row["report_status"] == "approved":
+                dia_info["concluido"] += horas
+            else:
+                dia_info["pendente"] += horas
 
         return {
             "status": True,
@@ -211,3 +232,4 @@ class Operational:
                 for nome, dias in recursos.items()
             ]
         }
+
