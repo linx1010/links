@@ -9,6 +9,8 @@ from timesheet import Timesheet
 from modules import Modules
 from reports import Reports
 from financial import Financial
+from operational import Operational
+
 
 # Configurações do RabbitMQ
 rabbitmq_host = os.getenv("RABBITMQ_HOST")
@@ -146,7 +148,22 @@ def on_request(ch, method, props, body):
             else:
                 response = {"status": False, "message": "invalid financial action"}
                 status = False
-        
+
+        elif source == "operational":
+            operational = Operational(conn)
+            if action == "hours_by_client":
+                response = operational.hours_by_client()
+            elif action == "hours_by_resource":
+                response = operational.hours_by_resource()
+            elif action == "timesheet_resources":
+                mes = data.get("mes") 
+                ano = data.get("ano")
+                response = operational.get_timesheet_resources(mes,ano)
+
+            else:
+                response = {"status": False, "message": "invalid operational action"}
+                status = False
+
         
 
     except Exception as e:
