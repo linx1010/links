@@ -38,7 +38,6 @@ export class LoginComponent {
     ];
 
     const user = testUsers.find(u => u.email === email && u.password === password);
-    console.log(user)
     if (user) {
       localStorage.setItem('userRole', user.role);
       this.router.navigate(['/dashboard']);
@@ -47,7 +46,6 @@ export class LoginComponent {
       this.loginService.login({ email, password }).subscribe({
         next: (res: any) => {
           if (res.status) {
-            console.log(res)
             localStorage.setItem('token', res.token);
             localStorage.setItem('userRole', res.role);
             localStorage.setItem('userId', res.id);

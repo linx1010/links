@@ -62,7 +62,6 @@ export class OperationMetricsComponent implements OnInit {
   private loadClientMetrics() {
     this.metricsService.getHoursByClient().subscribe((res: OperationalResponse) => {
       this.totalClientAgenda = Number(res.total_agendas.toFixed(1));
-      console.log(res);
 
       this.statusCliente = Object.fromEntries(
         Object.entries(res.totais_por_status).map(([k, v]) => [k, Number(v.toFixed(1))])

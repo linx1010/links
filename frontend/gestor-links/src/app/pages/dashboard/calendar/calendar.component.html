@@ -61,7 +61,7 @@
         <th mat-header-cell *matHeaderCellDef>Cliente</th>
         <td mat-cell *matCellDef="let e">{{ e.client_name }}</td>
       </ng-container>
-      <ng-container *ngIf="tipo === 'client'" matColumnDef="techlead_name">
+      <ng-container  matColumnDef="techlead_name">
         <th mat-header-cell *matHeaderCellDef>Tech Lead</th>
         <td mat-cell *matCellDef="let e">{{ e.techlead_name }}</td>
       </ng-container>
@@ -71,15 +71,13 @@
         <td mat-cell *matCellDef="let e">{{ e.title }}</td>
       </ng-container>
 
-      <ng-container matColumnDef="start_time">
-        <th mat-header-cell *matHeaderCellDef>Início</th>
-        <td mat-cell *matCellDef="let e">{{ e.start_time | date: 'shortTime' }}</td>
+      <ng-container matColumnDef="turno">
+        <th mat-header-cell *matHeaderCellDef>Turno</th>
+        <td mat-cell *matCellDef="let e">
+          {{ getTurnoLabel(e) }}
+        </td>
       </ng-container>
 
-      <ng-container matColumnDef="end_time">
-        <th mat-header-cell *matHeaderCellDef>Fim</th>
-        <td mat-cell *matCellDef="let e">{{ e.end_time ? (e.end_time | date: 'shortTime') : '—' }}</td>
-      </ng-container>
 
       <ng-container matColumnDef="location">
         <th mat-header-cell *matHeaderCellDef>Local</th>
@@ -145,8 +143,21 @@
         <mat-option value="integral">Integral</mat-option>
         <mat-option value="manha">Manhã</mat-option>
         <mat-option value="tarde">Tarde</mat-option>
+        <mat-option value="personalizado">personalizado</mat-option>
       </mat-select>
     </mat-form-field>
+    <!-- Início personalizado -->
+    <mat-form-field appearance="fill" *ngIf="formEvento.turno === 'personalizado'">
+      <mat-label>Início</mat-label>
+      <input matInput type="time" [(ngModel)]="formEvento.start_time" name="start_time" required />
+    </mat-form-field>
+
+    <!-- Fim personalizado -->
+    <mat-form-field appearance="fill" *ngIf="formEvento.turno === 'personalizado'">
+      <mat-label>Fim</mat-label>
+      <input matInput type="time" [(ngModel)]="formEvento.end_time" name="end_time" required />
+    </mat-form-field>
+
 
 
     <mat-form-field appearance="fill">
