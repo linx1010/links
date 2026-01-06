@@ -206,9 +206,9 @@ class Calendar:
                     dt = datetime.strptime(date, "%Y-%m-%d").date()
 
                     # Bloqueia datas retroativas
-                    if dt < datetime.today().date():
-                        results.append({"date": date, "success": False, "error": "Data retroativa"})
-                        continue
+                    # if dt < datetime.today().date():
+                    #     results.append({"date": date, "success": False, "error": "Data retroativa"})
+                    #     continue
 
                     # Pula finais de semana
                     if dt.weekday() in (5, 6):
