@@ -52,8 +52,8 @@ class Timesheet:
                         "thu": 3, "fri": 4, "sat": 5, "sun": 6
                     }
                     dia_offset = dia_map[dia]
-                    started_at = f"{week_start} 09:00:00"
-                    ended_at = f"{week_start} 09:00:00"
+                    started_at = f"{week_start} 08:00:00"
+                    ended_at = f"{week_start} 08:00:00"
                     query = """
                         INSERT INTO time_entries (user_id, project_id, task_id, started_at, ended_at, duration_minutes, description, organization_id)
                         VALUES (%s, %s, %s, DATE_ADD(%s, INTERVAL %s DAY), DATE_ADD(%s, INTERVAL %s DAY), %s, %s, %s)
