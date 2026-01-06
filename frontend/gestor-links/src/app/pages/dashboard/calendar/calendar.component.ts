@@ -59,7 +59,9 @@ export class CalendarComponent {
     title: '', 
     description: '', 
     user_id: [] as number[], 
-    turno: 'integral' as 'manha' | 'tarde' | 'integral' // novo campo
+    turno: 'integral' as 'manha' | 'tarde' | 'integral'| 'personalizado', // novo campo
+    start_time:'08:00',
+    end_time:'16:00'
   };
 
 
@@ -140,9 +142,10 @@ export class CalendarComponent {
     this.canCreateAgenda = this.tipo === 'client' || this.isTechLead || this.isAdmin;
     // Definir colunas da tabela conforme tipo
     if (this.tipo === 'user') {
-      this.displayedColumns = ['client_name','title','start_time','end_time','location','actions'];
+      this.displayedColumns = ['techlead_name','client_name', 'title', 'turno', 'location', 'actions'];
+
     } else {
-      this.displayedColumns = ['techlead_name','title','start_time','end_time','location','actions'];
+      this.displayedColumns = ['techlead_name','title','turno','location','actions'];
     }
 
     this.carregarAgenda();
@@ -442,6 +445,19 @@ excluirEvento(e: any) {
       }
     });
   }
+  getTurnoLabel(evento: any): string {
+    const start = evento.start_time?.substring(11, 16); // HH:MM
+    const end   = evento.end_time?.substring(11, 16);
+
+    if (!start || !end) return '—';
+
+    if (start === '08:00' && end === '16:00') return 'Integral';
+    if (start === '08:00' && end === '12:00') return 'Manhã';
+    if (start === '13:00' && end === '17:00') return 'Tarde';
+
+    return `Personalizado (${start} - ${end})`;
+  }
+
 
   // ---------------------------
   // Criação de evento único via formulário
@@ -458,20 +474,30 @@ excluirEvento(e: any) {
   // Definir horários conforme turno
     let start_time: string | null = null;
     let end_time: string | null = null;
+
     switch (this.formEvento.turno) {
       case 'manha':
         start_time = `${date}T08:00:00`;
         end_time   = `${date}T12:00:00`;
         break;
+
       case 'tarde':
         start_time = `${date}T13:00:00`;
         end_time   = `${date}T17:00:00`;
         break;
+
       case 'integral':
-        start_time = `${date}T09:00:00`;
-        end_time   = `${date}T18:00:00`;
+        start_time = `${date}T08:00:00`;
+        end_time   = `${date}T16:00:00`;
         break;
-  }
+
+      case 'personalizado':
+        start_time = `${date}T${this.formEvento.start_time}:00`;
+        end_time   = `${date}T${this.formEvento.end_time}:00`;
+        break;
+    }
+
+  
 
     const payload = {
       type: this.tipo,
@@ -498,8 +524,6 @@ excluirEvento(e: any) {
           let mensagem = res.error;
           if (res.user_id) {
             const usuario = this.recursos.find(r => r.id === res.user_id);
-            console.log(res)
-            console.log(this.recursos)
             if (usuario) {
               mensagem = `Usuário ${usuario.name} já possui 2 agendas neste dia.`;
             }
@@ -513,7 +537,30 @@ excluirEvento(e: any) {
     });
 
 
-    this.formEvento = { title: '', description: '', user_id: [],turno: 'integral' as 'manha' | 'tarde' | 'integral' };
+    this.formEvento = {
+      title: '',
+      description: '',
+      user_id: [],
+      turno: 'integral',
+      start_time: '08:00',
+      end_time: '16:00'
+    };
+
+  }
+  onTurnoChange() {
+    if (this.formEvento.turno === 'integral') {
+      this.formEvento.start_time = '08:00';
+      this.formEvento.end_time = '16:00';
+    } else if (this.formEvento.turno === 'manha') {
+      this.formEvento.start_time = '08:00';
+      this.formEvento.end_time = '12:00';
+    } else if (this.formEvento.turno === 'tarde') {
+      this.formEvento.start_time = '13:00';
+      this.formEvento.end_time = '17:00';
+    } else if (this.formEvento.turno === 'personalizado') {
+      this.formEvento.start_time = '';
+      this.formEvento.end_time = '';
+    }
   }
 
 
