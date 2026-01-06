@@ -224,8 +224,8 @@ class Calendar:
                         INSERT INTO schedules (client_id, title, description, start_time, end_time, location, lead_id)
                         VALUES (%s, %s, %s, %s, %s, %s, %s)
                     """
-                    start_time = f"{date} 09:00:00"
-                    end_time   = f"{date} 18:00:00"
+                    start_time = f"{date} 08:00:00"
+                    end_time   = f"{date} 16:00:00"
                     cursor.execute(insert_schedule, (client_id, title, description, start_time, end_time, location, lead_id))
                     schedule_id = cursor.lastrowid
 
