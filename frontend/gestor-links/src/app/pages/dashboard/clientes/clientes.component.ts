@@ -105,7 +105,7 @@ export class ClientesComponent implements OnInit {
     });
   }
 
-  atualizar(client: Client): void {
+  atualizar2(client: Client): void {
     const dialogRef = this.dialog.open(ClientsDialogFormComponent, {
       width: '400px',
       data: { ...client }
@@ -119,6 +119,9 @@ export class ClientesComponent implements OnInit {
         });
       }
     });
+  }
+  atualizar(client: any) { 
+    this.router.navigate(['/dashboard/clientes', client.id]); 
   }
 
   visualizar(client: Client): void {

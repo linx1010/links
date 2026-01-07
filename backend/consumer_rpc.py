@@ -72,14 +72,58 @@ def on_request(ch, method, props, body):
 
         elif source == 'clients':
             clients = Clients(conn)
+
+            # -----------------------------
+            # CLIENTES
+            # -----------------------------
             if action == "read":
                 response = clients.read_clients()
+
             elif action == "create":
                 response = clients.create_client(data['data'])
+
             elif action == "update":
                 response = clients.update_client(data)
+
             elif action == "delete":
                 response = clients.delete_client(data)
+
+            # -----------------------------
+            # CONTATOS  (FALTAVA ESSE BLOCO)
+            # -----------------------------
+            elif action == "get_contacts":
+                response = clients.get_contacts(data["client_id"])
+
+            elif action == "add_contact":
+                response = clients.add_contact(data)
+
+            elif action == "delete_contact":
+                response = clients.delete_contact(data)
+
+            # -----------------------------
+            # CONTRATOS
+            # -----------------------------
+            elif action == "get_contracts":
+                response = clients.get_contracts(data["client_id"])
+
+            elif action == "add_contract":
+                response = clients.add_contract(data)
+
+            elif action == "delete_contract":
+                response = clients.delete_contract(data)
+
+            # -----------------------------
+            # INVOICES
+            # -----------------------------
+            elif action == "get_invoices":
+                response = clients.get_invoices(data["client_id"])
+
+            elif action == "add_invoice":
+                response = clients.add_invoice(data)
+
+            elif action == "delete_invoice":
+                response = clients.delete_invoice(data)
+
             else:
                 response = {"status": False, "message": "invalid action!"}
                 status = False

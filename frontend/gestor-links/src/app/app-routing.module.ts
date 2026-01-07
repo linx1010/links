@@ -13,6 +13,7 @@ import {FinancialIndicatorsComponent} from './pages/dashboard/financial-indicato
 import {OperationMetricsComponent} from './pages/dashboard/operation-metrics/operation-metrics.component';
 import{TimesheetResourcesComponent}from './pages/dashboard/operation-metrics/details/timesheet-resources/timesheet-resources.component'
 import{UserConfiguratorComponent} from './pages/dashboard/user-configurator/user-configurator.component'
+import{ClienteDetalheComponent} from './pages/dashboard/clientes/cliente-detalhe/cliente-detalhe.component'
 export const routes: Routes = [
   { path: '', component: LoginComponent },
   {
@@ -22,6 +23,7 @@ export const routes: Routes = [
       { path: 'tasks', component: TasksComponent, canActivate:[authGuard] },
       { path: 'recursos', component: RecursosComponent, canActivate:[authGuard] },
       { path: 'clientes', component: ClientesComponent, canActivate:[authGuard] },
+      { path: 'clientes/:id',component: ClienteDetalheComponent, canActivate:[authGuard]},
       { path: 'projetos', component: ProjetosComponent, canActivate:[authGuard] },
       { path: 'calendar/:tipo/:id', component: CalendarComponent, canActivate:[authGuard] },
       // { path: 'timesheet/:id',component: TimesheetComponent, canActivate:[authGuard]},

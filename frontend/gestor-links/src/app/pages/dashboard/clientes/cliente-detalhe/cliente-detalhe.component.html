@@ -1,0 +1,148 @@
+<mat-tab-group (selectedTabChange)="onTabChange($event)">
+
+  <!-- ABA 1 — Dados Cadastrais -->
+  <mat-tab label="Dados Cadastrais">
+    <div class="dados-grid">
+
+      <div class="form-field">
+        <label>Nome do Cliente:</label>
+        <input [(ngModel)]="client.name" />
+      </div>
+
+      <div class="form-field">
+        <label>Código:</label>
+        <input [(ngModel)]="client.code" />
+      </div>
+
+      <div class="form-field">
+        <label>Moeda Padrão:</label>
+        <input [(ngModel)]="client.default_currency" maxlength="3" />
+      </div>
+
+      <div class="form-field">
+        <label>Prazo de Pagamento (dias):</label>
+        <input type="number" [(ngModel)]="client.payment_terms_days" />
+      </div>
+
+    </div>
+  </mat-tab>
+
+  <!-- ABA 2 — Contatos -->
+  <mat-tab label="Contatos">
+    <div class="tab-content">
+
+      <h4>Adicionar Contato</h4>
+
+      <div class="add-module-grid">
+
+        <mat-form-field appearance="outline">
+          <mat-label>Nome</mat-label>
+          <input matInput [(ngModel)]="newContact.name">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput [(ngModel)]="newContact.email">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Telefone</mat-label>
+          <input matInput [(ngModel)]="newContact.phone">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Função</mat-label>
+          <mat-select [(ngModel)]="newContact.role">
+            <mat-option value="CP">Coordenador de Projeto</mat-option>
+            <mat-option value="Gerente">Gerente</mat-option>
+            <mat-option value="Financeiro">Financeiro</mat-option>
+            <mat-option value="Ponto Focal">Ponto Focal</mat-option>
+            <mat-option value="Outro">Outro</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button class="custom-save-button" (click)="addContact()">
+          Adicionar
+        </button>
+
+      </div>
+
+      <table>
+        <tr>
+          <th>Nome</th>
+          <th>Email</th>
+          <th>Telefone</th>
+          <th>Função</th>
+          <th>Ação</th>
+        </tr>
+
+        <tr *ngFor="let c of clientContacts; let i = index">
+          <td>{{ c.name }}</td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.phone }}</td>
+          <td>{{ c.role }}</td>
+          <td>
+            <button class="remove-button" (click)="removeContact(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+  </mat-tab>
+
+  <!-- ABA 3 — Contratos -->
+  <mat-tab label="Contratos">
+    <div class="tab-content">
+
+      <table>
+        <tr><th>Tipo</th><th>Valor Base</th><th>Multiplicador</th><th>Validade</th></tr>
+        <tr *ngFor="let c of clientContracts">
+          <td>{{ c.contract_type }}</td>
+          <td>{{ c.base_value }}</td>
+          <td>{{ c.multiplier }}</td>
+          <td>{{ c.valid_from }} - {{ c.valid_to }}</td>
+        </tr>
+      </table>
+
+      <h4>Novo Contrato</h4>
+      <button (click)="addContract()">Adicionar</button>
+
+    </div>
+  </mat-tab>
+
+  <!-- ABA 4 — Invoices -->
+  <mat-tab label="Invoices">
+    <div class="tab-content">
+
+      <table>
+        <tr><th>Número</th><th>Valor</th><th>Status</th><th>Arquivo</th></tr>
+        <tr *ngFor="let inv of clientInvoices">
+          <td>{{ inv.invoice_number }}</td>
+          <td>{{ inv.amount }}</td>
+          <td>{{ inv.status }}</td>
+          <td><a *ngIf="inv.file_path" [href]="inv.file_path" target="_blank">Ver NF</a></td>
+        </tr>
+      </table>
+
+      <h4>Nova Invoice</h4>
+      <input #invoiceNumber placeholder="Número" />
+      <input #invoiceAmount type="number" placeholder="Valor" />
+      <input type="file" (change)="onFileSelected($event)" />
+      <button (click)="addInvoice(invoiceNumber.value, invoiceAmount.valueAsNumber)">
+        Adicionar
+      </button>
+
+    </div>
+  </mat-tab>
+
+</mat-tab-group>
+
+<!-- Botão Salvar -->
+<div class="save-container">
+  <button class="custom-save-button" (click)="saveClient()">
+    <mat-icon class="save-icon">save</mat-icon>
+    Salvar
+  </button>
+</div>

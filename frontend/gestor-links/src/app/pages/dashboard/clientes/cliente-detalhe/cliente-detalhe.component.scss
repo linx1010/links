@@ -1,0 +1,226 @@
+@use "sass:color";
+
+// Paleta
+$primary-color: #1976d2;
+$secondary-color: #f5f5f5;
+$accent-color: #4caf50;
+$error-color: #e53935;
+
+// Container principal
+:host {
+  display: block;
+  padding: 20px;
+  background: $secondary-color;
+  border-radius: 8px;
+}
+
+/* Tabs */
+::ng-deep .mat-tab-group {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+::ng-deep .mat-tab-label {
+  color: #000 !important;
+  font-weight: 600;
+}
+
+::ng-deep .mat-tab-label.mat-tab-label-active {
+  color: #000 !important;
+}
+
+::ng-deep .mdc-tab__text-label {
+  color: #000 !important;
+  font-weight: 600 !important;
+}
+
+/* Conteúdo padrão das abas */
+.tab-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  text-align: center;
+
+  label {
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #333;
+  }
+
+  input, select {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color .2s;
+
+    &:focus {
+      border-color: $primary-color;
+      outline: none;
+    }
+  }
+
+  button {
+    background: $primary-color;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background .2s;
+    align-self: flex-end;
+
+    &:hover {
+      background: color.adjust($primary-color, $lightness: -10%);
+    }
+  }
+}
+
+/* Grid das abas Dados Cadastrais */
+.dados-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+  padding: 20px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.form-field input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .dados-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tabelas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  th {
+    background: $primary-color;
+    color: white;
+    font-weight: 600;
+  }
+
+  tr:hover {
+    background: #f9f9f9;
+  }
+}
+
+/* Upload */
+input[type="file"] {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin-top: 10px;
+}
+
+/* Aba Senha (se usar no futuro) */
+.senha-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+}
+
+.eye-icon {
+  cursor: pointer;
+  color: #25514f !important;
+}
+
+/* Botão Salvar Geral */
+.save-container {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.custom-save-button {
+  background: #1976d2;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover {
+    background: #1565c0;
+  }
+
+  .save-icon {
+    font-size: 20px;
+  }
+}
+
+/* Grid da aba Contatos */
+.add-module-grid {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .add-module-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Inputs e selects com fundo branco e texto preto */
+mat-form-field.mat-form-field {
+  background: white !important;
+  color: #000 !important;
+}
+
+mat-form-field.mat-form-field input,
+mat-form-field.mat-form-field textarea,
+mat-form-field.mat-form-field .mat-select-value {
+  background: white !important;
+  color: #000 !important;
+}
+
+/* Caixa interna do mat-input */
+.mat-mdc-text-field-wrapper {
+  background: white !important;
+}
+
+/* Texto digitado */
+.mdc-text-field__input {
+  color: #000 !important;
+}
+
+/* Placeholder */
+.mdc-text-field__input::placeholder {
+  color: #555 !important;
+}
+
+/* Label do mat-form-field */
+.mdc-floating-label {
+  color: #000 !important;
+}

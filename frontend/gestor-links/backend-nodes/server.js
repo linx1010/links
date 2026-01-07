@@ -124,6 +124,93 @@ app.delete("/clients/:id", async (req, res) => {
   res.json(response);
 });
 
+// *************************************Rotas REST client_contacts*************************************
+
+app.get("/clients/:id/contacts", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "get_contacts",
+    data: { client_id: parseInt(req.params.id) }
+  });
+  res.json(response);
+});
+
+app.post("/clients/:id/contacts", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "add_contact",
+    data: { client_id: parseInt(req.params.id), ...req.body }
+  });
+  res.json(response);
+});
+
+app.delete("/clients/:clientId/contacts/:contactId", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "delete_contact",
+    data: { id: parseInt(req.params.contactId) }
+  });
+  res.json(response);
+});
+
+// *************************************Rotas REST client_contracts*************************************
+
+app.get("/clients/:id/contracts", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "get_contracts",
+    data: { client_id: parseInt(req.params.id) }
+  });
+  res.json(response);
+});
+
+app.post("/clients/:id/contracts", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "add_contract",
+    data: { client_id: parseInt(req.params.id), ...req.body }
+  });
+  res.json(response);
+});
+
+app.delete("/clients/:clientId/contracts/:contractId", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "delete_contract",
+    data: { id: parseInt(req.params.contractId) }
+  });
+  res.json(response);
+});
+// *************************************Rotas REST client_invoices*************************************
+
+app.get("/clients/:id/invoices", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "get_invoices",
+    data: { client_id: parseInt(req.params.id) }
+  });
+  res.json(response);
+});
+
+app.post("/clients/:id/invoices", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "add_invoice",
+    data: { client_id: parseInt(req.params.id), ...req.body }
+  });
+  res.json(response);
+});
+
+app.delete("/clients/:clientId/invoices/:invoiceId", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "delete_invoice",
+    data: { id: parseInt(req.params.invoiceId) }
+  });
+  res.json(response);
+});
+
+
 
 //*************************************Rotas Calendar*************************************
 app.get("/calendar", async (req, res) => {
