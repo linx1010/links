@@ -139,7 +139,7 @@ class Clients:
             data["base_value"],
             data.get("multiplier", 1),
             data["valid_from"],
-            data.get("valid_to")
+            data.get("valid_to") or None
         ))
         self.conn.commit()
         contract_id = cursor.lastrowid

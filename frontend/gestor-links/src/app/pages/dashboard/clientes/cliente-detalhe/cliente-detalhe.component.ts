@@ -48,6 +48,15 @@ export class ClienteDetalheComponent implements OnInit {
     role: ''
   };
 
+  newContract = {
+    contract_type: '',
+    base_value: null,
+    multiplier: 1,
+    valid_from: '',
+    valid_to: ''
+  };
+
+
   selectedFile: File | null = null;
 
   constructor(
@@ -126,18 +135,23 @@ export class ClienteDetalheComponent implements OnInit {
   }
 
   addContract() {
-    const newContract = {
-      contract_type: 'full_time',
-      base_value: 1000,
-      multiplier: 1,
-      valid_from: '2025-01-01',
-      valid_to: '2025-12-31'
-    };
+    if (!this.newContract.contract_type || !this.newContract.base_value || !this.newContract.valid_from) {
+      alert("Preencha os campos obrigatórios.");
+      return;
+    }
 
-    this.service.addContract(this.clientId, newContract).subscribe(() => {
+    this.service.addContract(this.clientId, this.newContract).subscribe(() => {
       this.loadContracts();
+      this.newContract = {
+        contract_type: '',
+        base_value: null,
+        multiplier: 1,
+        valid_from: '',
+        valid_to: ''
+      };
     });
   }
+
 
   removeContract(contractId: number) {
     this.service.deleteContract(this.clientId, contractId).subscribe(() => {

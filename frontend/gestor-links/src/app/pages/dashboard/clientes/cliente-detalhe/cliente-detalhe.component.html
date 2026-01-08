@@ -96,20 +96,84 @@
   <mat-tab label="Contratos">
     <div class="tab-content">
 
-      <table>
-        <tr><th>Tipo</th><th>Valor Base</th><th>Multiplicador</th><th>Validade</th></tr>
-        <tr *ngFor="let c of clientContracts">
-          <td>{{ c.contract_type }}</td>
-          <td>{{ c.base_value }}</td>
-          <td>{{ c.multiplier }}</td>
-          <td>{{ c.valid_from }} - {{ c.valid_to }}</td>
-        </tr>
-      </table>
+  <h3>Novo Contrato</h3>
 
-      <h4>Novo Contrato</h4>
-      <button (click)="addContract()">Adicionar</button>
+  <div class="dados-grid">
 
+    <div class="form-field">
+      <label>Tipo de Contrato *</label>
+      <select [(ngModel)]="newContract.contract_type">
+        <option value="">Selecione...</option>
+        <option value="full_time">Full Time</option>
+        <option value="part_time">Part Time</option>
+        <option value="hourly">Por Hora</option>
+        <option value="project">Por Projeto</option>
+      </select>
     </div>
+
+    <div class="form-field">
+      <label>Valor Base *</label>
+      <input type="number" [(ngModel)]="newContract.base_value">
+    </div>
+
+    <div class="form-field">
+      <label>Multiplicador</label>
+      <input type="number" [(ngModel)]="newContract.multiplier">
+    </div>
+
+    <div class="form-field">
+      <label>Vigência Inicial *</label>
+      <input type="date" [(ngModel)]="newContract.valid_from">
+    </div>
+
+    <div class="form-field">
+      <label>Vigência Final</label>
+      <input type="date" [(ngModel)]="newContract.valid_to">
+    </div>
+
+  </div>
+
+  <div class="save-container">
+    <button class="custom-save-button" (click)="addContract()">
+      <mat-icon class="save-icon">add</mat-icon>
+      Adicionar Contrato
+    </button>
+  </div>
+
+  <h3 style="margin-top: 30px;">Contratos Cadastrados</h3>
+
+  <table *ngIf="clientContracts.length > 0">
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Valor Base</th>
+        <th>Multiplicador</th>
+        <th>Início</th>
+        <th>Fim</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let c of clientContracts">
+        <td>{{ c.contract_type }}</td>
+        <td>{{ c.base_value }}</td>
+        <td>{{ c.multiplier }}</td>
+        <td>{{ c.valid_from }}</td>
+        <td>{{ c.valid_to }}</td>
+        <td>
+          <button (click)="removeContract(c.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="clientContracts.length === 0">Nenhum contrato cadastrado.</p>
+
+</div>
+
   </mat-tab>
 
   <!-- ABA 4 — Invoices -->
