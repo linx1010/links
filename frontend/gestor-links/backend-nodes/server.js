@@ -209,10 +209,56 @@ app.delete("/clients/:clientId/invoices/:invoiceId", async (req, res) => {
   });
   res.json(response);
 });
+//*************************************Rotas Contrato e horas*************************************
+
+// ===================== CONTRATO - SALDO =====================
+app.get("/contracts/:contractId/balance", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "get_contract_balance",
+    data: { contract_id: parseInt(req.params.contractId) }
+  });
+  res.json(response);
+});
+
+// ===================== CONTRATO - HISTÓRICO =====================
+app.get("/contracts/:contractId/history", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "get_contract_history",
+    data: { contract_id: parseInt(req.params.contractId) }
+  });
+  res.json(response);
+});
+
+// ===================== CONTRATO - CONSUMIR HORAS =====================
+app.post("/contracts/:contractId/consume", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "consume_contract_hours",
+    data: {
+      contract_id: parseInt(req.params.contractId),
+      hours: req.body.hours
+    }
+  });
+  res.json(response);
+});
+
+// ===================== CONTRATO - EXPIRAR HORAS =====================
+app.post("/contracts/:contractId/expire", async (req, res) => {
+  const response = await sendRpcMessage({
+    source: "clients",
+    action: "expire_contract_hours",
+    data: { contract_id: parseInt(req.params.contractId) }
+  });
+  res.json(response);
+});
+
 
 
 
 //*************************************Rotas Calendar*************************************
+
 app.get("/calendar", async (req, res) => {
   const origType = req.query.type; // 'cliente' ou 'recurso'
   const clientId = parseInt(req.query.id);

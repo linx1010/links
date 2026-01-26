@@ -124,6 +124,20 @@ def on_request(ch, method, props, body):
             elif action == "delete_invoice":
                 response = clients.delete_invoice(data)
 
+                # HORAS DO CONTRATO
+            elif action == "get_contract_balance":
+                response = clients.get_contract_balance(data["contract_id"])
+
+            elif action == "get_contract_history":
+                response = clients.get_contract_history(data["contract_id"])
+
+            elif action == "consume_contract_hours":
+                response = clients.consume_contract_hours(data)
+
+            elif action == "expire_contract_hours":
+                response = clients.expire_old_hours(data["contract_id"])
+
+
             else:
                 response = {"status": False, "message": "invalid action!"}
                 status = False

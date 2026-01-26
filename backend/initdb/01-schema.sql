@@ -158,7 +158,58 @@ CREATE TABLE `users` (
   UNIQUE KEY `email` (`email`),
   KEY `organization_id` (`organization_id`),
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- `left`.client_contacts definition
+
+CREATE TABLE `client_contacts` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `client_id` bigint NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(50) DEFAULT NULL,
+  `role` varchar(100) NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  CONSTRAINT `fk_client_contacts_client` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- `left`.client_contracts definition
+
+CREATE TABLE `client_contracts` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `client_id` bigint NOT NULL,
+  `contract_type` varchar(50) NOT NULL,
+  `base_value` decimal(10,2) NOT NULL,
+  `multiplier` decimal(10,2) DEFAULT '1.00',
+  `valid_from` date NOT NULL,
+  `valid_to` date DEFAULT NULL,
+  `monthly_hours` decimal(10,2) DEFAULT NULL,
+  `rollover_months` int DEFAULT '3',
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  CONSTRAINT `client_contracts_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- `left`.client_invoices definition
+
+CREATE TABLE `client_invoices` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `client_id` bigint NOT NULL,
+  `invoice_number` varchar(50) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `status` enum('pending','paid','canceled') DEFAULT 'pending',
+  `file_path` text,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `client_id` (`client_id`),
+  CONSTRAINT `client_invoices_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- `left`.project_members definition
@@ -214,12 +265,15 @@ CREATE TABLE `schedules` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `status` enum('open','completed') NOT NULL DEFAULT 'open',
   `lead_id` bigint DEFAULT NULL,
+  `contact_id` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `client_id` (`client_id`),
   KEY `fk_schedules_lead` (`lead_id`),
+  KEY `fk_schedules_contact` (`contact_id`),
+  CONSTRAINT `fk_schedules_contact` FOREIGN KEY (`contact_id`) REFERENCES `client_contacts` (`id`),
   CONSTRAINT `fk_schedules_lead` FOREIGN KEY (`lead_id`) REFERENCES `users` (`id`),
   CONSTRAINT `schedules_ibfk_1` FOREIGN KEY (`client_id`) REFERENCES `clients` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=274 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=300 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
 -- `left`.task_tags definition
@@ -315,6 +369,23 @@ CREATE TABLE `user_modules` (
   CONSTRAINT `user_modules_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `user_modules_ibfk_2` FOREIGN KEY (`module_code`, `organization_id`) REFERENCES `modules` (`code`, `organization_id`) ON DELETE CASCADE,
   CONSTRAINT `user_modules_chk_1` CHECK ((`proficiency_score` between 1 and 5))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- `left`.client_contract_hours_balance definition
+
+CREATE TABLE `client_contract_hours_balance` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `contract_id` bigint NOT NULL,
+  `month_year` date NOT NULL,
+  `hours_added` decimal(10,2) NOT NULL,
+  `hours_used` decimal(10,2) DEFAULT '0.00',
+  `hours_expired` decimal(10,2) DEFAULT '0.00',
+  `valid_until` date NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `contract_id` (`contract_id`),
+  CONSTRAINT `client_contract_hours_balance_ibfk_1` FOREIGN KEY (`contract_id`) REFERENCES `client_contracts` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 

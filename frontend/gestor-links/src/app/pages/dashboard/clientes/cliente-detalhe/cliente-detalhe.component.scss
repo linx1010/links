@@ -15,22 +15,16 @@ $error-color: #e53935;
 }
 
 /* Tabs */
-::ng-deep .mat-tab-group {
+::ng-deep .mat-mdc-tab-group {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
-
-::ng-deep .mat-tab-label {
-  color: #000 !important;
-  font-weight: 600;
-}
-
-::ng-deep .mat-tab-label.mat-tab-label-active {
+::ng-deep .mat-mdc-tab-label {
   color: #000 !important;
 }
 
-::ng-deep .mdc-tab__text-label {
+.mat-mdc-tab .mdc-tab__text-label {
   color: #000 !important;
   font-weight: 600 !important;
 }
@@ -41,7 +35,7 @@ $error-color: #e53935;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  text-align: center;
+  text-align: left;
 
   label {
     font-weight: 500;
@@ -60,24 +54,9 @@ $error-color: #e53935;
       outline: none;
     }
   }
-
-  button {
-    background: $primary-color;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background .2s;
-    align-self: flex-end;
-
-    &:hover {
-      background: color.adjust($primary-color, $lightness: -10%);
-    }
-  }
 }
 
-/* Grid das abas Dados Cadastrais */
+/* Grid das abas Dados Cadastrais / Recebimento / Contratos */
 .dados-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -88,22 +67,26 @@ $error-color: #e53935;
 .form-field {
   display: flex;
   flex-direction: column;
-}
 
-.form-field label {
-  font-weight: 600;
-  margin-bottom: 4px;
-}
+  label {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
 
-.form-field input {
-  padding: 6px 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  input {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
 }
 
 /* Responsivo */
 @media (max-width: 768px) {
   .dados-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .add-module-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -112,6 +95,7 @@ $error-color: #e53935;
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 20px;
   margin-bottom: 20px;
 
   th, td {
@@ -130,27 +114,6 @@ table {
   }
 }
 
-/* Upload */
-input[type="file"] {
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin-top: 10px;
-}
-
-/* Aba Senha (se usar no futuro) */
-.senha-tab {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  max-width: 400px;
-}
-
-.eye-icon {
-  cursor: pointer;
-  color: #25514f !important;
-}
-
 /* Botão Salvar Geral */
 .save-container {
   margin-top: 20px;
@@ -160,13 +123,15 @@ input[type="file"] {
 .custom-save-button {
   background: #1976d2;
   color: white;
-  padding: 8px 16px;
+  height: 56px;
+  padding: 0 24px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: background 0.2s;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 
   &:hover {
@@ -181,14 +146,28 @@ input[type="file"] {
 /* Grid da aba Contatos */
 .add-module-grid {
   display: grid;
-  grid-template-columns: 2fr 3fr 1fr auto;
+  grid-template-columns: 2fr 3fr 1.5fr 1.5fr auto;
   gap: 16px;
-  align-items: center;
+  align-items: end;
 }
 
-@media (max-width: 768px) {
-  .add-module-grid {
-    grid-template-columns: 1fr;
+mat-form-field {
+  width: 100%;
+}
+
+/* Botão Adicionar Contato */
+.add-contact-btn {
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 500;
+
+  mat-icon {
+    font-size: 22px;
   }
 }
 
@@ -198,29 +177,18 @@ mat-form-field.mat-form-field {
   color: #000 !important;
 }
 
-mat-form-field.mat-form-field input,
-mat-form-field.mat-form-field textarea,
-mat-form-field.mat-form-field .mat-select-value {
-  background: white !important;
-  color: #000 !important;
-}
-
-/* Caixa interna do mat-input */
 .mat-mdc-text-field-wrapper {
   background: white !important;
 }
 
-/* Texto digitado */
 .mdc-text-field__input {
   color: #000 !important;
 }
 
-/* Placeholder */
 .mdc-text-field__input::placeholder {
   color: #555 !important;
 }
 
-/* Label do mat-form-field */
 .mdc-floating-label {
   color: #000 !important;
 }

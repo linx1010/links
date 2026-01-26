@@ -61,7 +61,9 @@
           </mat-select>
         </mat-form-field>
 
-        <button class="custom-save-button" (click)="addContact()">
+        <!-- Botão com ícone person_add -->
+        <button class="custom-save-button add-contact-btn" (click)="addContact()">
+          <mat-icon>person_add</mat-icon>
           Adicionar
         </button>
 
@@ -93,88 +95,88 @@
   </mat-tab>
 
   <!-- ABA 3 — Contratos -->
-  <mat-tab label="Contratos">
-    <div class="tab-content">
+<mat-tab label="Contratos">
+  <div class="tab-content">
 
-  <h3>Novo Contrato</h3>
+    <h3>Novo Contrato</h3>
 
-  <div class="dados-grid">
+    <div class="dados-grid">
 
-    <div class="form-field">
-      <label>Tipo de Contrato *</label>
-      <select [(ngModel)]="newContract.contract_type">
-        <option value="">Selecione...</option>
-        <option value="full_time">Full Time</option>
-        <option value="part_time">Part Time</option>
-        <option value="hourly">Por Hora</option>
-        <option value="project">Por Projeto</option>
-      </select>
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo de Contrato *</mat-label>
+        <mat-select [(ngModel)]="newContract.contract_type">
+          <mat-option value="">Selecione...</mat-option>
+          <mat-option value="full_time">Full Time</mat-option>
+          <mat-option value="part_time">Part Time</mat-option>
+          <mat-option value="hourly">Por Hora</mat-option>
+          <mat-option value="project">Por Projeto</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Valor Base *</mat-label>
+        <input matInput type="number" [(ngModel)]="newContract.base_value">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Multiplicador</mat-label>
+        <input matInput type="number" [(ngModel)]="newContract.multiplier">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Vigência Inicial *</mat-label>
+        <input matInput type="date" [(ngModel)]="newContract.valid_from">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Vigência Final</mat-label>
+        <input matInput type="date" [(ngModel)]="newContract.valid_to">
+      </mat-form-field>
+
     </div>
 
-    <div class="form-field">
-      <label>Valor Base *</label>
-      <input type="number" [(ngModel)]="newContract.base_value">
+    <div class="save-container">
+      <button class="custom-save-button" (click)="addContract()">
+        <mat-icon class="save-icon">add</mat-icon>
+        Adicionar Contrato
+      </button>
     </div>
 
-    <div class="form-field">
-      <label>Multiplicador</label>
-      <input type="number" [(ngModel)]="newContract.multiplier">
-    </div>
+    <h3 style="margin-top: 30px;">Contratos Cadastrados</h3>
 
-    <div class="form-field">
-      <label>Vigência Inicial *</label>
-      <input type="date" [(ngModel)]="newContract.valid_from">
-    </div>
+    <table *ngIf="clientContracts.length > 0">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Valor Base</th>
+          <th>Multiplicador</th>
+          <th>Início</th>
+          <th>Fim</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
 
-    <div class="form-field">
-      <label>Vigência Final</label>
-      <input type="date" [(ngModel)]="newContract.valid_to">
-    </div>
+      <tbody>
+        <tr *ngFor="let c of clientContracts">
+          <td>{{ c.contract_type }}</td>
+          <td>{{ c.base_value }}</td>
+          <td>{{ c.multiplier }}</td>
+          <td>{{ c.valid_from }}</td>
+          <td>{{ c.valid_to }}</td>
+          <td>
+            <button (click)="removeContract(c.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p *ngIf="clientContracts.length === 0">Nenhum contrato cadastrado.</p>
 
   </div>
+</mat-tab>
 
-  <div class="save-container">
-    <button class="custom-save-button" (click)="addContract()">
-      <mat-icon class="save-icon">add</mat-icon>
-      Adicionar Contrato
-    </button>
-  </div>
-
-  <h3 style="margin-top: 30px;">Contratos Cadastrados</h3>
-
-  <table *ngIf="clientContracts.length > 0">
-    <thead>
-      <tr>
-        <th>Tipo</th>
-        <th>Valor Base</th>
-        <th>Multiplicador</th>
-        <th>Início</th>
-        <th>Fim</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr *ngFor="let c of clientContracts">
-        <td>{{ c.contract_type }}</td>
-        <td>{{ c.base_value }}</td>
-        <td>{{ c.multiplier }}</td>
-        <td>{{ c.valid_from }}</td>
-        <td>{{ c.valid_to }}</td>
-        <td>
-          <button (click)="removeContract(c.id)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-
-  <p *ngIf="clientContracts.length === 0">Nenhum contrato cadastrado.</p>
-
-</div>
-
-  </mat-tab>
 
   <!-- ABA 4 — Invoices -->
   <mat-tab label="Invoices">

@@ -196,3 +196,107 @@ class Clients:
         cursor.close()
         self.conn.close()
         return {"status": "ok"}
+
+    def get_contract_balance(self, contract_id):
+        cursor = self.conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT 
+                SUM(hours_added - hours_used - hours_expired) AS balance
+            FROM client_contract_hours_balance
+            WHERE contract_id = %s
+            AND valid_until >= CURDATE()
+        """, (contract_id,))
+
+        row = cursor.fetchone()
+        cursor.close()
+        self.conn.close()
+
+        return {"contract_id": contract_id, "balance": row["balance"] or 0}
+
+    def get_contract_history(self, contract_id):
+        cursor = self.conn.cursor(dictionary=True)
+
+        cursor.execute("""
+            SELECT 
+                month_year,
+                hours_added,
+                hours_used,
+                hours_expired,
+                valid_until
+            FROM client_contract_hours_balance
+            WHERE contract_id = %s
+            ORDER BY month_year DESC
+        """, (contract_id,))
+
+        rows = cursor.fetchall()
+        cursor.close()
+        self.conn.close()
+
+        return rows
+
+    def consume_contract_hours(self, data):
+        contract_id = data["contract_id"]
+        hours_to_consume = float(data["hours"])
+
+        cursor = self.conn.cursor(dictionary=True)
+
+        # Buscar meses válidos (FIFO)
+        cursor.execute("""
+            SELECT id, hours_added, hours_used, hours_expired
+            FROM client_contract_hours_balance
+            WHERE contract_id = %s
+            AND valid_until >= CURDATE()
+            ORDER BY month_year ASC
+        """, (contract_id,))
+
+        months = cursor.fetchall()
+
+        remaining = hours_to_consume
+
+        for m in months:
+            available = m["hours_added"] - m["hours_used"] - m["hours_expired"]
+
+            if available <= 0:
+                continue
+
+            consume = min(available, remaining)
+
+            cursor.execute("""
+                UPDATE client_contract_hours_balance
+                SET hours_used = hours_used + %s
+                WHERE id = %s
+            """, (consume, m["id"]))
+
+            remaining -= consume
+
+            if remaining <= 0:
+                break
+
+        self.conn.commit()
+        cursor.close()
+        self.conn.close()
+
+        return {
+            "status": "ok",
+            "contract_id": contract_id,
+            "requested": hours_to_consume,
+            "remaining_unconsumed": remaining
+        }
+
+    def expire_old_hours(self, contract_id):
+        cursor = self.conn.cursor()
+
+        cursor.execute("""
+            UPDATE client_contract_hours_balance
+            SET hours_expired = hours_added - hours_used
+            WHERE contract_id = %s
+            AND valid_until < CURDATE()
+            AND hours_expired = 0
+        """, (contract_id,))
+
+        self.conn.commit()
+        cursor.close()
+        self.conn.close()
+
+        return {"status": "ok", "expired_rows": cursor.rowcount}

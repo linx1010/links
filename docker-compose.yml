@@ -2,7 +2,7 @@ services:
   angular:
     build:
       context: ./frontend/gestor-links
-      dockerfile: Dockerfile   # opcional, se o nome for diferente
+      dockerfile: Dockerfile
     image: linxfsa/linksproject:angular
     platform: linux/amd64
     ports:
@@ -42,16 +42,16 @@ services:
       - RABBITMQ_HOST=rabbitmq-compose
       - RABBITMQ_PORT=5672
       - MYSQL_HOST=mysql-compose
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=123456
+      - MYSQL_USER=appuser
+      - MYSQL_PASSWORD=AppS3nh@F0rt3!2026
       - MYSQL_DB=left
-
-      # === EMAIL CONFIG === 
-      - EMAIL_USER=xxx@xxx.com.br 
+      - EMAIL_USER=xxx@xxx.com.br
       - EMAIL_PASS=xxxxx
     depends_on:
-      - rabbitmq-compose
-      - mysql-compose
+      mysql-compose:
+        condition: service_healthy
+      rabbitmq-compose:
+        condition: service_started
     networks:
       - app-network
 
@@ -60,7 +60,7 @@ services:
     container_name: rabbitmq-compose
     ports:
       - "5672:5672"
-      - "15672:15672" # painel web
+      - "15672:15672"
     networks:
       - app-network
 
@@ -68,26 +68,50 @@ services:
     image: mysql:8.0
     container_name: mysql-compose
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: S3nh@F0rt3!2026
       MYSQL_DATABASE: left
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: AppS3nh@F0rt3!2026
+      MYSQL_ROOT_HOST: "%"
     ports:
       - "3306:3306"
     volumes:
       - ./backend/initdb:/docker-entrypoint-initdb.d
-      - mysql_data:/var/lib/mysql   
+      - mysql_data:/var/lib/mysql
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin-compose
     environment:
-      PMA_HOST: mysql-compose   # nome do serviço MySQL no Compose
+      PMA_HOST: mysql-compose
       PMA_PORT: 3306
       PMA_USER: root
-      PMA_PASSWORD: 123456
+      PMA_PASSWORD: S3nh@F0rt3!2026
     ports:
-      - "8080:80"               # acessa via http://localhost:8080
+      - "8080:80"
+    depends_on:
+      - mysql-compose
+    networks:
+      - app-network
+
+  mysql-backup:
+    image: mysql:8.0
+    container_name: mysql-backup
+    command: >
+      bash -c "while true; do
+        mysqldump -h mysql-compose -u root -pS3nh@F0rt3!2026 --all-databases > /backup/backup-$(date +%F-%H-%M).sql;
+        find /backup -type f -mtime +7 -delete;
+        sleep 86400;
+      done"
+    volumes:
+      - ./mysql_backups:/backup
     depends_on:
       - mysql-compose
     networks:
@@ -99,4 +123,3 @@ networks:
 
 volumes:
   mysql_data:
-
